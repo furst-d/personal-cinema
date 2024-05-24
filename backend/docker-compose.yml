@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  php-fpm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./symfony:/var/www
+    working_dir: /var/www
+    networks:
+      - backend
+    command: sh -c "composer install && php-fpm"
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/fastcgi-php.conf:/etc/nginx/fastcgi-php.conf
+      - ./symfony:/var/www
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
