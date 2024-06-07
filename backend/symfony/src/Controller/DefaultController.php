@@ -13,6 +13,7 @@ class DefaultController extends ApiController
     public function index(TestRepository $repository): JsonResponse
     {
         $tests = $repository->findAll();
+        $test = $repository->find(1);
         return $this->re->withData($tests);
     }
 }

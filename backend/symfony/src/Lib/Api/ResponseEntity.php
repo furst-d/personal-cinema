@@ -45,6 +45,7 @@ class ResponseEntity
      */
     public function withData(array $payload, int $code = Response::HTTP_OK): JsonResponse
     {
+        //TODO fix
         $count = 0;
         if (isset($payload[0]) && is_array($payload[0])) {
             $count = count($payload);
