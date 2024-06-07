@@ -2,33 +2,18 @@
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Exception;
+use App\Repository\TestRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class DefaultController extends AbstractController
 {
     #[Route('/', name: 'homepage')]
-    public function index(EntityManagerInterface $em): JsonResponse
+    public function index(TestRepository $repository, SerializerInterface $serializer): JsonResponse
     {
-        try {
-            $connection = $em->getConnection();
-            $connection->connect();
-
-            if ($connection->isConnected()) {
-                $message = 'Database connection is successful!';
-            } else {
-                $message = 'Failed to connect to the database.';
-            }
-        } catch (Exception $e) {
-            $message = 'Error: ' . $e->getMessage();
-        }
-
-        return $this->json([
-            'message' => $message,
-            'path' => 'src/Controller/DefaultController.php',
-        ]);
+       $tests = $repository->findAll();
+       return new JsonResponse($serializer->serialize($tests, 'json'), 200, [], true);
     }
 }
