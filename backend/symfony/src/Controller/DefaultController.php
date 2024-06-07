@@ -2,18 +2,17 @@
 
 namespace App\Controller;
 
+use App\Lib\Api\Exception\ApiException;
 use App\Repository\TestRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\SerializerInterface;
 
-class DefaultController extends AbstractController
+class DefaultController extends ApiController
 {
     #[Route('/', name: 'homepage')]
-    public function index(TestRepository $repository, SerializerInterface $serializer): JsonResponse
+    public function index(TestRepository $repository): JsonResponse
     {
-       $tests = $repository->findAll();
-       return new JsonResponse($serializer->serialize($tests, 'json'), 200, [], true);
+        $tests = $repository->findAll();
+        return $this->re->withData($tests);
     }
 }
