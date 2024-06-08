@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Lib\Api\Exception\ApiException;
 use App\Repository\TestRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
@@ -14,6 +13,10 @@ class DefaultController extends ApiController
     {
         $tests = $repository->findAll();
         $test = $repository->find(1);
-        return $this->re->withData($tests);
+        $payload = [
+            'message' => 'Welcome to your new controller!',
+            'path' => 'src/Controller/DefaultController.php',
+        ];
+        return $this->re->withData($payload);
     }
 }

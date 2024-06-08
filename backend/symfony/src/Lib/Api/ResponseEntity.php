@@ -39,23 +39,15 @@ class ResponseEntity
 
     /**
      * Return a response with a JSON data
-     * @param array $payload
+     * @param object|array $payload
      * @param int $code
      * @return JsonResponse
      */
-    public function withData(array $payload, int $code = Response::HTTP_OK): JsonResponse
+    public function withData(object|array $payload, int $code = Response::HTTP_OK): JsonResponse
     {
-        //TODO fix
-        $count = 0;
-        if (isset($payload[0]) && is_array($payload[0])) {
-            $count = count($payload);
-        } elseif (!empty($payload)) {
-            $count = 1;
-        }
-
         return $this->send($code, $this->getHeader($code) + [
                 'payload' => [
-                    'count' => $count,
+                    'count' => $this->getCount($payload),
                     'data' => $payload,
                 ]
             ]);
@@ -88,6 +80,20 @@ class ResponseEntity
             'code' => $code,
             'timestamp' => time()
         ];
+    }
+
+    /**
+     * @param object|array $payload
+     * @return int
+     */
+    private function getCount(object|array $payload): int
+    {
+        // Object or an associative array (custom payloads)
+        if (is_object($payload) || !array_is_list($payload)) {
+            return 1;
+        }
+
+        return count($payload);
     }
 
     /**
