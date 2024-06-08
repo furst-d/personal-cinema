@@ -19,16 +19,20 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo mbstring exif pcntl bcmath gd pdo_pgsql \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
-WORKDIR /var/www
-
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Create a non-root user
 RUN groupadd -g 1000 appuser && useradd -r -u 1000 -g appuser appuser
 
-# Copy existing application directory contents
+# Set working directory
+WORKDIR /var/www
+
+# Copy Composer configuration and install dependencies
+COPY symfony/composer.json symfony/composer.lock ./
+RUN composer install --no-scripts --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+# Copy application source code
 COPY symfony /var/www
 
 # Set ownership to the non-root user
@@ -42,9 +46,6 @@ USER appuser
 
 # Set environment variable to allow composer to run as root
 ENV COMPOSER_ALLOW_SUPERUSER=1
-
-# Install Symfony dependencies
-RUN composer install --no-scripts
 
 # Switch back to root to copy nginx configuration file
 USER root

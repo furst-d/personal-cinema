@@ -11,8 +11,8 @@ class DefaultController extends ApiController
     #[Route('/', name: 'homepage')]
     public function index(TestRepository $repository): JsonResponse
     {
-        $tests = $repository->findAll();
-        $test = $repository->find(1);
+//        $tests = $repository->findAll();
+//        $test = $repository->find(1);
         $payload = [
             'message' => 'Welcome to your new controller!',
             'path' => 'src/Controller/DefaultController.php',
