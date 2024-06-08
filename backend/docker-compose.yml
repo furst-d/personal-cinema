@@ -8,7 +8,7 @@ services:
     working_dir: /var/www
     networks:
       - backend
-    command: sh -c "composer install && php-fpm"
+    command: sh -c "chown -R appuser:appuser /var/www/var/log && chmod -R 775 /var/www/var/log && composer install && php-fpm"
     env_file:
       - ./.env
 

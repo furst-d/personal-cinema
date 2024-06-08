@@ -34,6 +34,9 @@ COPY symfony /var/www
 # Set ownership to the non-root user
 RUN chown -R appuser:appuser /var/www
 
+# Ensure logs directory exists and has correct permissions
+RUN mkdir -p /var/www/var/log && chown -R appuser:appuser /var/www/var/log && chmod -R 775 /var/www/var/log
+
 # Switch to the non-root user
 USER appuser
 
