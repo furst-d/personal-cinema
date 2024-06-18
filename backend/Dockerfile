@@ -30,7 +30,12 @@ WORKDIR /var/www
 
 # Copy Composer configuration and install dependencies
 COPY symfony/composer.json symfony/composer.lock ./
-RUN composer install --no-scripts --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+# Set environment variable to allow composer to run as root
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+RUN composer install --no-scripts --no-dev --prefer-dist --no-interaction --optimize-autoloader \
+    && composer show symfony/runtime
 
 # Copy application source code
 COPY symfony /var/www
@@ -43,16 +48,6 @@ RUN mkdir -p /var/www/var/log && chown -R appuser:appuser /var/www/var/log && ch
 
 # Switch to the non-root user
 USER appuser
-
-# Set environment variable to allow composer to run as root
-ENV COMPOSER_ALLOW_SUPERUSER=1
-
-# Switch back to root to copy nginx configuration file
-USER root
-
-# Copy nginx configuration files
-COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
-COPY ./nginx/fastcgi-php.conf /etc/nginx/fastcgi-php.conf
 
 # Expose port 9000 and start php-fpm server
 EXPOSE 9000
