@@ -25,9 +25,7 @@ jobs:
       - name: Build and push Docker images
         run: |
           docker build -t furstd/personal-cinema_backend -f backend/Dockerfile backend
-          docker build -t furstd/personal-cinema_nginx -f backend/nginx/Dockerfile backend/nginx
           docker push furstd/personal-cinema_backend
-          docker push furstd/personal-cinema_nginx
 
       - name: Deploy to VPS
         env:
