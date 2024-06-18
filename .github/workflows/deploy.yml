@@ -22,9 +22,9 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker images
+      - name: Build and push backend Docker image
         run: |
-          docker build -t furstd/personal-cinema_backend -f backend/Dockerfile backend
+          docker build --no-cache -t furstd/personal-cinema_backend -f backend/Dockerfile backend
           docker push furstd/personal-cinema_backend
 
       - name: Deploy to VPS
@@ -38,9 +38,9 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan $VPS_HOST >> ~/.ssh/known_hosts
           scp -i private_key backend/docker-compose.yml backend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/
-          ssh -i private_key $VPS_USER@$VPS_HOST << 'EOF'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
             cd /opt/soukromekino/backend/
             docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
             docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-            docker-compose exec php-fpm php bin/console cache:clear
+            docker-compose exec -T php-fpm php bin/console cache:clear
           EOF
