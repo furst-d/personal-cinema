@@ -42,4 +42,5 @@ jobs:
             cd /opt/soukromekino/backend/
             docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
             docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+            docker-compose exec php-fpm php bin/console cache:clear
           EOF
