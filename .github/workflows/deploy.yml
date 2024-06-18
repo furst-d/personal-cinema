@@ -30,9 +30,14 @@ jobs:
       - name: Replace environment variables in .env file
         run: |
           cp backend/.env.example backend/.env
+          cp backend/symfony/.env.example backend/symfony/.env
           sed -i 's/db_name/${{ secrets.POSTGRES_DB }}/' backend/.env
           sed -i 's/db_user/${{ secrets.POSTGRES_USER }}/' backend/.env
-          sed -i 's/db_password/${{ secrets.POSTGRES_PASSWORD }}/' backend/.env    
+          sed -i 's/db_password/${{ secrets.POSTGRES_PASSWORD }}/' backend/.env
+          sed -i 's/APP_ENV=dev/APP_ENV=prod/' backend/.env
+          sed -i 's/app_secret/${{ secrets.APP_SECRET }}/' backend/symfony/.env
+          sed -i 's/jwt_passphrase/${{ secrets.JWT_PASSPHRASE }}/' backend/symfony/.env
+          
 
       - name: Deploy to VPS
         env:
