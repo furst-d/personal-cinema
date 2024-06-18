@@ -3,12 +3,8 @@ version: '3.8'
 services:
   php-fpm:
     image: furstd/personal-cinema_backend:latest
-    volumes:
-      - ./symfony:/var/www:rw
-    working_dir: /var/www
     networks:
       - backend
-    command: sh -c "chown -R appuser:appuser /var/www/var/log && chmod -R 775 /var/www/var/log && composer install && php-fpm"
     env_file:
       - ./.env
     labels:
@@ -20,10 +16,6 @@ services:
 
   nginx:
     image: nginx:alpine
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx/fastcgi-php.conf:/etc/nginx/fastcgi-php.conf
-      - ./symfony:/var/www
     networks:
       - backend
     depends_on:

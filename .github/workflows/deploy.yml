@@ -24,7 +24,7 @@ jobs:
 
       - name: Build and push backend Docker image
         run: |
-          docker build ./backend -t furstd/personal-cinema_backend:latest
+          docker build ./backend -t furstd/personal-cinema_backend:latest 
           docker push furstd/personal-cinema_backend:latest
 
       - name: Deploy to VPS
@@ -42,5 +42,6 @@ jobs:
             cd /opt/soukromekino/backend/
             docker-compose -f docker-compose.prod.yml down
             docker-compose -f docker-compose.prod.yml pull
-            docker-compose -f docker-compose.prod.yml up -d --force-recreate --remove-orphans
+            docker-compose -f docker-compose.prod.yml up -d
+            docker-compose exec -T php-fpm php bin/console cache:clear
           EOF
