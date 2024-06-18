@@ -24,7 +24,7 @@ jobs:
 
       - name: Build and push backend Docker image
         run: |
-          docker build ./backend -t furstd/personal-cinema_backend:latest 
+          docker build --no-cache ./backend -t furstd/personal-cinema_backend:latest 
           docker push furstd/personal-cinema_backend:latest
 
       - name: Replace environment variables in .env file
@@ -37,7 +37,9 @@ jobs:
           sed -i 's/APP_ENV=dev/APP_ENV=prod/' backend/.env
           sed -i 's/app_secret/${{ secrets.APP_SECRET }}/' backend/symfony/.env
           sed -i 's/jwt_passphrase/${{ secrets.JWT_PASSPHRASE }}/' backend/symfony/.env
-          
+          # Copy .env file to backend directory so Dockerfile can access it
+          cp backend/.env backend/.env
+          cp backend/symfony/.env backend/symfony/.env
 
       - name: Deploy to VPS
         env:

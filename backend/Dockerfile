@@ -40,6 +40,9 @@ RUN composer install --no-scripts --no-dev --prefer-dist --no-interaction --opti
 # Copy application source code
 COPY symfony /var/www
 
+# Copy environment file
+COPY .env /var/www/.env
+
 # Set ownership to the non-root user
 RUN chown -R appuser:appuser /var/www
 
