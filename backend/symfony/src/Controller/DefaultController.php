@@ -14,7 +14,7 @@ class DefaultController extends ApiController
 //        $tests = $repository->findAll();
 //        $test = $repository->find(1);
         $payload = [
-            'message' => 'Welcome to your new controller! Test 2',
+            'message' => 'Welcome to your new controller! Test 3',
             'path' => 'src/Controller/DefaultController.php',
         ];
         return $this->re->withData($payload);
