@@ -27,6 +27,13 @@ jobs:
           docker build ./backend -t furstd/personal-cinema_backend:latest 
           docker push furstd/personal-cinema_backend:latest
 
+      - name: Replace environment variables in .env file
+        run: |
+          cp backend/.env.example backend/.env
+          sed -i 's/db_name/${{ secrets.POSTGRES_DB }}/' backend/.env
+          sed -i 's/db_user/${{ secrets.POSTGRES_USER }}/' backend/.env
+          sed -i 's/db_password/${{ secrets.POSTGRES_PASSWORD }}/' backend/.env    
+
       - name: Deploy to VPS
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
