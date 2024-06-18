@@ -41,7 +41,6 @@ jobs:
           ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
             cd /opt/soukromekino/backend/
             docker-compose -f docker-compose.prod.yml down
-            docker image prune -f
             docker-compose -f docker-compose.prod.yml pull
             docker-compose -f docker-compose.prod.yml up -d --force-recreate --remove-orphans
             docker-compose exec -T php-fpm php bin/console cache:clear
