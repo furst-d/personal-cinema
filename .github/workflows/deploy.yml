@@ -35,6 +35,7 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key
           chmod 600 private_key
+          mkdir -p ~/.ssh
           ssh-keyscan $VPS_HOST >> ~/.ssh/known_hosts
           scp -i private_key backend/docker-compose.yml backend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/
           ssh -i private_key $VPS_USER@$VPS_HOST << 'EOF'
