@@ -24,7 +24,7 @@ jobs:
 
       - name: Build and push backend Docker image
         run: |
-          docker build --no-cache -t furstd/personal-cinema_backend -f backend/Dockerfile ./backend
+          docker build ./backend -t furstd/personal-cinema_backend:latest
           docker push furstd/personal-cinema_backend:latest
 
       - name: Deploy to VPS
