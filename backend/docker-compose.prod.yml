@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   php-fpm:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: furstd/personal-cinema_backend:latest
     volumes:
       - ./symfony:/var/www:rw
     working_dir: /var/www
