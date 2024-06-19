@@ -16,6 +16,8 @@ services:
 
   nginx:
     image: furstd/personal-cinema_nginx:latest
+    ports:
+      - "8080:80"
     networks:
       - backend
     depends_on:
