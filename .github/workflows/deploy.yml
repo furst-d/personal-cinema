@@ -57,11 +57,9 @@ jobs:
           scp -i private_key backend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/.env
           scp -i private_key backend/symfony/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/symfony/.env
           ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
-            cd /opt/soukromekino/backend/
-            docker-compose -f docker-compose.prod.yml pull
-            docker-compose -f docker-compose.prod.yml down
-            docker-compose -f docker-compose.prod.yml up -d
-            cd /opt/soukromekino/traefik/
-            docker-compose down
-            docker-compose up -d
+            docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml pull
+            docker-compose -f /opt/soukromekino/traefik/docker-compose.yml down
+            docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml down
+            docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml up -d
+            docker-compose -f /opt/soukromekino/traefik/docker-compose.yml up -d
           EOF
