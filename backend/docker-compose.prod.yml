@@ -13,6 +13,7 @@ services:
       - "traefik.http.routers.backend_php.entrypoints=websecure"
       - "traefik.http.routers.backend_php.tls.certresolver=letsencrypt"
       - "traefik.http.services.backend_php.loadbalancer.server.port=9000"
+      - "traefik.docker.network=backend"
 
   nginx:
     image: furstd/personal-cinema_nginx:latest
@@ -28,6 +29,7 @@ services:
       - "traefik.http.routers.backend_nginx.entrypoints=websecure"
       - "traefik.http.routers.backend_nginx.tls.certresolver=letsencrypt"
       - "traefik.http.services.backend_nginx.loadbalancer.server.port=80"
+      - "traefik.docker.network=backend"
 
   db:
     image: postgres:13
