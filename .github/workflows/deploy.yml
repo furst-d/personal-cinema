@@ -17,17 +17,11 @@ jobs:
         run: |
           cp backend/.env.example backend/.env
           cp backend/symfony/.env.example backend/symfony/.env
-          echo "Before substitution:"
-          cat backend/.env
-          cat backend/symfony/.env
           sed -i 's/db_name/${{ secrets.POSTGRES_DB }}/' backend/.env
           sed -i 's/db_user/${{ secrets.POSTGRES_USER }}/' backend/.env
           sed -i 's/db_password/${{ secrets.POSTGRES_PASSWORD }}/' backend/.env
           sed -i 's/app_secret/${{ secrets.APP_SECRET }}/' backend/symfony/.env
           sed -i 's/jwt_passphrase/${{ secrets.JWT_PASSPHRASE }}/' backend/symfony/.env
-          echo "After substitution:"
-          cat backend/.env
-          cat backend/symfony/.env
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -61,9 +55,6 @@ jobs:
           scp -i private_key backend/symfony/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/symfony/.env
           ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
             cd /opt/soukromekino/backend/
-            echo "Environment variables before starting Docker:"
-            cat .env
-            cat symfony/.env
             docker-compose -f docker-compose.prod.yml down
             docker-compose -f docker-compose.prod.yml pull
             docker-compose -f docker-compose.prod.yml up -d
