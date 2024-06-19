@@ -56,6 +56,9 @@ jobs:
           scp -i private_key backend/docker-compose.yml backend/docker-compose.prod.yml backend/.env backend/symfony/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/
           ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
             cd /opt/soukromekino/backend/
+            echo "Environment variables before starting Docker:"
+            cat .env
+            cat symfony/.env
             docker-compose -f docker-compose.prod.yml down
             docker-compose -f docker-compose.prod.yml pull
             docker-compose -f docker-compose.prod.yml up -d
