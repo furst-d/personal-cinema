@@ -28,8 +28,13 @@ RUN groupadd -g 1000 appuser && useradd -r -u 1000 -g appuser appuser
 # Set working directory
 WORKDIR /var/www
 
-# Copy Composer configuration and install dependencies
+# Copy Composer configuration
 COPY symfony/composer.json symfony/composer.lock ./
+
+# Set environment variable to allow composer to run as root
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+# Install composer dependencies
 RUN composer install --no-scripts --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
 # Copy application source code
