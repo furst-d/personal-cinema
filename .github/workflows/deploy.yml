@@ -36,6 +36,8 @@ jobs:
         run: |
           docker build ./backend -t furstd/personal-cinema_backend:latest 
           docker push furstd/personal-cinema_backend:latest
+          docker build ./backend/nginx -t furstd/personal-cinema_nginx:latest
+          docker push furstd/personal-cinema_nginx:latest
 
       - name: Deploy to VPS
         env:

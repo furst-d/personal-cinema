@@ -15,7 +15,7 @@ services:
       - "traefik.http.services.backend_php.loadbalancer.server.port=9000"
 
   nginx:
-    image: furstd/personal-cinema_backend:latest
+    image: furstd/personal-cinema_nginx:latest
     networks:
       - backend
     depends_on:
