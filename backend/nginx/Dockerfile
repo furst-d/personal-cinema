@@ -9,4 +9,4 @@ COPY nginx/fastcgi-php.conf /etc/nginx/fastcgi-php.conf
 COPY symfony/public /var/www/public
 
 # Expose port
-EXPOSE 80
+EXPOSE 8080
