@@ -53,6 +53,7 @@ jobs:
             mkdir -p /opt/soukromekino/backend/symfony
           EOF
           scp -i private_key backend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/
+          scp -i private_key traefik/docker-compose.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/traefik/
           scp -i private_key backend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/.env
           scp -i private_key backend/symfony/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/symfony/.env
           ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
