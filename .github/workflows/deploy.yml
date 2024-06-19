@@ -60,4 +60,7 @@ jobs:
             docker-compose -f docker-compose.prod.yml pull
             docker-compose -f docker-compose.prod.yml down
             docker-compose -f docker-compose.prod.yml up -d
+            cd /opt/soukromekino/traefik/
+            docker-compose down
+            docker-compose up -d
           EOF
