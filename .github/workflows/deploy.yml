@@ -41,7 +41,7 @@ jobs:
 
       - name: Build and push frontend Docker images
         run: |
-          docker build ./frontend -t furstd/personal-cinema_frontend:latest 
+          docker build -f ./frontend/Dockerfile.prod -t furstd/personal-cinema_frontend:latest ./frontend
           docker push furstd/personal-cinema_frontend:latest
 
       - name: Deploy to VPS
