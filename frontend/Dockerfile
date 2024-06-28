@@ -19,5 +19,5 @@ RUN npm run build
 # Expose port
 EXPOSE 4173
 
-# Start the app
-CMD ["npm", "run", "preview"]
+# Start the app with --host flag
+CMD ["npm", "run", "preview", "--", "--host"]
