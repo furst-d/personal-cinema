@@ -82,7 +82,7 @@ jobs:
             docker-compose -f /opt/soukromekino/traefik/docker-compose.yml down --remove-orphans
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml down --remove-orphans
             docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml down --remove-orphans
-            docker-compose -f /opt/soukromekino/frontend-admin/docker-compose.prod.yml down --remove-orphans
+            docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml down --remove-orphans
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml up -d
