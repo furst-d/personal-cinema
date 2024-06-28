@@ -18,12 +18,14 @@ jobs:
           cp backend/.env.example backend/.env
           cp backend/symfony/.env.example backend/symfony/.env
           cp frontend/.env.example frontend/.env
+          cp admin-frontend/.env.example admin-frontend/.env
           sed -i 's|db_name|${{ secrets.POSTGRES_DB }}|' backend/.env
           sed -i 's|db_user|${{ secrets.POSTGRES_USER }}|' backend/.env
           sed -i 's|db_password|${{ secrets.POSTGRES_PASSWORD }}|' backend/.env
           sed -i 's|app_secret|${{ secrets.APP_SECRET }}|' backend/symfony/.env
           sed -i 's|jwt_passphrase|${{ secrets.JWT_PASSPHRASE }}|' backend/symfony/.env
           sed -i 's|api_url|${{ secrets.API_URL }}|' frontend/.env
+          sed -i 's|api_url|${{ secrets.API_URL }}|' admin-frontend/.env
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -46,6 +48,11 @@ jobs:
           docker build -f ./frontend/Dockerfile.prod -t furstd/personal-cinema_frontend:latest ./frontend
           docker push furstd/personal-cinema_frontend:latest
 
+      - name: Build and push admin frontend Docker images
+        run: |
+          docker build -f ./admin-frontend/Dockerfile.prod -t furstd/personal-cinema_frontend_admin:latest ./admin-frontend
+          docker push furstd/personal-cinema_frontend_admin:latest    
+
       - name: Deploy to VPS
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -59,9 +66,11 @@ jobs:
           ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
             mkdir -p /opt/soukromekino/backend/symfony
             mkdir -p /opt/soukromekino/frontend
+            mkdir -p /opt/soukromekino/admin-frontend
           EOF
           scp -i private_key backend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/
           scp -i private_key frontend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/frontend/
+          scp -i private_key admin-frontend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/admin-frontend/
           scp -i private_key traefik/docker-compose.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/traefik/
           scp -i private_key traefik/traefik.toml $VPS_USER@$VPS_HOST:/opt/soukromekino/traefik/
           scp -i private_key backend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/.env
@@ -69,10 +78,13 @@ jobs:
           ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml pull
             docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml pull
+            docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml pull
             docker-compose -f /opt/soukromekino/traefik/docker-compose.yml down
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml down
             docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml down
+            docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml down
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml up -d
+            docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/traefik/docker-compose.yml up -d
           EOF

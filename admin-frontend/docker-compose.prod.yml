@@ -1,0 +1,17 @@
+services:
+  frontend:
+    image: furstd/personal-cinema_frontend_admin:latest
+    networks:
+      - frontend-admin
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`admin.soukromekino.cz`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.frontend.loadbalancer.server.port=4174"
+      - "traefik.docker.network=frontend-admin"
+
+networks:
+  frontend-admin:
+    name: frontend-admin
+    driver: bridge

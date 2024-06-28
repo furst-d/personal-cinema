@@ -1,15 +1,15 @@
 services:
-  frontend:
+  frontend-admin:
     build: .
     ports:
-      - "3000:5173"
+      - "3001:5174"
     volumes:
       - .:/var/www
     networks:
-      - frontend
+      - frontend-admin
     working_dir: /var/www
     command: npm run dev -- --host 0.0.0.0
 
 networks:
-  frontend:
+  frontend-admin:
     driver: bridge

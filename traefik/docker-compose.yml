@@ -22,6 +22,7 @@ services:
     networks:
       - backend
       - frontend
+      - frontend-admin
 
 networks:
   backend:
@@ -30,3 +31,6 @@ networks:
   frontend:
     external:
       name: frontend
+  frontend-admin:
+    external:
+      name: frontend-admin
