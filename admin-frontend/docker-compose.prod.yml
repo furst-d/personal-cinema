@@ -1,5 +1,5 @@
 services:
-  frontend:
+  frontend-admin:
     image: furstd/personal-cinema_frontend_admin:latest
     networks:
       - frontend-admin
