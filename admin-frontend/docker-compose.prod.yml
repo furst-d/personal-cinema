@@ -5,10 +5,10 @@ services:
       - frontend-admin
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`admin.soukromekino.cz`)"
-      - "traefik.http.routers.frontend.entrypoints=websecure"
-      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.frontend.loadbalancer.server.port=4174"
+      - "traefik.http.routers.frontend-admin.rule=Host(`admin.soukromekino.cz`)"
+      - "traefik.http.routers.frontend-admin.entrypoints=websecure"
+      - "traefik.http.routers.frontend-admin.tls.certresolver=letsencrypt"
+      - "traefik.http.services.frontend-admin.loadbalancer.server.port=4174"
       - "traefik.docker.network=frontend-admin"
 
 networks:
