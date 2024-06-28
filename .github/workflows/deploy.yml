@@ -39,6 +39,11 @@ jobs:
           docker build -f ./backend/nginx/Dockerfile -t furstd/personal-cinema_nginx:latest ./backend
           docker push furstd/personal-cinema_nginx:latest
 
+      - name: Build and push frontend Docker images
+        run: |
+          docker build ./frontend -t furstd/personal-cinema_frontend:latest 
+          docker push furstd/personal-cinema_frontend:latest
+
       - name: Deploy to VPS
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -51,15 +56,21 @@ jobs:
           ssh-keyscan $VPS_HOST >> ~/.ssh/known_hosts
           ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
             mkdir -p /opt/soukromekino/backend/symfony
+            mkdir -p /opt/soukromekino/frontend
           EOF
           scp -i private_key backend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/
           scp -i private_key traefik/docker-compose.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/traefik/
+          scp -i private_key frontend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/frontend/
           scp -i private_key backend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/.env
           scp -i private_key backend/symfony/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/symfony/.env
           ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
+            docker network create frontend || true
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml pull
+            docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml pull
             docker-compose -f /opt/soukromekino/traefik/docker-compose.yml down
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml down
+            docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml down
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml up -d
+            docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/traefik/docker-compose.yml up -d
           EOF

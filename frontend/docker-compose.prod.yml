@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: furstd/personal-cinema_frontend:latest
+    networks:
+      - frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`soukromekino.cz`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.frontend.loadbalancer.server.port=4173"
+      - "traefik.docker.network=frontend"
+
+networks:
+  frontend:
+    name: frontend
+    driver: bridge

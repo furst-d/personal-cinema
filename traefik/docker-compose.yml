@@ -21,8 +21,12 @@ services:
       - "./acme.json:/acme.json"
     networks:
       - backend
+      - frontend
 
 networks:
   backend:
     external:
       name: backend
+  frontend:
+    external:
+      name: frontend

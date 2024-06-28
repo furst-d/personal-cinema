@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/var/www
+    networks:
+      - frontend
+    command: npm run dev
+
+networks:
+  frontend:
+    driver: bridge
