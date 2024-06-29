@@ -53,7 +53,8 @@ services:
 
 networks:
   cdn-backend:
-    external: true
+    name: cdn-backend
+    driver: bridge
 
 volumes:
   minio_data:
