@@ -1,0 +1,57 @@
+services:
+  cdn-api:
+    build: .
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    depends_on:
+      - minio
+      - redis
+      - postgres-cdn
+    volumes:
+      - .:/var/www
+    command: npm run dev
+    networks:
+      - cdn
+
+  minio:
+    image: minio/minio
+    command: server /data
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    volumes:
+      - minio_data:/data
+    networks:
+      - cdn
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - cdn
+
+  postgres-cdn:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cdn
+
+networks:
+  cdn:
+    driver: bridge
+
+volumes:
+  minio_data:
+  postgres_data:
