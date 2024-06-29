@@ -88,6 +88,9 @@ jobs:
           scp -i private_key traefik/traefik.toml $VPS_USER@$VPS_HOST:/opt/soukromekino/traefik/
           scp -i private_key backend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/.env
           scp -i private_key backend/symfony/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/symfony/.env
+          scp -i private_key frontend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/frontend/.env
+          scp -i private_key admin-frontend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/admin-frontend/.env
+          scp -i private_key cdn-backend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/cdn-backend/.env
           ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml pull
             docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml pull
