@@ -22,6 +22,7 @@ services:
       - backend
       - frontend
       - frontend-admin
+      - cdn-backend
 
 networks:
   backend:
@@ -33,3 +34,6 @@ networks:
   frontend-admin:
     external:
       name: frontend-admin
+  cdn-backend:
+    external:
+      name: cdn-backend

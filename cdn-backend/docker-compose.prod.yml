@@ -1,0 +1,60 @@
+services:
+  cdn-api:
+    image: furstd/personal-cinema_backend_cdn:latest
+    env_file:
+      - .env
+    depends_on:
+      - minio
+      - redis
+      - postgres-cdn
+    networks:
+      - cdn-backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cdn-api.rule=Host(`api.cdn.soukromekino.cz`)"
+      - "traefik.http.routers.cdn-api.entrypoints=websecure"
+      - "traefik.http.routers.cdn-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.cdn-api.loadbalancer.server.port=4000"
+      - "traefik.docker.network=cdn-backend"
+
+  minio:
+    image: minio/minio
+    command: server /data
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    volumes:
+      - minio_data:/data
+    networks:
+      - cdn-backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cdn-files.rule=Host(`file.soukromekino.cz`)"
+      - "traefik.http.routers.cdn-files.entrypoints=websecure"
+      - "traefik.http.routers.cdn-files.tls.certresolver=letsencrypt"
+      - "traefik.http.services.cdn-files.loadbalancer.server.port=9000"
+      - "traefik.docker.network=cdn-backend"
+
+  redis:
+    image: redis
+    networks:
+      - cdn-backend
+
+  postgres-cdn:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cdn-backend
+
+networks:
+  cdn-backend:
+    external: true
+
+volumes:
+  minio_data:
+  postgres_data:

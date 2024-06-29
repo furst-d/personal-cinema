@@ -19,6 +19,7 @@ jobs:
           cp backend/symfony/.env.example backend/symfony/.env
           cp frontend/.env.example frontend/.env
           cp admin-frontend/.env.example admin-frontend/.env
+          cp cdn-backend/.env.example cdn-backend/.env
           sed -i 's|db_name|${{ secrets.POSTGRES_DB }}|' backend/.env
           sed -i 's|db_user|${{ secrets.POSTGRES_USER }}|' backend/.env
           sed -i 's|db_password|${{ secrets.POSTGRES_PASSWORD }}|' backend/.env
@@ -26,6 +27,11 @@ jobs:
           sed -i 's|jwt_passphrase|${{ secrets.JWT_PASSPHRASE }}|' backend/symfony/.env
           sed -i 's|api_url|${{ secrets.API_URL }}|' frontend/.env
           sed -i 's|api_url|${{ secrets.API_URL }}|' admin-frontend/.env
+          sed -i 's|db_name|${{ secrets.POSTGRES_CDN_DB }}|' cdn-backend/.env
+          sed -i 's|db_user|${{ secrets.POSTGRES_CDN_USER }}|' cdn-backend/.env
+          sed -i 's|db_password|${{ secrets.POSTGRES_CDN_PASSWORD }}|' cdn-backend/.env
+          sed -i 's|minio_access_key|${{ secrets.MINIO_ACCESS_KEY }}|' cdn-backend/.env
+          sed -i 's|minio_secret_key|${{ secrets.MINIO_SECRET_KEY }}|' cdn-backend/.env
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -51,7 +57,12 @@ jobs:
       - name: Build and push admin frontend Docker images
         run: |
           docker build -f ./admin-frontend/Dockerfile.prod -t furstd/personal-cinema_frontend_admin:latest ./admin-frontend
-          docker push furstd/personal-cinema_frontend_admin:latest    
+          docker push furstd/personal-cinema_frontend_admin:latest
+
+      - name: Build and push CDN backend Docker images
+        run: |
+          docker build -f ./cdn-backend/Dockerfile.prod -t furstd/personal-cinema_backend_cdn:latest ./cdn-backend
+          docker push furstd/personal-cinema_backend_cdn:latest        
 
       - name: Deploy to VPS
         env:
@@ -67,10 +78,12 @@ jobs:
             mkdir -p /opt/soukromekino/backend/symfony
             mkdir -p /opt/soukromekino/frontend
             mkdir -p /opt/soukromekino/admin-frontend
+            mkdir -p /opt/soukromekino/cdn-backend
           EOF
           scp -i private_key backend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/
           scp -i private_key frontend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/frontend/
           scp -i private_key admin-frontend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/admin-frontend/
+          scp -i private_key cdn-backend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/cdn-backend/
           scp -i private_key traefik/docker-compose.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/traefik/
           scp -i private_key traefik/traefik.toml $VPS_USER@$VPS_HOST:/opt/soukromekino/traefik/
           scp -i private_key backend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/.env
@@ -79,12 +92,15 @@ jobs:
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml pull
             docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml pull
             docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml pull
+            docker-compose -f /opt/soukromekino/cdn-backend/docker-compose.prod.yml pull
             docker-compose -f /opt/soukromekino/traefik/docker-compose.yml down --remove-orphans
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml down --remove-orphans
             docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml down --remove-orphans
             docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml down --remove-orphans
+            docker-compose -f /opt/soukromekino/cdn-backend/docker-compose.prod.yml down --remove-orphans
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml up -d
+            docker-compose -f /opt/soukromekino/cdn-backend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/traefik/docker-compose.yml up -d
           EOF
