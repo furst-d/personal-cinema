@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Lib\Api\ResponseEntity;
+use App\Helper\Api\ResponseEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ApiController extends AbstractController

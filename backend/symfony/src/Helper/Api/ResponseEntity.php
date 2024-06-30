@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Lib\Api;
+namespace App\Helper\Api;
 
-use App\Lib\Api\Exception\ApiException;
+use App\Helper\Api\Exception\ApiException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -56,14 +56,23 @@ class ResponseEntity
     /**
      * Return a response with an exception
      * @param ApiException $ex
+     * @param array $payload
      * @return JsonResponse
      */
     public function withException(ApiException $ex): JsonResponse
     {
+        $payload = ['message' => $ex->getMessage()];
+
+        if ($ex->getTag()) {
+            $payload['tag'] = $ex->getTag();
+        }
+
+        if ($ex->getDetails()) {
+            $payload['details'] = $ex->getDetails();
+        }
+
         return $this->send($ex->getCode(), $this->getHeader($ex->getCode(), 'error') + [
-                'payload' => $ex->getTag()
-                    ? ['tag' => $ex->getTag(), 'message' => $ex->getMessage()]
-                    : ['message' => $ex->getMessage()]
+                'payload' => $payload
             ]);
     }
 
