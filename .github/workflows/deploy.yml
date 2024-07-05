@@ -9,6 +9,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      DOCKER_IMAGE_PREFIX: "furstd/personal-cinema"
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -44,31 +50,27 @@ jobs:
 
       - name: Build and push backend Docker images
         run: |
-          docker build ./backend -t furstd/personal-cinema_backend:latest 
-          docker push furstd/personal-cinema_backend:latest
-          docker build -f ./backend/nginx/Dockerfile -t furstd/personal-cinema_nginx:latest ./backend
-          docker push furstd/personal-cinema_nginx:latest
+          docker build ./backend -t ${{ env.DOCKER_IMAGE_PREFIX }}_backend:latest 
+          docker push ${{ env.DOCKER_IMAGE_PREFIX }}_backend:latest
+          docker build -f ./backend/nginx/Dockerfile -t ${{ env.DOCKER_IMAGE_PREFIX }}_nginx:latest ./backend
+          docker push ${{ env.DOCKER_IMAGE_PREFIX }}_nginx:latest
 
       - name: Build and push frontend Docker images
         run: |
-          docker build -f ./frontend/Dockerfile.prod -t furstd/personal-cinema_frontend:latest ./frontend
-          docker push furstd/personal-cinema_frontend:latest
+          docker build -f ./frontend/Dockerfile.prod -t ${{ env.DOCKER_IMAGE_PREFIX }}_frontend:latest ./frontend
+          docker push ${{ env.DOCKER_IMAGE_PREFIX }}_frontend:latest
 
       - name: Build and push admin frontend Docker images
         run: |
-          docker build -f ./admin-frontend/Dockerfile.prod -t furstd/personal-cinema_frontend_admin:latest ./admin-frontend
-          docker push furstd/personal-cinema_frontend_admin:latest
+          docker build -f ./admin-frontend/Dockerfile.prod -t ${{ env.DOCKER_IMAGE_PREFIX }}_frontend_admin:latest ./admin-frontend
+          docker push ${{ env.DOCKER_IMAGE_PREFIX }}_frontend_admin:latest
 
       - name: Build and push CDN backend Docker images
         run: |
-          docker build -f ./cdn-backend/Dockerfile.prod -t furstd/personal-cinema_backend_cdn:latest ./cdn-backend
-          docker push furstd/personal-cinema_backend_cdn:latest        
+          docker build -f ./cdn-backend/Dockerfile.prod -t ${{ env.DOCKER_IMAGE_PREFIX }}_backend_cdn:latest ./cdn-backend
+          docker push ${{ env.DOCKER_IMAGE_PREFIX }}_backend_cdn:latest    
 
-      - name: Deploy to VPS
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
+      - name: Deploy files to VPS
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key
           chmod 600 private_key
@@ -90,7 +92,10 @@ jobs:
           scp -i private_key backend/symfony/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/symfony/.env
           scp -i private_key frontend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/frontend/.env
           scp -i private_key admin-frontend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/admin-frontend/.env
-          scp -i private_key cdn-backend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/cdn-backend/.env
+          scp -i private_key cdn-backend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/cdn-backend/    
+
+      - name: Pull and restart services
+        run: |
           ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml pull
             docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml pull
@@ -106,5 +111,10 @@ jobs:
             docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/cdn-backend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/traefik/docker-compose.yml up -d
+          EOF    
+
+      - name: Run database migrations
+        run: |
+          ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml exec -T php-fpm php bin/console doctrine:migrations:migrate --no-interaction
           EOF
