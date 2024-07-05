@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Entity\User\User;
+use App\Entity\User\Account;
 use App\Repository\FolderRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
@@ -20,13 +20,25 @@ class Folder
 
     #[ORM\ManyToOne(inversedBy: 'folders')]
     #[ORM\JoinColumn(nullable: false)]
-    private User $owner;
+    private Account $owner;
 
     #[ORM\Column]
     private DateTimeImmutable $createdAt;
 
     #[ORM\Column]
     private DateTimeImmutable $updatedAt;
+
+    /**
+     * @param string $name
+     * @param Account $owner
+     */
+    public function __construct(string $name, Account $owner)
+    {
+        $this->name = $name;
+        $this->owner = $owner;
+        $this->createdAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
+    }
 
     /**
      * @return int
@@ -54,20 +66,11 @@ class Folder
     }
 
     /**
-     * @return User
+     * @return Account
      */
-    public function getOwner(): User
+    public function getOwner(): Account
     {
         return $this->owner;
-    }
-
-    /**
-     * @param User $owner
-     * @return void
-     */
-    public function setOwner(User $owner): void
-    {
-        $this->owner = $owner;
     }
 
     /**

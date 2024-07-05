@@ -3,16 +3,18 @@
 namespace App\Entity\User;
 
 use App\Entity\Folder;
-use App\Repository\User\UserRepository;
+use App\Repository\Account\AccountRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\MaxDepth;
 
-#[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
-class User implements UserInterface
+#[ORM\Entity(repositoryClass: AccountRepository::class)]
+#[ORM\Table(name: '`account`')]
+class Account implements UserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -20,6 +22,7 @@ class User implements UserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['serialize'])]
     private string $email;
 
     #[ORM\Column(length: 255)]
@@ -29,15 +32,22 @@ class User implements UserInterface
     private string $salt;
 
     #[ORM\Column]
+    #[Groups(['serialize'])]
     private DateTimeImmutable $createdAt;
 
     #[ORM\Column]
+    #[Groups(['serialize'])]
     private bool $isActive = false;
 
     #[ORM\Column]
+    #[Groups(['serialize'])]
     private bool $isDeleted = false;
 
+    /**
+     * @var Collection<int, Role>
+     */
     #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: "users")]
+    #[Groups(['serialize'])]
     private Collection $roles;
 
     /**
@@ -61,11 +71,11 @@ class User implements UserInterface
     {
         $this->email = $email;
         $this->password = $password;
-        $this->apiTokens = new ArrayCollection();
         $this->createdAt = new DateTimeImmutable();
         $this->salt = $salt;
-        $this->folders = new ArrayCollection();
         $this->roles = new ArrayCollection();
+        $this->apiTokens = new ArrayCollection();
+        $this->folders = new ArrayCollection();
     }
 
     /**
@@ -218,27 +228,5 @@ class User implements UserInterface
     public function getFolders(): Collection
     {
         return $this->folders;
-    }
-
-    public function addFolder(Folder $folder): static
-    {
-        if (!$this->folders->contains($folder)) {
-            $this->folders->add($folder);
-            $folder->setOwner($this);
-        }
-
-        return $this;
-    }
-
-    public function removeFolder(Folder $folder): static
-    {
-        if ($this->folders->removeElement($folder)) {
-            // set the owning side to null (unless already changed)
-            if ($folder->getOwner() === $this) {
-                $folder->setOwner(null);
-            }
-        }
-
-        return $this;
     }
 }

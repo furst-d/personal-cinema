@@ -16,6 +16,7 @@ jobs:
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
 
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -39,6 +40,12 @@ jobs:
           sed -i 's|db_password|${{ secrets.POSTGRES_CDN_PASSWORD }}|' cdn-backend/.env
           sed -i 's|minio_access_key|${{ secrets.MINIO_ACCESS_KEY }}|' cdn-backend/.env
           sed -i 's|minio_secret_key|${{ secrets.MINIO_SECRET_KEY }}|' cdn-backend/.env
+
+      - name: Create JWT key files
+        run: |
+          mkdir -p backend/symfony/config/jwt
+          echo "${{ secrets.JWT_PRIVATE_KEY }}" > backend/symfony/config/jwt/private.pem
+          echo "${{ secrets.JWT_PUBLIC_KEY }}" > backend/symfony/config/jwt/public.pem      
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1

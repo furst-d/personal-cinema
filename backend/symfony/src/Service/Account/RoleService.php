@@ -1,51 +1,44 @@
 <?php
 
-namespace App\Service\User;
+namespace App\Service\Account;
 
-use App\Entity\User\User;
+use App\Entity\User\Account;
 use App\Helper\Api\Exception\NotFoundException;
-use App\Repository\User\RoleRepository;
+use App\Repository\Account\RoleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class RoleService
 {
-    /**
-     * @var EntityManagerInterface $em
-     */
-    private EntityManagerInterface $em;
-
     /**
      * @var RoleRepository $roleRepository
      */
     private RoleRepository $roleRepository;
 
     /**
-     * @param EntityManagerInterface $em
      * @param RoleRepository $roleRepository
      */
-    public function __construct(EntityManagerInterface $em, RoleRepository $roleRepository)
+    public function __construct(RoleRepository $roleRepository)
     {
-        $this->em = $em;
         $this->roleRepository = $roleRepository;
     }
 
     /**
-     * @param User $user
-     * @return User
+     * @param Account $user
+     * @return Account
      * @throws NotFoundException
      */
-    public function addDefaultRole(User $user): User
+    public function addDefaultRole(Account $user): Account
     {
         return $this->addRoleByKeyword($user, 'ROLE_USER');
     }
 
     /**
-     * @param User $user
+     * @param Account $user
      * @param string $keyword
-     * @return User
+     * @return Account
      * @throws NotFoundException
      */
-    private function addRoleByKeyword(User $user, string $keyword): User
+    private function addRoleByKeyword(Account $user, string $keyword): Account
     {
         $role = $this->roleRepository->findByKeyword($keyword);
         if (!$role) {

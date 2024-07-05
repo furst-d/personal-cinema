@@ -3,11 +3,11 @@
 namespace App\Service\Jwt;
 
 use App\Entity\User\ApiToken;
-use App\Entity\User\User;
+use App\Entity\User\Account;
 use App\Helper\Jwt\JwtExpiration;
 use App\Helper\Jwt\JwtUsage;
-use App\Repository\User\ApiTokenRepository;
-use App\Service\User\SessionService;
+use App\Repository\Account\ApiTokenRepository;
+use App\Service\Account\SessionService;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -63,8 +63,8 @@ class JwtService
      */
     public function generateToken(UserInterface $user, JwtUsage $usage): string
     {
-        if (!$user instanceof User) {
-            throw new InvalidArgumentException('Expected an instance of ' . User::class);
+        if (!$user instanceof Account) {
+            throw new InvalidArgumentException('Expected an instance of ' . Account::class);
         }
 
         $expiration = $this->getExpirationForUsage($usage);
@@ -85,8 +85,8 @@ class JwtService
      */
     public function createOrUpdateRefreshToken(UserInterface $user, Request $request): ApiToken
     {
-        if (!$user instanceof User) {
-            throw new InvalidArgumentException('Expected an instance of ' . User::class);
+        if (!$user instanceof Account) {
+            throw new InvalidArgumentException('Expected an instance of ' . Account::class);
         }
 
         $sessionId = $this->sessionService->generate($request);
@@ -118,6 +118,7 @@ class JwtService
         return match($usage) {
             JwtUsage::USAGE_API_ACCESS => JwtExpiration::EXPIRATION_10_MINUTES->value,
             JwtUsage::USAGE_API_REFRESH => JwtExpiration::EXPIRATION_1_YEAR->value,
+            JwtUsage::USAGE_ACCOUNT_ACTIVATION => JwtExpiration::EXPIRATION_1_HOUR->value,
         };
     }
 }

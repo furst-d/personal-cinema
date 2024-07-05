@@ -2,7 +2,7 @@
 
 namespace App\Entity\User;
 
-use App\Repository\User\ApiTokenRepository;
+use App\Repository\Account\ApiTokenRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -14,7 +14,7 @@ class ApiToken
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255, unique: true)]
+    #[ORM\Column(type: 'text', unique: true)]
     private string $refreshToken;
 
     #[ORM\Column(length: 255)]
@@ -22,7 +22,7 @@ class ApiToken
 
     #[ORM\ManyToOne(inversedBy: 'apiTokens')]
     #[ORM\JoinColumn(nullable: false)]
-    private User $user;
+    private Account $account;
 
     #[ORM\Column]
     private ?DateTimeImmutable $createdAt;
@@ -33,13 +33,13 @@ class ApiToken
     /**
      * @param string $refreshToken
      * @param string $sessionId
-     * @param User $user
+     * @param Account $user
      */
-    public function __construct(string $refreshToken, string $sessionId, User $user)
+    public function __construct(string $refreshToken, string $sessionId, Account $user)
     {
         $this->refreshToken = $refreshToken;
         $this->sessionId = $sessionId;
-        $this->user = $user;
+        $this->account = $user;
         $this->createdAt = new DateTimeImmutable();
     }
 
@@ -68,11 +68,11 @@ class ApiToken
     }
 
     /**
-     * @return User
+     * @return Account
      */
-    public function getUser(): User
+    public function getAccount(): Account
     {
-        return $this->user;
+        return $this->account;
     }
 
     /**

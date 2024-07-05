@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Repository\User;
+namespace App\Repository\Account;
 
 use App\Entity\User\ApiToken;
-use App\Entity\User\User;
+use App\Entity\User\Account;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -21,16 +21,16 @@ class ApiTokenRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param User $user
+     * @param Account $account
      * @param string $sessionId
      * @return ApiToken|null
      */
-    public function findByUserAndSession(User $user, string $sessionId): ?ApiToken
+    public function findByUserAndSession(Account $account, string $sessionId): ?ApiToken
     {
         return $this->createQueryBuilder('t')
-            ->andWhere('t.user = :user')
+            ->andWhere('t.account = :account')
             ->andWhere('t.sessionId = :sessionId')
-            ->setParameter('user', $user)
+            ->setParameter('account', $account)
             ->setParameter('sessionId', $sessionId)
             ->getQuery()
             ->getOneOrNullResult();

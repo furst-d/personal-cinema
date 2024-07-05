@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repository\User;
+namespace App\Repository\Account;
 
 use App\Entity\User\Role;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;

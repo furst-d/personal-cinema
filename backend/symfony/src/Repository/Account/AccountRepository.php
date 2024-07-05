@@ -1,21 +1,21 @@
 <?php
 
-namespace App\Repository\User;
+namespace App\Repository\Account;
 
-use App\Entity\User\User;
+use App\Entity\User\Account;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<User>
+ * @extends ServiceEntityRepository<Account>
  */
-class UserRepository extends ServiceEntityRepository
+class AccountRepository extends ServiceEntityRepository
 {
     /**
      * @param ManagerRegistry $registry
      */
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, User::class);
+        parent::__construct($registry, Account::class);
     }
 }

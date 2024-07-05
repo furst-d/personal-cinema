@@ -1,5 +1,8 @@
 # Use the official PHP image as a parent image
-FROM php:8.2-fpm
+FROM php:8.1-fpm
+
+# Set the timezone
+RUN echo "date.timezone=Europe/Prague" > /usr/local/etc/php/conf.d/timezone.ini
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
