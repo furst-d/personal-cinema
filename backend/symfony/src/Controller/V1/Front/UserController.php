@@ -13,6 +13,7 @@ use App\Helper\Api\Exception\NotFoundException;
 use App\Helper\Api\ResponseEntity;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Jwt\JwtService;
+use App\Service\Locator\BaseControllerLocator;
 use App\Service\Mailer\MailerService;
 use App\Service\Account\AccountService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -41,22 +42,18 @@ class UserController extends ApiController
     private JwtService $jwtService;
 
     /**
-     * @param ResponseEntity $re
-     * @param EntityManagerInterface $em
+     * @param BaseControllerLocator $locator
      * @param AccountService $userService
      * @param MailerService $mailerService
      * @param JwtService $jwtService
-     * @param SerializerInterface $serializer
      */
     public function __construct(
-        ResponseEntity         $re,
-        EntityManagerInterface $em,
-        SerializerInterface    $serializer,
+        BaseControllerLocator    $locator,
         AccountService         $userService,
         MailerService          $mailerService,
         JwtService             $jwtService,
     ) {
-        parent::__construct($re, $em, $serializer);
+        parent::__construct($locator);
         $this->userService = $userService;
         $this->mailerService = $mailerService;
         $this->jwtService = $jwtService;
