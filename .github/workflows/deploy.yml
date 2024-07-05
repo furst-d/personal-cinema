@@ -92,13 +92,18 @@ jobs:
           scp -i private_key admin-frontend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/admin-frontend/.env
           scp -i private_key cdn-backend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/cdn-backend/
 
-      - name: Pull and restart services
+      - name: Pull services
         run: |
           ssh -i private_key -T $VPS_USER@$VPS_HOST <<'EOF'
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml pull
             docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml pull
             docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml pull
             docker-compose -f /opt/soukromekino/cdn-backend/docker-compose.prod.yml pull
+          EOF
+
+      - name: Restart services
+        run: |
+          ssh -i private_key -T $VPS_USER@$VPS_HOST <<'EOF'
             docker-compose -f /opt/soukromekino/traefik/docker-compose.yml down --remove-orphans
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml down --remove-orphans
             docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml down --remove-orphans
@@ -109,7 +114,7 @@ jobs:
             docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/cdn-backend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/traefik/docker-compose.yml up -d
-          EOF
+          EOF    
 
       - name: Run database migrations
         run: |
