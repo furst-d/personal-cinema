@@ -106,4 +106,5 @@ jobs:
             docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/cdn-backend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/traefik/docker-compose.yml up -d
+            docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml exec -T php-fpm php bin/console doctrine:migrations:migrate --no-interaction
           EOF

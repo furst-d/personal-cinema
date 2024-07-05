@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Helper\Api\ResponseEntity;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ApiController extends AbstractController
@@ -12,11 +13,15 @@ class ApiController extends AbstractController
      */
     protected ResponseEntity $re;
 
+    protected EntityManagerInterface $em;
+
     /**
      * @param ResponseEntity $re
+     * @param EntityManagerInterface $em
      */
-    public function __construct(ResponseEntity $re)
+    public function __construct(ResponseEntity $re, EntityManagerInterface $em)
     {
         $this->re = $re;
+        $this->em = $em;
     }
 }

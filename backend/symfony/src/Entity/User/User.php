@@ -2,6 +2,7 @@
 
 namespace App\Entity\User;
 
+use App\Entity\Folder;
 use App\Repository\User\UserRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -46,6 +47,12 @@ class User implements UserInterface
     private Collection $apiTokens;
 
     /**
+     * @var Collection<int, Folder>
+     */
+    #[ORM\OneToMany(targetEntity: Folder::class, mappedBy: 'owner', orphanRemoval: true)]
+    private Collection $folders;
+
+    /**
      * @param string $email
      * @param string $password
      * @param string $salt
@@ -57,6 +64,8 @@ class User implements UserInterface
         $this->apiTokens = new ArrayCollection();
         $this->createdAt = new DateTimeImmutable();
         $this->salt = $salt;
+        $this->folders = new ArrayCollection();
+        $this->roles = new ArrayCollection();
     }
 
     /**
@@ -201,5 +210,35 @@ class User implements UserInterface
     public function getUserIdentifier(): string
     {
         return $this->getEmail();
+    }
+
+    /**
+     * @return Collection<int, Folder>
+     */
+    public function getFolders(): Collection
+    {
+        return $this->folders;
+    }
+
+    public function addFolder(Folder $folder): static
+    {
+        if (!$this->folders->contains($folder)) {
+            $this->folders->add($folder);
+            $folder->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFolder(Folder $folder): static
+    {
+        if ($this->folders->removeElement($folder)) {
+            // set the owning side to null (unless already changed)
+            if ($folder->getOwner() === $this) {
+                $folder->setOwner(null);
+            }
+        }
+
+        return $this;
     }
 }

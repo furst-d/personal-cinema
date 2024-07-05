@@ -18,4 +18,17 @@ class RoleRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Role::class);
     }
+
+    /**
+     * @param string $keyword
+     * @return Role|null
+     */
+    public function findByKeyword(string $keyword): ?Role
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.keyName = :keyword')
+            ->setParameter('keyword', $keyword)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
