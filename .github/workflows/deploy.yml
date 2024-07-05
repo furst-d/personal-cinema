@@ -11,7 +11,7 @@ jobs:
 
     env:
       DOCKER_IMAGE_PREFIX: "furstd/personal-cinema"
-      PROJECT_PATH: '${{ env.PROJECT_PATH }}'
+      PROJECT_PATH: '/opt/soukromekino'
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
