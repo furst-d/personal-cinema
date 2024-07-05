@@ -70,18 +70,16 @@ jobs:
           docker build -f ./cdn-backend/Dockerfile.prod -t ${{ env.DOCKER_IMAGE_PREFIX }}_backend_cdn:latest ./cdn-backend
           docker push ${{ env.DOCKER_IMAGE_PREFIX }}_backend_cdn:latest    
 
-      - name: Deploy files to VPS
+      - name: Create necessary directories on VPS
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key
           chmod 600 private_key
           mkdir -p ~/.ssh
           ssh-keyscan $VPS_HOST >> ~/.ssh/known_hosts
-          ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
-            mkdir -p /opt/soukromekino/backend/symfony
-            mkdir -p /opt/soukromekino/frontend
-            mkdir -p /opt/soukromekino/admin-frontend
-            mkdir -p /opt/soukromekino/cdn-backend
-          EOF
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'mkdir -p /opt/soukromekino/backend/symfony /opt/soukromekino/frontend /opt/soukromekino/admin-frontend /opt/soukromekino/cdn-backend'
+
+      - name: Copy files to VPS
+        run: |
           scp -i private_key backend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/
           scp -i private_key frontend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/frontend/
           scp -i private_key admin-frontend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/admin-frontend/
@@ -92,11 +90,11 @@ jobs:
           scp -i private_key backend/symfony/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/symfony/.env
           scp -i private_key frontend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/frontend/.env
           scp -i private_key admin-frontend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/admin-frontend/.env
-          scp -i private_key cdn-backend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/cdn-backend/    
+          scp -i private_key cdn-backend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/cdn-backend/
 
       - name: Pull and restart services
         run: |
-          ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST <<'EOF'
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml pull
             docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml pull
             docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml pull
@@ -111,10 +109,10 @@ jobs:
             docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/cdn-backend/docker-compose.prod.yml up -d
             docker-compose -f /opt/soukromekino/traefik/docker-compose.yml up -d
-          EOF    
+          EOF
 
       - name: Run database migrations
         run: |
-          ssh -i private_key -T $VPS_USER@$VPS_HOST << 'EOF'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST <<'EOF'
             docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml exec -T php-fpm php bin/console doctrine:migrations:migrate --no-interaction
           EOF
