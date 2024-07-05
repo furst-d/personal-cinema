@@ -11,6 +11,7 @@ jobs:
 
     env:
       DOCKER_IMAGE_PREFIX: "furstd/personal-cinema"
+      PROJECT_PATH: '${{ env.PROJECT_PATH }}'
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
@@ -76,45 +77,42 @@ jobs:
           chmod 600 private_key
           mkdir -p ~/.ssh
           ssh-keyscan $VPS_HOST >> ~/.ssh/known_hosts
-          ssh -i private_key -T $VPS_USER@$VPS_HOST 'mkdir -p /opt/soukromekino/backend/symfony /opt/soukromekino/frontend /opt/soukromekino/admin-frontend /opt/soukromekino/cdn-backend'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'mkdir -p ${{ env.PROJECT_PATH }}/backend/symfony ${{ env.PROJECT_PATH }}/frontend ${{ env.PROJECT_PATH }}/admin-frontend ${{ env.PROJECT_PATH }}/cdn-backend'
 
       - name: Copy files to VPS
         run: |
-          scp -i private_key backend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/
-          scp -i private_key frontend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/frontend/
-          scp -i private_key admin-frontend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/admin-frontend/
-          scp -i private_key cdn-backend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/cdn-backend/
-          scp -i private_key traefik/docker-compose.yml $VPS_USER@$VPS_HOST:/opt/soukromekino/traefik/
-          scp -i private_key traefik/traefik.toml $VPS_USER@$VPS_HOST:/opt/soukromekino/traefik/
-          scp -i private_key backend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/.env
-          scp -i private_key backend/symfony/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/backend/symfony/.env
-          scp -i private_key frontend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/frontend/.env
-          scp -i private_key admin-frontend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/admin-frontend/.env
-          scp -i private_key cdn-backend/.env $VPS_USER@$VPS_HOST:/opt/soukromekino/cdn-backend/
+          scp -i private_key backend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:${{ env.PROJECT_PATH }}/backend/
+          scp -i private_key frontend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:${{ env.PROJECT_PATH }}/frontend/
+          scp -i private_key admin-frontend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:${{ env.PROJECT_PATH }}/admin-frontend/
+          scp -i private_key cdn-backend/docker-compose.prod.yml $VPS_USER@$VPS_HOST:${{ env.PROJECT_PATH }}/cdn-backend/
+          scp -i private_key traefik/docker-compose.yml $VPS_USER@$VPS_HOST:${{ env.PROJECT_PATH }}/traefik/
+          scp -i private_key traefik/traefik.toml $VPS_USER@$VPS_HOST:${{ env.PROJECT_PATH }}/traefik/
+          scp -i private_key backend/.env $VPS_USER@$VPS_HOST:${{ env.PROJECT_PATH }}/backend/.env
+          scp -i private_key backend/symfony/.env $VPS_USER@$VPS_HOST:${{ env.PROJECT_PATH }}/backend/symfony/.env
+          scp -i private_key frontend/.env $VPS_USER@$VPS_HOST:${{ env.PROJECT_PATH }}/frontend/.env
+          scp -i private_key admin-frontend/.env $VPS_USER@$VPS_HOST:${{ env.PROJECT_PATH }}/admin-frontend/.env
+          scp -i private_key cdn-backend/.env $VPS_USER@$VPS_HOST:${{ env.PROJECT_PATH }}/cdn-backend/
 
       - name: Pull services
         run: |
-          ssh -i private_key -T $VPS_USER@$VPS_HOST <<'EOF'
-            docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml pull
-            docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml pull
-            docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml pull
-            docker-compose -f /opt/soukromekino/cdn-backend/docker-compose.prod.yml pull
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/backend/docker-compose.prod.yml pull'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/frontend/docker-compose.prod.yml pull'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/admin-frontend/docker-compose.prod.yml pull'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/cdn-backend/docker-compose.prod.yml pull'
 
       - name: Restart services
         run: |
-          ssh -i private_key -T $VPS_USER@$VPS_HOST <<'EOF'
-            docker-compose -f /opt/soukromekino/traefik/docker-compose.yml down --remove-orphans
-            docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml down --remove-orphans
-            docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml down --remove-orphans
-            docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml down --remove-orphans
-            docker-compose -f /opt/soukromekino/cdn-backend/docker-compose.prod.yml down --remove-orphans
-            docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml up -d
-            docker-compose -f /opt/soukromekino/frontend/docker-compose.prod.yml up -d
-            docker-compose -f /opt/soukromekino/admin-frontend/docker-compose.prod.yml up -d
-            docker-compose -f /opt/soukromekino/cdn-backend/docker-compose.prod.yml up -d
-            docker-compose -f /opt/soukromekino/traefik/docker-compose.yml up -d
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/traefik/docker-compose.yml down --remove-orphans'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/backend/docker-compose.prod.yml down --remove-orphans'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/frontend/docker-compose.prod.yml down --remove-orphans'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/admin-frontend/docker-compose.prod.yml down --remove-orphans'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/cdn-backend/docker-compose.prod.yml down --remove-orphans'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/backend/docker-compose.prod.yml up -d'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/frontend/docker-compose.prod.yml up -d'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/admin-frontend/docker-compose.prod.yml up -d'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/cdn-backend/docker-compose.prod.yml up -d'
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/traefik/docker-compose.yml up -d'
 
       - name: Run database migrations
         run: |
-          ssh -i private_key -T $VPS_USER@$VPS_HOST <<'EOF'
-            docker-compose -f /opt/soukromekino/backend/docker-compose.prod.yml exec -T php-fpm php bin/console doctrine:migrations:migrate --no-interaction
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/backend/docker-compose.prod.yml exec -T php-fpm php bin/console doctrine:migrations:migrate --no-interaction'
