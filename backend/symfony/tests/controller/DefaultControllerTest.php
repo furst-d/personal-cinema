@@ -16,8 +16,8 @@ class DefaultControllerTest extends WebTestCase
         $responseContent = $client->getResponse()->getContent();
         $responseData = json_decode($responseContent, true);
 
-        $expectedPayload = [
-            'message' => 'Welcome to your new controller!',
+        $expectedData = [
+            'message' => 'Welcome to your new controller! Test 1',
             'path' => 'src/Controller/DefaultController.php',
         ];
 
@@ -25,6 +25,6 @@ class DefaultControllerTest extends WebTestCase
         $this->assertSame('success', $responseData['status']);
         $this->assertArrayHasKey('timestamp', $responseData); // Check if timestamp key exists
         $this->assertSame(1, $responseData['payload']['count']);
-        $this->assertSame($expectedPayload, $responseData['payload']['data']);
+        $this->assertSame($expectedData, $responseData['payload']['data']);
     }
 }

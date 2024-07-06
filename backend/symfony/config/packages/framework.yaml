@@ -1,13 +1,19 @@
-# see https://symfony.com/doc/current/reference/configuration/framework.html
+# config/packages/framework.yaml
 framework:
     secret: '%env(APP_SECRET)%'
     #csrf_protection: true
 
-    # Note that the session will be started ONLY if you read or write from it.
-    session: true
-
     #esi: true
     #fragments: true
+
+    http_method_override: true
+    handle_all_throwables: true
+    php_errors:
+        log: true
+    session:
+        cookie_secure: auto
+        cookie_samesite: lax
+        handler_id: session.handler.native_file
 
 when@test:
     framework:

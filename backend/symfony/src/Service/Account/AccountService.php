@@ -29,7 +29,7 @@ class AccountService
      */
     private AccountRepository $accountRepository;
 
-    private const string ACCOUNT_NOT_FOUND_MESSAGE = 'Account not found.';
+    private const ACCOUNT_NOT_FOUND_MESSAGE = 'Account not found.';
 
     /**
      * @param EntityManagerInterface $em

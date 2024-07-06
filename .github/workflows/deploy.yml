@@ -128,3 +128,7 @@ jobs:
       - name: Run database migrations
         run: |
           ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/backend/docker-compose.prod.yml exec -T php-fpm php bin/console doctrine:migrations:migrate --no-interaction'
+
+      - name: Clean up old Docker images
+        run: |
+          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker image prune -f'

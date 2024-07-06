@@ -1,16 +1,17 @@
 <?php declare(strict_types=1);
 
 use Symfony\Component\Dotenv\Dotenv;
+use Symfony\Component\ErrorHandler\ErrorHandler;
 
 require_once dirname(__DIR__).'/vendor/autoload.php';
-use Symfony\Component\ErrorHandler\ErrorHandler;
 
 ErrorHandler::register(null, false);
 
-if (method_exists(Dotenv::class, 'bootEnv')) {
-    (new Dotenv())->bootEnv(dirname(__DIR__).'/.env');
-}
+$_ENV['APP_ENV'] = 'test';
+$_ENV['APP_DEBUG'] = '1';
 
-if ($_SERVER['APP_DEBUG']) {
-    umask(0000);
+if (method_exists(Dotenv::class, 'bootEnv')) {
+    $dotenv = new Dotenv();
+    // Explicitně načítání .env.test
+    $dotenv->load(dirname(__DIR__).'/.env.test');
 }
