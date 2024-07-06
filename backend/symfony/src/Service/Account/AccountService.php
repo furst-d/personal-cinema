@@ -10,7 +10,7 @@ use App\Helper\Api\Exception\NotFoundException;
 use App\Helper\Authenticator\Authenticator;
 use App\Repository\Account\AccountRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Random\RandomException;
+use Exception;
 
 class AccountService
 {
@@ -29,29 +29,37 @@ class AccountService
      */
     private AccountRepository $accountRepository;
 
+    /**
+     * @var Authenticator $authenticator
+     */
+    private Authenticator $authenticator;
+
     private const ACCOUNT_NOT_FOUND_MESSAGE = 'Account not found.';
 
     /**
      * @param EntityManagerInterface $em
      * @param RoleService $roleService
      * @param AccountRepository $accountRepository
+     * @param Authenticator $authenticator
      */
     public function __construct(
         EntityManagerInterface $em,
         RoleService            $roleService,
         AccountRepository      $accountRepository,
+        Authenticator          $authenticator
     )
     {
         $this->em = $em;
         $this->roleService = $roleService;
         $this->accountRepository = $accountRepository;
+        $this->authenticator = $authenticator;
     }
 
     /**
      * @param string $email
      * @param string $password
      * @return Account
-     * @throws ConflictException|NotFoundException|InternalException
+     * @throws InternalException
      */
     public function registerUser(string $email, string $password): Account
     {
@@ -60,8 +68,8 @@ class AccountService
                 throw new ConflictException('Account already exists.');
             }
 
-            $salt = Authenticator::generateSalt();
-            $password = Authenticator::combinePassword($password, $salt);
+            $salt = $this->authenticator->generateSalt();
+            $password = $this->authenticator->combinePassword($password, $salt);
 
             $user = new Account($email, $password, $salt);
             $this->roleService->addDefaultRole($user);
@@ -69,7 +77,7 @@ class AccountService
             $this->em->persist($user);
             $this->em->flush();
 
-        } catch (RandomException $e) {
+        } catch (Exception $e) {
             throw new InternalException($e->getMessage());
         }
 
@@ -86,7 +94,7 @@ class AccountService
     {
         $user = $this->accountRepository->findOneBy(['email' => $email, 'isDeleted' => false]);
 
-        if (!$user || !Authenticator::verifyPassword($password, $user->getPassword(), $user->getSalt())) {
+        if (!$user || !$this->authenticator->verifyPassword($password, $user->getPassword(), $user->getSalt())) {
             throw new BadRequestException('Invalid email or password.');
         }
 
@@ -101,7 +109,7 @@ class AccountService
     public function changePassword(Account $account, string $password): Account
     {
         $salt = $account->getSalt();
-        $password = Authenticator::combinePassword($password, $salt);
+        $password = $this->authenticator->combinePassword($password, $salt);
         $account->setPassword($password);
         $this->em->flush();
         return $account;

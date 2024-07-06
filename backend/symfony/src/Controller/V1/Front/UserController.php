@@ -15,7 +15,6 @@ use App\Service\Jwt\JwtService;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Mailer\MailerService;
 use App\Service\Account\AccountService;
-use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

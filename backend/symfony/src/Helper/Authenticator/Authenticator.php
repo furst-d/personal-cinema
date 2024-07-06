@@ -2,15 +2,15 @@
 
 namespace App\Helper\Authenticator;
 
-use Random\RandomException;
+use Exception;
 
 class Authenticator
 {
     /**
      * @return string
-     * @throws RandomException
+     * @throws Exception
      */
-    public static function generateSalt(): string
+    public function generateSalt(): string
     {
         return bin2hex(random_bytes(32));
     }
@@ -20,7 +20,7 @@ class Authenticator
      * @param string $salt
      * @return string
      */
-    public static function combinePassword(string $password, string $salt): string
+    public function combinePassword(string $password, string $salt): string
     {
         return hash('sha256', $password . $salt);
     }
@@ -31,7 +31,7 @@ class Authenticator
      * @param string|null $getSalt
      * @return bool
      */
-    public static function verifyPassword(string $password, string $getPassword, ?string $getSalt): bool
+    public function verifyPassword(string $password, string $getPassword, ?string $getSalt): bool
     {
         return hash('sha256', $password . $getSalt) === $getPassword;
     }

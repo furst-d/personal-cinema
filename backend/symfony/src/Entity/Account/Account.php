@@ -87,6 +87,15 @@ class Account implements UserInterface
     }
 
     /**
+     * @param int $id
+     * @return void
+     */
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+    }
+
+    /**
      * @return string
      */
     public function getEmail(): string
