@@ -43,6 +43,9 @@ RUN composer install --no-scripts --prefer-dist --no-interaction --optimize-auto
 # Copy application source code
 COPY symfony /var/www
 
+# Copy phpunit configuration
+COPY symfony/phpunit.xml /var/www/phpunit.xml
+
 # Set ownership to the non-root user
 RUN chown -R appuser:appuser /var/www
 
