@@ -78,6 +78,10 @@ jobs:
         run: |
           docker build -f ./cdn-backend/Dockerfile.prod -t ${{ env.DOCKER_IMAGE_PREFIX }}_backend_cdn:latest ./cdn-backend
           docker push ${{ env.DOCKER_IMAGE_PREFIX }}_backend_cdn:latest    
+          
+      - name: Run backend tests
+        run: |
+          docker run --rm ${{ env.DOCKER_IMAGE_PREFIX }}_backend:latest vendor/bin/phpunit --configuration phpunit.xml    
 
       - name: Create necessary directories on VPS
         run: |
