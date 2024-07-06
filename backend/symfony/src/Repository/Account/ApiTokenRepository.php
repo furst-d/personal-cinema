@@ -2,8 +2,8 @@
 
 namespace App\Repository\Account;
 
-use App\Entity\User\ApiToken;
-use App\Entity\User\Account;
+use App\Entity\Account\ApiToken;
+use App\Entity\Account\Account;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

@@ -37,3 +37,13 @@ services:
             $serializer: '@serializer'
         autowire: true
         autoconfigure: true
+
+    App\Service\Mailer\MailerService:
+        arguments:
+            $sendGrid: '@sendgrid'
+            $logger: '@monolog.logger.mailer'
+
+    sendgrid:
+        class: SendGrid
+        arguments:
+            $apiKey: '%env(SENDGRID_API_KEY)%'

@@ -3,33 +3,31 @@
 namespace App\Controller\V1\Front;
 
 use App\Controller\ApiController;
-use App\DTO\User\LoginRequest;
-use App\DTO\User\RegisterRequest;
+use App\DTO\Account\LoginRequest;
+use App\DTO\Account\RegisterRequest;
 use App\Helper\Api\Exception\BadGatewayException;
 use App\Helper\Api\Exception\BadRequestException;
 use App\Helper\Api\Exception\ConflictException;
 use App\Helper\Api\Exception\InternalException;
 use App\Helper\Api\Exception\NotFoundException;
-use App\Helper\Api\ResponseEntity;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Jwt\JwtService;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Mailer\MailerService;
 use App\Service\Account\AccountService;
-use Doctrine\ORM\EntityManagerInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/users')]
 class UserController extends ApiController
 {
     /**
-     * @var AccountService $userService
+     * @var AccountService $accountService
      */
-    private AccountService $userService;
+    private AccountService $accountService;
 
     /**
      * @var MailerService $mailerService
@@ -43,18 +41,18 @@ class UserController extends ApiController
 
     /**
      * @param BaseControllerLocator $locator
-     * @param AccountService $userService
+     * @param AccountService $accountService
      * @param MailerService $mailerService
      * @param JwtService $jwtService
      */
     public function __construct(
         BaseControllerLocator    $locator,
-        AccountService         $userService,
+        AccountService         $accountService,
         MailerService          $mailerService,
         JwtService             $jwtService,
     ) {
         parent::__construct($locator);
-        $this->userService = $userService;
+        $this->accountService = $accountService;
         $this->mailerService = $mailerService;
         $this->jwtService = $jwtService;
     }
@@ -67,14 +65,18 @@ class UserController extends ApiController
     public function register(RegisterRequest $registerRequest): JsonResponse
     {
         try {
-            $user = $this->userService->registerUser($registerRequest->email, $registerRequest->password);
+            $user = $this->accountService->registerUser($registerRequest->email, $registerRequest->password);
 
-            $this->mailerService->sendActivationEmail(
+            $activationToken = $this->jwtService->generateToken($user, JwtUsage::USAGE_ACCOUNT_ACTIVATION);
+            $this->mailerService->sendAccountActivation(
                 $user->getEmail(),
-                $this->jwtService->generateToken($user, JwtUsage::USAGE_ACCOUNT_ACTIVATION)
+                $activationToken
             );
 
-            return $this->re->withMessage('User registered successfully.', Response::HTTP_CREATED);
+            return $this->re->withMessage(
+                'User registered successfully. Please check your email to activate your account.',
+                Response::HTTP_CREATED
+            );
         } catch (ConflictException|InternalException|NotFoundException|BadGatewayException $e) {
             return $this->re->withException($e);
         }
@@ -84,7 +86,7 @@ class UserController extends ApiController
     public function login(LoginRequest $loginRequest, Request $request): JsonResponse
     {
         try {
-            $user = $this->userService->loginUser($loginRequest->email, $loginRequest->password);
+            $user = $this->accountService->loginUser($loginRequest->email, $loginRequest->password);
 
             $accessToken = $this->jwtService->generateToken($user, JwtUsage::USAGE_API_ACCESS);
             $refreshToken = $this->jwtService->createOrUpdateRefreshToken($user, $request)->getRefreshToken();
@@ -97,7 +99,7 @@ class UserController extends ApiController
                 'user' => $this->serialize($user)
             ]);
 
-        } catch (BadRequestException $e) {
+        } catch (BadRequestException|InternalException $e) {
             return $this->re->withException($e);
         }
     }

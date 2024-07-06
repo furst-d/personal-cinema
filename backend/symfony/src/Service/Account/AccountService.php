@@ -2,14 +2,13 @@
 
 namespace App\Service\Account;
 
-use App\Entity\User\Account;
+use App\Entity\Account\Account;
 use App\Helper\Api\Exception\BadRequestException;
 use App\Helper\Api\Exception\ConflictException;
 use App\Helper\Api\Exception\InternalException;
 use App\Helper\Api\Exception\NotFoundException;
 use App\Helper\Authenticator\Authenticator;
 use App\Repository\Account\AccountRepository;
-use App\Service\Jwt\JwtService;
 use Doctrine\ORM\EntityManagerInterface;
 use Random\RandomException;
 
@@ -29,6 +28,8 @@ class AccountService
      * @var AccountRepository $accountRepository
      */
     private AccountRepository $accountRepository;
+
+    private const string ACCOUNT_NOT_FOUND_MESSAGE = 'Account not found.';
 
     /**
      * @param EntityManagerInterface $em
@@ -56,7 +57,7 @@ class AccountService
     {
         try {
             if ($this->accountRepository->findOneBy(['email' => $email])) {
-                throw new ConflictException('User already exists.');
+                throw new ConflictException('Account already exists.');
             }
 
             $salt = Authenticator::generateSalt();
@@ -87,6 +88,78 @@ class AccountService
 
         if (!$user || !Authenticator::verifyPassword($password, $user->getPassword(), $user->getSalt())) {
             throw new BadRequestException('Invalid email or password.');
+        }
+
+        return $user;
+    }
+
+    /**
+     * @param Account $account
+     * @param string $password
+     * @return Account
+     */
+    public function changePassword(Account $account, string $password): Account
+    {
+        $salt = $account->getSalt();
+        $password = Authenticator::combinePassword($password, $salt);
+        $account->setPassword($password);
+        $this->em->flush();
+        return $account;
+    }
+
+    /**
+     * @param int $accountId
+     * @return Account
+     * @throws NotFoundException|BadRequestException
+     */
+    public function activateAccount(int $accountId): Account
+    {
+        /** @var Account $account */
+        $account = $this->accountRepository->find($accountId);
+
+        if (!$account) {
+            throw new NotFoundException(self::ACCOUNT_NOT_FOUND_MESSAGE);
+        }
+
+        if ($account->isActive()) {
+            throw new BadRequestException('Account is already activated.');
+        }
+
+        $account->setActive(true);
+        $this->em->flush();
+
+        return $account;
+    }
+
+    /**
+     * @param string $email
+     * @return Account
+     * @throws NotFoundException
+     */
+    public function getAccountByEmail(string $email): Account
+    {
+        /** @var Account $user */
+        $user = $this->accountRepository->findOneBy(['email' => $email]);
+
+        if (!$user) {
+            throw new NotFoundException(self::ACCOUNT_NOT_FOUND_MESSAGE);
+        }
+
+        return $user;
+    }
+
+    /**
+     * @param int $id
+     * @return Account
+     * @throws NotFoundException
+     */
+    public function getAccountById(int $id): Account
+    {
+        /** @var Account $user */
+        $user = $this->accountRepository->find($id);
+
+        if (!$user) {
+            throw new NotFoundException(self::ACCOUNT_NOT_FOUND_MESSAGE);
         }
 
         return $user;

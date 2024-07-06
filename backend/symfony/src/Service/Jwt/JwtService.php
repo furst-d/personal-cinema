@@ -2,14 +2,19 @@
 
 namespace App\Service\Jwt;
 
-use App\Entity\User\ApiToken;
-use App\Entity\User\Account;
+use App\Entity\Account\ApiToken;
+use App\Entity\Account\Account;
+use App\Helper\Api\Exception\BadRequestException;
+use App\Helper\Api\Exception\InternalException;
 use App\Helper\Jwt\JwtExpiration;
 use App\Helper\Jwt\JwtUsage;
 use App\Repository\Account\ApiTokenRepository;
 use App\Service\Account\SessionService;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
+use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
+use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -17,14 +22,14 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class JwtService
 {
     /**
-     * @var JWTTokenManagerInterface $jwtManager
+     * @var JWTEncoderInterface $jwtManager
      */
-    private JWTTokenManagerInterface $jwtManager;
+    private JWTEncoderInterface $jwtEncoder;
 
     /**
      * @var EntityManagerInterface $entityManager
      */
-    private EntityManagerInterface $entityManager;
+    private EntityManagerInterface $em;
 
     /**
      * @var ApiTokenRepository $apiTokenRepository
@@ -37,20 +42,20 @@ class JwtService
     private SessionService $sessionService;
 
     /**
-     * @param JWTTokenManagerInterface $jwtManager
-     * @param EntityManagerInterface $entityManager
+     * @param JWTEncoderInterface $jwtEncoder
+     * @param EntityManagerInterface $em
      * @param ApiTokenRepository $apiTokenRepository
      * @param SessionService $sessionService
      */
     public function __construct(
-        JWTTokenManagerInterface $jwtManager,
-        EntityManagerInterface $entityManager,
+        JWTEncoderInterface $jwtEncoder,
+        EntityManagerInterface $em,
         ApiTokenRepository $apiTokenRepository,
         SessionService $sessionService
     )
     {
-        $this->jwtManager = $jwtManager;
-        $this->entityManager = $entityManager;
+        $this->jwtEncoder = $jwtEncoder;
+        $this->em = $em;
         $this->apiTokenRepository = $apiTokenRepository;
         $this->sessionService = $sessionService;
     }
@@ -60,21 +65,26 @@ class JwtService
      * @param UserInterface $user
      * @param JwtUsage $usage
      * @return string
+     * @throws InternalException
      */
     public function generateToken(UserInterface $user, JwtUsage $usage): string
     {
-        if (!$user instanceof Account) {
-            throw new InvalidArgumentException('Expected an instance of ' . Account::class);
+        try {
+            if (!$user instanceof Account) {
+                throw new InvalidArgumentException('Expected an instance of ' . Account::class);
+            }
+
+            $expiration = $this->getExpirationForUsage($usage);
+            $payload = [
+                'user_id' => $user->getId(),
+                'usage' => $usage->value,
+                'exp' => (time() + $expiration),
+            ];
+
+            return $this->jwtEncoder->encode($payload);
+        } catch (JWTEncodeFailureException) {
+            throw new InternalException('Failed to generate token.');
         }
-
-        $expiration = $this->getExpirationForUsage($usage);
-        $payload = [
-            'user_id' => $user->getId(),
-            'usage' => $usage->value,
-            'exp' => (time() + $expiration),
-        ];
-
-        return $this->jwtManager->createFromPayload($user, $payload);
     }
 
     /**
@@ -82,6 +92,7 @@ class JwtService
      * @param UserInterface $user
      * @param Request $request
      * @return ApiToken
+     * @throws InternalException
      */
     public function createOrUpdateRefreshToken(UserInterface $user, Request $request): ApiToken
     {
@@ -94,7 +105,7 @@ class JwtService
 
         if ($existingToken) {
             $existingToken->updateToken($this->generateToken($user, JwtUsage::USAGE_API_REFRESH));
-            $this->entityManager->flush();
+            $this->em->flush();
             return $existingToken;
         }
 
@@ -103,10 +114,35 @@ class JwtService
             $sessionId,
             $user
         );
-        $this->entityManager->persist($refreshToken);
-        $this->entityManager->flush();
+        $this->em->persist($refreshToken);
+        $this->em->flush();
 
         return $refreshToken;
+    }
+
+    /**
+     * Decode a JWT token
+     * @param string $token
+     * @param JwtUsage $usage
+     * @return array
+     * @throws BadRequestException
+     */
+    public function decodeToken(string $token, JwtUsage $usage): array
+    {
+        $invalidTokenMessage = 'Invalid token.';
+
+        try {
+            $decodedToken = $this->jwtEncoder->decode($token);
+
+            if ($decodedToken['usage'] !== $usage->value) {
+                throw new BadRequestException($invalidTokenMessage);
+            }
+
+        } catch (JWTDecodeFailureException) {
+            throw new BadRequestException($invalidTokenMessage);
+        }
+
+        return $decodedToken;
     }
 
     /**
@@ -118,7 +154,7 @@ class JwtService
         return match($usage) {
             JwtUsage::USAGE_API_ACCESS => JwtExpiration::EXPIRATION_10_MINUTES->value,
             JwtUsage::USAGE_API_REFRESH => JwtExpiration::EXPIRATION_1_YEAR->value,
-            JwtUsage::USAGE_ACCOUNT_ACTIVATION => JwtExpiration::EXPIRATION_1_HOUR->value,
+            JwtUsage::USAGE_ACCOUNT_ACTIVATION, JwtUsage::USAGE_PASSWORD_RESET => JwtExpiration::EXPIRATION_1_HOUR->value
         };
     }
 }

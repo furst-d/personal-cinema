@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Entity\User\Account;
+use App\Entity\Account\Account;
 use App\Repository\FolderRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;

@@ -3,32 +3,37 @@
 namespace App\Service\Mailer;
 
 use App\Helper\Api\Exception\BadGatewayException;
-use App\Helper\Mailer\MailBuilder;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
+use Psr\Log\LoggerInterface;
+use SendGrid;
+use SendGrid\Mail\Mail;
+use SendGrid\Mail\TypeException;
 
 class MailerService
 {
     /**
-     * @var MailerInterface $mailer
-
+     * @var SendGrid $sendGrid
      */
-    private MailerInterface $mailer;
-
-    /**3
-     * @var MailBuilder $mailBuilder
-     */
-    private MailBuilder $mailBuilder;
+    private SendGrid $sendGrid;
 
     /**
-     * @param MailerInterface $mailer
-     * @param MailBuilder $mailBuilder
+     * @var LoggerInterface $logger
      */
-    public function __construct(MailerInterface $mailer, MailBuilder $mailBuilder)
+    private LoggerInterface $logger;
+
+    /**
+     * @var string $fromEmail
+     */
+    private string $fromEmail;
+
+    /**
+     * @param SendGrid $sendGrid
+     * @param LoggerInterface $logger
+     */
+    public function __construct(SendGrid $sendGrid, LoggerInterface $logger)
     {
-        $this->mailer = $mailer;
-        $this->mailBuilder = $mailBuilder;
+        $this->sendGrid = $sendGrid;
+        $this->logger = $logger;
+        $this->fromEmail = 'info.soukromekino@gmail.com';
     }
 
     /**
@@ -37,31 +42,65 @@ class MailerService
      * @return void
      * @throws BadGatewayException
      */
-    public function sendActivationEmail(string $to, string $token): void
+    public function sendAccountActivation(string $to, string $token): void
     {
-        $subject = 'SoukromeKino - Aktivace účtu';
-        $content = 'pro aktivaci účtu klikněte na následující odkaz: <a href="http://localhost:8000/activate/' . $token . '">Aktivovat účet</a>';
-        $this->sendEmail($to, $subject, $content);
+        $templateId = 'd-c5d7091d86324686b4a5f228bac19e74';
+        $dynamicTemplateData = [
+            'name' => $to,
+            'link' => $_ENV['FRONTEND_URL'] . '/activate/' . $token
+        ];
+
+        $this->sendEmail($to, $templateId, $dynamicTemplateData);
     }
 
     /**
      * @param string $to
-     * @param string $subject
-     * @param string $content
+     * @param string $token
      * @return void
      * @throws BadGatewayException
      */
-    private function sendEmail(string $to, string $subject, string $content): void
+    public function sendPasswordReset(string $to, string $token): void
     {
-        $email = (new Email())
-            ->from('info.soukromekino@gmail.com')
-            ->to($to)
-            ->subject($subject)
-            ->html($this->mailBuilder->buildContent($content));
+        $templateId = 'd-828ba6419b7d41f2a02eb169635a113b';
+        $dynamicTemplateData = [
+            'name' => $to,
+            'link' => $_ENV['FRONTEND_URL'] . '/password-reset/' . $token
+        ];
 
+        $this->sendEmail($to, $templateId, $dynamicTemplateData);
+    }
+
+    /**
+     * @param string $to
+     * @param string $templateId
+     * @param array $dynamicTemplateData
+     * @return void
+     * @throws BadGatewayException
+     */
+    private function sendEmail(string $to, string $templateId, array $dynamicTemplateData): void
+    {
         try {
-            $this->mailer->send($email);
-        } catch (TransportExceptionInterface $e) {
+            $email = new Mail();
+            $email->setFrom($this->fromEmail, "SoukromeKino");
+            $email->addTo($to);
+            $email->setTemplateId($templateId);
+
+            foreach ($dynamicTemplateData as $key => $value) {
+                $email->addDynamicTemplateData($key, $value);
+            }
+
+            $response = $this->sendGrid->send($email);
+
+            if ($response->statusCode() >= 400) {
+                throw new BadGatewayException('Failed to send email: ' . $response->body());
+            }
+
+            $this->logger->info('Email was sent successfully.', [
+                'to' => $to,
+                'templateId' => $templateId,
+            ]);
+
+        } catch (TypeException $e) {
             throw new BadGatewayException($e->getMessage());
         }
     }

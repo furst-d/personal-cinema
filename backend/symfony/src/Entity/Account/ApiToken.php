@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity\User;
+namespace App\Entity\Account;
 
 use App\Repository\Account\ApiTokenRepository;
 use DateTimeImmutable;
