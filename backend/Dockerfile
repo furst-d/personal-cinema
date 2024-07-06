@@ -38,7 +38,7 @@ COPY symfony/composer.json symfony/composer.lock ./
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # Install composer dependencies
-RUN composer install --no-scripts --no-dev --prefer-dist --no-interaction --optimize-autoloader
+RUN composer install --no-scripts --prefer-dist --no-interaction --optimize-autoloader
 
 # Copy application source code
 COPY symfony /var/www
