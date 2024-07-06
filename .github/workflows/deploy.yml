@@ -1,87 +1,24 @@
 name: Deploy to VPS
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Run Tests"]
+    types:
+      - completed
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     env:
-      DOCKER_IMAGE_PREFIX: "furstd/personal-cinema"
       PROJECT_PATH: '/opt/soukromekino'
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
 
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Replace environment variables in .env file
-        run: |
-          cp backend/.env.example backend/.env
-          cp backend/symfony/.env.example backend/symfony/.env
-          cp frontend/.env.example frontend/.env
-          cp admin-frontend/.env.example admin-frontend/.env
-          cp cdn-backend/.env.example cdn-backend/.env
-          sed -i 's|db_name|${{ secrets.POSTGRES_DB }}|' backend/.env
-          sed -i 's|db_user|${{ secrets.POSTGRES_USER }}|' backend/.env
-          sed -i 's|db_password|${{ secrets.POSTGRES_PASSWORD }}|' backend/.env
-          sed -i 's|app_secret|${{ secrets.APP_SECRET }}|' backend/symfony/.env
-          sed -i 's|jwt_passphrase|${{ secrets.JWT_PASSPHRASE }}|' backend/symfony/.env
-          sed -i 's|sendgrid_api_key|${{ secrets.SENDGRID_API_KEY }}|' backend/symfony/.env
-          sed -i 's|api_url|${{ secrets.API_URL }}|' frontend/.env
-          sed -i 's|api_url|${{ secrets.API_URL }}|' admin-frontend/.env
-          sed -i 's|db_name|${{ secrets.POSTGRES_CDN_DB }}|' cdn-backend/.env
-          sed -i 's|db_user|${{ secrets.POSTGRES_CDN_USER }}|' cdn-backend/.env
-          sed -i 's|db_password|${{ secrets.POSTGRES_CDN_PASSWORD }}|' cdn-backend/.env
-          sed -i 's|minio_access_key|${{ secrets.MINIO_ACCESS_KEY }}|' cdn-backend/.env
-          sed -i 's|minio_secret_key|${{ secrets.MINIO_SECRET_KEY }}|' cdn-backend/.env
-
-      - name: Create JWT key files
-        run: |
-          mkdir -p backend/symfony/config/jwt
-          echo "${{ secrets.JWT_PRIVATE_KEY }}" > backend/symfony/config/jwt/private.pem
-          echo "${{ secrets.JWT_PUBLIC_KEY }}" > backend/symfony/config/jwt/public.pem      
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push backend Docker images
-        run: |
-          docker build ./backend -t ${{ env.DOCKER_IMAGE_PREFIX }}_backend:latest 
-          docker push ${{ env.DOCKER_IMAGE_PREFIX }}_backend:latest
-          docker build -f ./backend/nginx/Dockerfile -t ${{ env.DOCKER_IMAGE_PREFIX }}_nginx:latest ./backend
-          docker push ${{ env.DOCKER_IMAGE_PREFIX }}_nginx:latest
-
-      - name: Run backend tests
-        run: |
-          docker run --rm ${{ env.DOCKER_IMAGE_PREFIX }}_backend:latest vendor/bin/phpunit --configuration phpunit.xml    
-
-      - name: Build and push frontend Docker images
-        run: |
-          docker build -f ./frontend/Dockerfile.prod -t ${{ env.DOCKER_IMAGE_PREFIX }}_frontend:latest ./frontend
-          docker push ${{ env.DOCKER_IMAGE_PREFIX }}_frontend:latest
-
-      - name: Build and push admin frontend Docker images
-        run: |
-          docker build -f ./admin-frontend/Dockerfile.prod -t ${{ env.DOCKER_IMAGE_PREFIX }}_frontend_admin:latest ./admin-frontend
-          docker push ${{ env.DOCKER_IMAGE_PREFIX }}_frontend_admin:latest
-
-      - name: Build and push CDN backend Docker images
-        run: |
-          docker build -f ./cdn-backend/Dockerfile.prod -t ${{ env.DOCKER_IMAGE_PREFIX }}_backend_cdn:latest ./cdn-backend
-          docker push ${{ env.DOCKER_IMAGE_PREFIX }}_backend_cdn:latest    
 
       - name: Create necessary directories on VPS
         run: |
@@ -114,21 +51,4 @@ jobs:
 
       - name: Restart services
         run: |
-          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/traefik/docker-compose.yml down --remove-orphans'
-          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/backend/docker-compose.prod.yml down --remove-orphans'
-          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/frontend/docker-compose.prod.yml down --remove-orphans'
-          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/admin-frontend/docker-compose.prod.yml down --remove-orphans'
-          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/cdn-backend/docker-compose.prod.yml down --remove-orphans'
-          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/backend/docker-compose.prod.yml up -d'
-          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/frontend/docker-compose.prod.yml up -d'
-          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/admin-frontend/docker-compose.prod.yml up -d'
-          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/cdn-backend/docker-compose.prod.yml up -d'
-          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/traefik/docker-compose.yml up -d'
-
-      - name: Run database migrations
-        run: |
-          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker-compose -f ${{ env.PROJECT_PATH }}/backend/docker-compose.prod.yml exec -T php-fpm php bin/console doctrine:migrations:migrate --no-interaction'
-
-      - name: Clean up old Docker images
-        run: |
-          ssh -i private_key -T $VPS_USER@$VPS_HOST 'docker image prune -f'
+          ssh -i private_key -T $VPS_USER@$

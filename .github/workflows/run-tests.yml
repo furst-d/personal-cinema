@@ -1,0 +1,22 @@
+name: Run Tests
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Docker Images"]
+    types:
+      - completed
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      DOCKER_IMAGE_PREFIX: "furstd/personal-cinema"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run backend tests
+        run: |
+          docker run --rm ${{ env.DOCKER_IMAGE_PREFIX }}_backend:latest vendor/bin/phpunit --configuration phpunit.xml
