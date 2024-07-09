@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Helper\Api\Exception;
+namespace App\Exception;
 
 use Symfony\Component\HttpFoundation\Response;
 
-class BadGatewayException extends ApiException
+class ConflictException extends ApiException
 {
     /**
      * @param string $message
@@ -12,6 +12,6 @@ class BadGatewayException extends ApiException
      */
     public function __construct(string $message, array $details = [])
     {
-        parent::__construct($message, Response::HTTP_BAD_GATEWAY, $details);
+        parent::__construct($message, Response::HTTP_CONFLICT, $details);
     }
 }

@@ -47,3 +47,7 @@ services:
         class: SendGrid
         arguments:
             $apiKey: '%env(SENDGRID_API_KEY)%'
+
+    App\Listener\TokenValidatorListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }

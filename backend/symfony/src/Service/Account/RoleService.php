@@ -3,9 +3,8 @@
 namespace App\Service\Account;
 
 use App\Entity\Account\Account;
-use App\Helper\Api\Exception\NotFoundException;
+use App\Exception\NotFoundException;
 use App\Repository\Account\RoleRepository;
-use Doctrine\ORM\EntityManagerInterface;
 
 class RoleService
 {

@@ -2,8 +2,8 @@
 
 namespace App\Resolver;
 
-use App\Helper\Api\Exception\ApiException;
-use App\Helper\Api\Exception\BadRequestException;
+use App\Exception\ApiException;
+use App\Exception\BadRequestException;
 use App\Helper\Api\ResponseEntity;
 use JetBrains\PhpStorm\NoReturn;
 use Symfony\Component\HttpFoundation\Request;

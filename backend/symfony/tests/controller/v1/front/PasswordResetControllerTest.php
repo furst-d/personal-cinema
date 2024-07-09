@@ -4,13 +4,14 @@ namespace App\Tests\Controller\v1;
 
 use App\Entity\Account\Account;
 use App\Entity\Account\ApiToken;
+use App\Exception\BadRequestException;
+use App\Exception\NotFoundException;
+use App\Exception\UnauthorizedException;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
 use App\Service\Mailer\MailerService;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
-use App\Helper\Api\Exception\NotFoundException;
-use App\Helper\Api\Exception\BadRequestException;
 
 class PasswordResetControllerTest extends WebTestCase
 {
@@ -58,7 +59,7 @@ class PasswordResetControllerTest extends WebTestCase
 
     public function testResetPasswordInvalidToken()
     {
-        $this->mockJwtService->method('decodeToken')->willThrowException(new BadRequestException('Invalid token.'));
+        $this->mockJwtService->method('decodeToken')->willThrowException(new UnauthorizedException('Invalid token.'));
 
         $this->client->request('POST', self::RESET_PASSWORD_URL, [], [], self::APPLICATION_JSON, json_encode([
             'token' => 'invalidToken',

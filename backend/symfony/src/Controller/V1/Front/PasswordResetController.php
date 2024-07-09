@@ -5,15 +5,15 @@ namespace App\Controller\V1\Front;
 use App\Controller\ApiController;
 use App\DTO\Account\EmailRequest;
 use App\DTO\Account\PasswordResetRequest;
-use App\DTO\Account\TokenRequest;
-use App\Helper\Api\Exception\BadGatewayException;
-use App\Helper\Api\Exception\BadRequestException;
-use App\Helper\Api\Exception\InternalException;
-use App\Helper\Api\Exception\NotFoundException;
+use App\Exception\BadGatewayException;
+use App\Exception\BadRequestException;
+use App\Exception\InternalException;
+use App\Exception\NotFoundException;
+use App\Exception\UnauthorizedException;
 use App\Helper\Jwt\JwtUsage;
+use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
 use App\Service\Locator\BaseControllerLocator;
-use App\Service\Account\AccountService;
 use App\Service\Mailer\MailerService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
@@ -67,7 +67,7 @@ class PasswordResetController extends ApiController
             $this->accountService->changePassword($account, $passwordResetRequest->password);
 
             return $this->re->withMessage('Password was successfully changed.');
-        } catch (BadRequestException|NotFoundException $e) {
+        } catch (UnauthorizedException|NotFoundException $e) {
             return $this->re->withException($e);
         }
     }

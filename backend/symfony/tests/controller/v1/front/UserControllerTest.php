@@ -4,8 +4,8 @@ namespace App\Tests\Controller\v1;
 
 use App\Entity\Account\Account;
 use App\Entity\Account\ApiToken;
-use App\Helper\Api\Exception\BadRequestException;
-use App\Helper\Api\Exception\ConflictException;
+use App\Exception\BadRequestException;
+use App\Exception\ConflictException;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
 use App\Service\Mailer\MailerService;

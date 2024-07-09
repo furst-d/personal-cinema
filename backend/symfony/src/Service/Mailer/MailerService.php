@@ -2,7 +2,7 @@
 
 namespace App\Service\Mailer;
 
-use App\Helper\Api\Exception\BadGatewayException;
+use App\Exception\BadGatewayException;
 use Psr\Log\LoggerInterface;
 use SendGrid;
 use SendGrid\Mail\Mail;
