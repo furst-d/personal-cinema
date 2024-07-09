@@ -146,6 +146,27 @@ class JwtService
     }
 
     /**
+     * @param $refresh_token
+     * @return string
+     * @throws BadRequestException
+     * @throws InternalException
+     */
+    public function refreshToken($refresh_token): string
+    {
+        /** @var ApiToken $apiToken */
+        $apiToken = $this->apiTokenRepository->findOneBy(['refreshToken' => $refresh_token]);
+
+        if (!$apiToken) {
+            throw new BadRequestException('Invalid refresh token.');
+        }
+
+        // Decode to check if the token is valid
+        $this->decodeToken($refresh_token, JwtUsage::USAGE_API_REFRESH);
+
+        return $this->generateToken($apiToken->getAccount(), JwtUsage::USAGE_API_ACCESS);
+    }
+
+    /**
      * @param JwtUsage $usage
      * @return int
      */

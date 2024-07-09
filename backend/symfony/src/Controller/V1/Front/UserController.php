@@ -5,6 +5,7 @@ namespace App\Controller\V1\Front;
 use App\Controller\ApiController;
 use App\DTO\Account\LoginRequest;
 use App\DTO\Account\RegisterRequest;
+use App\DTO\Account\TokenRequest;
 use App\Helper\Api\Exception\BadGatewayException;
 use App\Helper\Api\Exception\BadRequestException;
 use App\Helper\Api\Exception\ConflictException;
@@ -98,6 +99,20 @@ class UserController extends ApiController
                 'user' => $this->serialize($user)
             ]);
 
+        } catch (BadRequestException|InternalException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('/refresh-token', name: 'user_refresh_token', methods: ['POST'])]
+    public function refreshToken(TokenRequest $tokenRequest): JsonResponse
+    {
+        try {
+            return $this->re->withData([
+                'tokens' => [
+                    'access_token' =>  $this->jwtService->refreshToken($tokenRequest->token)
+                ],
+            ]);
         } catch (BadRequestException|InternalException $e) {
             return $this->re->withException($e);
         }
