@@ -61,7 +61,7 @@ class UserActivationControllerTest extends WebTestCase
             'token' => 'invalidToken'
         ]));
 
-        $this->assertEquals(Response::HTTP_BAD_REQUEST, $this->client->getResponse()->getStatusCode());
+        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $this->client->getResponse()->getStatusCode());
         $this->assertStringContainsString('Invalid token.', $this->client->getResponse()->getContent());
     }
 

@@ -25,7 +25,6 @@ class PasswordResetControllerTest extends WebTestCase
     private $mockJwtService;
     private $mockMailerService;
     private $account;
-    private $apiToken;
 
     protected function setUp(): void
     {
@@ -40,7 +39,6 @@ class PasswordResetControllerTest extends WebTestCase
         $this->client->getContainer()->set(MailerService::class, $this->mockMailerService);
 
         $this->account = new Account(self::TEST_EMAIL, 'password', 'salt');
-        $this->apiToken = new ApiToken('refreshToken', 'sessionId', $this->account);
     }
 
     public function testResetPasswordSuccess()
@@ -66,7 +64,7 @@ class PasswordResetControllerTest extends WebTestCase
             'password' => 'newPassword'
         ]));
 
-        $this->assertEquals(Response::HTTP_BAD_REQUEST, $this->client->getResponse()->getStatusCode());
+        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $this->client->getResponse()->getStatusCode());
         $this->assertStringContainsString('Invalid token.', $this->client->getResponse()->getContent());
     }
 
