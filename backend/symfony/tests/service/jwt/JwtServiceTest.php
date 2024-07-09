@@ -2,16 +2,16 @@
 
 namespace App\Tests\Service\Jwt;
 
-use App\Entity\Account\ApiToken;
 use App\Entity\Account\Account;
-use App\Helper\Api\Exception\BadRequestException;
-use App\Helper\Api\Exception\InternalException;
+use App\Entity\Account\ApiToken;
+use App\Exception\BadRequestException;
+use App\Exception\InternalException;
+use App\Exception\UnauthorizedException;
 use App\Helper\Jwt\JwtUsage;
 use App\Repository\Account\ApiTokenRepository;
 use App\Service\Account\SessionService;
 use App\Service\Jwt\JwtService;
 use Doctrine\ORM\EntityManagerInterface;
-use InvalidArgumentException;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
@@ -160,7 +160,7 @@ class JwtServiceTest extends TestCase
                 'usage' => 'invalid_usage'
             ]);
 
-        $this->expectException(BadRequestException::class);
+        $this->expectException(UnauthorizedException::class);
 
         $this->jwtService->decodeToken(self::TEST_TOKEN, JwtUsage::USAGE_API_ACCESS);
     }
@@ -171,7 +171,7 @@ class JwtServiceTest extends TestCase
             ->method('decode')
             ->willThrowException(new JWTDecodeFailureException('decode_failure', 0));
 
-        $this->expectException(BadRequestException::class);
+        $this->expectException(UnauthorizedException::class);
 
         $this->jwtService->decodeToken(self::TEST_TOKEN, JwtUsage::USAGE_API_ACCESS);
     }

@@ -3,10 +3,10 @@
 namespace App\Service\Account;
 
 use App\Entity\Account\Account;
-use App\Helper\Api\Exception\BadRequestException;
-use App\Helper\Api\Exception\ConflictException;
-use App\Helper\Api\Exception\InternalException;
-use App\Helper\Api\Exception\NotFoundException;
+use App\Exception\BadRequestException;
+use App\Exception\ConflictException;
+use App\Exception\InternalException;
+use App\Exception\NotFoundException;
 use App\Helper\Authenticator\Authenticator;
 use App\Repository\Account\AccountRepository;
 use Doctrine\ORM\EntityManagerInterface;

@@ -28,6 +28,9 @@ class Folder
     #[ORM\Column]
     private DateTimeImmutable $updatedAt;
 
+    #[ORM\ManyToOne(inversedBy: 'folders')]
+    private ?Folder $parent = null;
+
     /**
      * @param string $name
      * @param Account $owner
@@ -96,5 +99,13 @@ class Folder
     public function setUpdatedAt(DateTimeImmutable $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * @return Folder|null
+     */
+    public function getParent(): ?Folder
+    {
+        return $this->parent;
     }
 }

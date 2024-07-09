@@ -2,10 +2,11 @@
 
 namespace App\Service\Jwt;
 
-use App\Entity\Account\ApiToken;
 use App\Entity\Account\Account;
-use App\Helper\Api\Exception\BadRequestException;
-use App\Helper\Api\Exception\InternalException;
+use App\Entity\Account\ApiToken;
+use App\Exception\BadRequestException;
+use App\Exception\InternalException;
+use App\Exception\UnauthorizedException;
 use App\Helper\Jwt\JwtExpiration;
 use App\Helper\Jwt\JwtUsage;
 use App\Repository\Account\ApiTokenRepository;
@@ -15,7 +16,6 @@ use InvalidArgumentException;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -125,7 +125,7 @@ class JwtService
      * @param string $token
      * @param JwtUsage $usage
      * @return array
-     * @throws BadRequestException
+     * @throws UnauthorizedException
      */
     public function decodeToken(string $token, JwtUsage $usage): array
     {
@@ -135,11 +135,11 @@ class JwtService
             $decodedToken = $this->jwtEncoder->decode($token);
 
             if ($decodedToken['usage'] !== $usage->value) {
-                throw new BadRequestException($invalidTokenMessage);
+                throw new UnauthorizedException($invalidTokenMessage);
             }
 
         } catch (JWTDecodeFailureException) {
-            throw new BadRequestException($invalidTokenMessage);
+            throw new UnauthorizedException($invalidTokenMessage);
         }
 
         return $decodedToken;
@@ -150,6 +150,7 @@ class JwtService
      * @return string
      * @throws BadRequestException
      * @throws InternalException
+     * @throws UnauthorizedException
      */
     public function refreshToken($refresh_token): string
     {

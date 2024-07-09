@@ -4,13 +4,14 @@ namespace App\Tests\Controller\v1;
 
 use App\Entity\Account\Account;
 use App\Entity\Account\ApiToken;
+use App\Exception\BadRequestException;
+use App\Exception\NotFoundException;
+use App\Exception\UnauthorizedException;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
 use App\Service\Mailer\MailerService;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
-use App\Helper\Api\Exception\NotFoundException;
-use App\Helper\Api\Exception\BadRequestException;
 
 class PasswordResetControllerTest extends WebTestCase
 {
@@ -24,7 +25,6 @@ class PasswordResetControllerTest extends WebTestCase
     private $mockJwtService;
     private $mockMailerService;
     private $account;
-    private $apiToken;
 
     protected function setUp(): void
     {
@@ -39,7 +39,6 @@ class PasswordResetControllerTest extends WebTestCase
         $this->client->getContainer()->set(MailerService::class, $this->mockMailerService);
 
         $this->account = new Account(self::TEST_EMAIL, 'password', 'salt');
-        $this->apiToken = new ApiToken('refreshToken', 'sessionId', $this->account);
     }
 
     public function testResetPasswordSuccess()
@@ -58,14 +57,14 @@ class PasswordResetControllerTest extends WebTestCase
 
     public function testResetPasswordInvalidToken()
     {
-        $this->mockJwtService->method('decodeToken')->willThrowException(new BadRequestException('Invalid token.'));
+        $this->mockJwtService->method('decodeToken')->willThrowException(new UnauthorizedException('Invalid token.'));
 
         $this->client->request('POST', self::RESET_PASSWORD_URL, [], [], self::APPLICATION_JSON, json_encode([
             'token' => 'invalidToken',
             'password' => 'newPassword'
         ]));
 
-        $this->assertEquals(Response::HTTP_BAD_REQUEST, $this->client->getResponse()->getStatusCode());
+        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $this->client->getResponse()->getStatusCode());
         $this->assertStringContainsString('Invalid token.', $this->client->getResponse()->getContent());
     }
 

@@ -5,14 +5,15 @@ namespace App\Controller\V1\Front;
 use App\Controller\ApiController;
 use App\DTO\Account\EmailRequest;
 use App\DTO\Account\TokenRequest;
-use App\Helper\Api\Exception\BadGatewayException;
-use App\Helper\Api\Exception\BadRequestException;
-use App\Helper\Api\Exception\InternalException;
-use App\Helper\Api\Exception\NotFoundException;
+use App\Exception\BadGatewayException;
+use App\Exception\BadRequestException;
+use App\Exception\InternalException;
+use App\Exception\NotFoundException;
+use App\Exception\UnauthorizedException;
 use App\Helper\Jwt\JwtUsage;
+use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
 use App\Service\Locator\BaseControllerLocator;
-use App\Service\Account\AccountService;
 use App\Service\Mailer\MailerService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
@@ -64,7 +65,7 @@ class UserActivationController extends ApiController
             $decodedToken = $this->jwtService->decodeToken($tokenRequest->token, JwtUsage::USAGE_ACCOUNT_ACTIVATION);
             $this->accountService->activateAccount($decodedToken['user_id']);
             return $this->re->withMessage('User was activated successfully.');
-        } catch (BadRequestException|NotFoundException $e) {
+        } catch (BadRequestException|NotFoundException|UnauthorizedException $e) {
             return $this->re->withException($e);
         }
     }

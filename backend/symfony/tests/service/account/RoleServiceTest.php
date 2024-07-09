@@ -4,7 +4,7 @@ namespace App\Tests\Service\Account;
 
 use App\Entity\Account\Account;
 use App\Entity\Account\Role;
-use App\Helper\Api\Exception\NotFoundException;
+use App\Exception\NotFoundException;
 use App\Repository\Account\RoleRepository;
 use App\Service\Account\RoleService;
 use PHPUnit\Framework\TestCase;

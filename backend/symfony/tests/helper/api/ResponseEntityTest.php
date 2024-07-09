@@ -2,7 +2,7 @@
 
 namespace App\Tests\Helper\Api;
 
-use App\Helper\Api\Exception\ApiException;
+use App\Exception\ApiException;
 use App\Helper\Api\ResponseEntity;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;

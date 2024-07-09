@@ -3,13 +3,14 @@
 namespace App\Tests\Controller\v1;
 
 use App\Entity\Account\Account;
+use App\Exception\BadRequestException;
+use App\Exception\NotFoundException;
+use App\Exception\UnauthorizedException;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
 use App\Service\Mailer\MailerService;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
-use App\Helper\Api\Exception\NotFoundException;
-use App\Helper\Api\Exception\BadRequestException;
 
 class UserActivationControllerTest extends WebTestCase
 {
@@ -54,13 +55,13 @@ class UserActivationControllerTest extends WebTestCase
 
     public function testActivateInvalidToken()
     {
-        $this->mockJwtService->method('decodeToken')->willThrowException(new BadRequestException('Invalid token.'));
+        $this->mockJwtService->method('decodeToken')->willThrowException(new UnauthorizedException('Invalid token.'));
 
         $this->client->request('POST', self::ACTIVATE_URL, [], [], self::APPLICATION_JSON, json_encode([
             'token' => 'invalidToken'
         ]));
 
-        $this->assertEquals(Response::HTTP_BAD_REQUEST, $this->client->getResponse()->getStatusCode());
+        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $this->client->getResponse()->getStatusCode());
         $this->assertStringContainsString('Invalid token.', $this->client->getResponse()->getContent());
     }
 

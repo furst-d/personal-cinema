@@ -2,7 +2,7 @@
 
 namespace App\Helper\Api;
 
-use App\Helper\Api\Exception\ApiException;
+use App\Exception\ApiException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -56,7 +56,6 @@ class ResponseEntity
     /**
      * Return a response with an exception
      * @param ApiException $ex
-     * @param array $payload
      * @return JsonResponse
      */
     public function withException(ApiException $ex): JsonResponse

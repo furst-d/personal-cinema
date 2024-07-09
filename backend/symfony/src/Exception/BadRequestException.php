@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Helper\Api\Exception;
+namespace App\Exception;
 
 use Symfony\Component\HttpFoundation\Response;
 
-class InternalException extends ApiException
+class BadRequestException extends ApiException
 {
     /**
      * @param string $message
@@ -12,6 +12,6 @@ class InternalException extends ApiException
      */
     public function __construct(string $message, array $details = [])
     {
-        parent::__construct($message, Response::HTTP_INTERNAL_SERVER_ERROR, $details);
+        parent::__construct($message, Response::HTTP_BAD_REQUEST, $details);
     }
 }
