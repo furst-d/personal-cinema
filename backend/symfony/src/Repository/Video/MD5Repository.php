@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repository\Video;
 
-use App\Entity\Folder;
+use App\Entity\Video\MD5;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Folder>
+ * @extends ServiceEntityRepository<MD5>
  */
-class FolderRepository extends ServiceEntityRepository
+class MD5Repository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Folder::class);
+        parent::__construct($registry, MD5::class);
     }
 }

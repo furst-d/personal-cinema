@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\V1\Private\Folder;
+namespace App\Controller\V1\Private;
 
 use App\Controller\ApiController;
 use App\Entity\Account\Account;

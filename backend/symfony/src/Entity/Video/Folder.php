@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Video;
 
 use App\Entity\Account\Account;
-use App\Repository\FolderRepository;
+use App\Repository\Video\FolderRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: FolderRepository::class)]
@@ -32,6 +34,12 @@ class Folder
     private ?Folder $parent = null;
 
     /**
+     * @var Collection<int, Video>
+     */
+    #[ORM\OneToMany(targetEntity: Video::class, mappedBy: 'folder')]
+    private Collection $videos;
+
+    /**
      * @param string $name
      * @param Account $owner
      */
@@ -41,6 +49,7 @@ class Folder
         $this->owner = $owner;
         $this->createdAt = new DateTimeImmutable();
         $this->updatedAt = new DateTimeImmutable();
+        $this->videos = new ArrayCollection();
     }
 
     /**
@@ -107,5 +116,13 @@ class Folder
     public function getParent(): ?Folder
     {
         return $this->parent;
+    }
+
+    /**
+     * @return Collection<int, Video>
+     */
+    public function getVideos(): Collection
+    {
+        return $this->videos;
     }
 }

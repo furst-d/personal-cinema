@@ -11,6 +11,7 @@ use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
+use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -59,13 +60,15 @@ class ValidationResolver implements ValueResolverInterface
         $data = json_decode($request->getContent(), true);
 
         if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
-            $this->sendErrorResponse(new BadRequestException('Invalid JSON'));
+            $this->sendErrorResponse(new BadRequestException('Expected JSON data'));
         }
 
         try {
             $object = $this->denormalizer->denormalize($data, $argument->getType());
         } catch (NotEncodableValueException) {
             $this->sendErrorResponse(new BadRequestException('Invalid data format'));
+        } catch (NotNormalizableValueException $e) {
+            $this->sendErrorResponse(new BadRequestException($e->getMessage()));
         }
 
         $errors = $this->validator->validate($object);

@@ -2,6 +2,7 @@ monolog:
     channels:
         - deprecation
         - mailer
+        - cdn
 
 when@dev:
     monolog:
@@ -20,6 +21,11 @@ when@dev:
                 path: "%kernel.logs_dir%/mailer.log"
                 level: debug
                 channels: [ "mailer" ]
+            cdn:
+                type: stream
+                path: "%kernel.logs_dir%/cdn.log"
+                level: debug
+                channels: [ "cdn" ]
 
 when@test:
     monolog:
@@ -63,4 +69,9 @@ when@prod:
                 path: "%kernel.logs_dir%/mailer.log"
                 level: debug
                 channels: [ "mailer" ]
+            cdn:
+                type: stream
+                path: "%kernel.logs_dir%/cdn.log"
+                level: debug
+                channels: [ "cdn" ]
 

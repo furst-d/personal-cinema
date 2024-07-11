@@ -64,10 +64,11 @@ class JwtService
      * Generate a token for a user based on the usage
      * @param UserInterface $user
      * @param JwtUsage $usage
+     * @param array $data
      * @return string
      * @throws InternalException
      */
-    public function generateToken(UserInterface $user, JwtUsage $usage): string
+    public function generateToken(UserInterface $user, JwtUsage $usage, array $data = []): string
     {
         try {
             if (!$user instanceof Account) {
@@ -80,6 +81,8 @@ class JwtService
                 'usage' => $usage->value,
                 'exp' => (time() + $expiration),
             ];
+
+            $payload = array_merge($payload, $data);
 
             return $this->jwtEncoder->encode($payload);
         } catch (JWTEncodeFailureException) {
@@ -176,7 +179,8 @@ class JwtService
         return match($usage) {
             JwtUsage::USAGE_API_ACCESS => JwtExpiration::EXPIRATION_10_MINUTES->value,
             JwtUsage::USAGE_API_REFRESH => JwtExpiration::EXPIRATION_1_YEAR->value,
-            JwtUsage::USAGE_ACCOUNT_ACTIVATION, JwtUsage::USAGE_PASSWORD_RESET => JwtExpiration::EXPIRATION_1_HOUR->value
+            JwtUsage::USAGE_ACCOUNT_ACTIVATION, JwtUsage::USAGE_PASSWORD_RESET => JwtExpiration::EXPIRATION_1_HOUR->value,
+            JwtUsage::USAGE_UPLOAD => JwtExpiration::EXPIRATION_1_WEEK->value,
         };
     }
 }

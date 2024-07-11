@@ -2,6 +2,7 @@
 
 namespace App\Controller\V1\Private\Folder;
 
+use App\Controller\V1\Private\BasePrivateController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
