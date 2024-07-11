@@ -43,6 +43,12 @@ services:
             $sendGrid: '@sendgrid'
             $logger: '@monolog.logger.mailer'
 
+    App\Service\Cdn\CdnService:
+        arguments:
+            $cdnProjectId: '%env(CDN_PROJECT_ID)%'
+            $cdnSecretKey: '%env(CDN_API_KEY)%'
+            $logger: '@monolog.logger.cdn'
+
     sendgrid:
         class: SendGrid
         arguments:

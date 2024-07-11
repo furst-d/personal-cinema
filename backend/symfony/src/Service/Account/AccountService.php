@@ -77,8 +77,8 @@ class AccountService
             $this->em->persist($user);
             $this->em->flush();
 
-        } catch (Exception $e) {
-            throw new InternalException($e->getMessage());
+        } catch (Exception) {
+            throw new InternalException("Failed to register user.");
         }
 
         return $user;

@@ -2,7 +2,8 @@
 
 namespace App\Entity\Account;
 
-use App\Entity\Folder;
+use App\Entity\Video\Folder;
+use App\Entity\Video\Video;
 use App\Repository\Account\AccountRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -10,7 +11,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Attribute\MaxDepth;
 
 #[ORM\Entity(repositoryClass: AccountRepository::class)]
 #[ORM\Table(name: '`account`')]
@@ -63,6 +63,12 @@ class Account implements UserInterface
     private Collection $folders;
 
     /**
+     * @var Collection<int, Video>
+     */
+    #[ORM\OneToMany(targetEntity: Video::class, mappedBy: 'account', orphanRemoval: true)]
+    private Collection $videos;
+
+    /**
      * @param string $email
      * @param string $password
      * @param string $salt
@@ -76,6 +82,7 @@ class Account implements UserInterface
         $this->roles = new ArrayCollection();
         $this->apiTokens = new ArrayCollection();
         $this->folders = new ArrayCollection();
+        $this->videos = new ArrayCollection();
     }
 
     /**
@@ -237,5 +244,13 @@ class Account implements UserInterface
     public function getFolders(): Collection
     {
         return $this->folders;
+    }
+
+    /**
+     * @return Collection<int, Video>
+     */
+    public function getVideos(): Collection
+    {
+        return $this->videos;
     }
 }
