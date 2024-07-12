@@ -55,9 +55,9 @@ class VideoController extends BasePrivateController
             ]);
 
             $data = $this->cdnService->createUploadData([
-                'params' => [
+                'params' => json_encode([
                     'video_token' => $videoToken,
-                ]
+                ])
             ]);
 
             return $this->re->withData($data);

@@ -18,7 +18,15 @@ const Video = sequelize.define('Video', {
         allowNull: false,
         defaultValue: 'pending',
     },
-    url: {
+    originalPath: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    hlsPath: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    hash: {
         type: DataTypes.STRING,
         allowNull: true,
     },
@@ -32,14 +40,14 @@ const Video = sequelize.define('Video', {
     },
     length: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
     },
     resolution: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     parameters: {
-        type: DataTypes.JSONB,
+        type: DataTypes.JSON,
         allowNull: true,
     },
     md5Id: {
