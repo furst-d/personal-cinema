@@ -10,9 +10,9 @@ use Psr\Log\LoggerInterface;
 class CdnService
 {
     /**
-     * @var int $cdnProjectId
+     * @var string $cdnProjectId
      */
-    private int $cdnProjectId;
+    private string $cdnProjectId;
 
     /**
      * @var string $cdnSecretKey
@@ -30,13 +30,13 @@ class CdnService
     private CdnHasher $cdnHasher;
 
     /**
-     * @param int $cdnProjectId
+     * @param string $cdnProjectId
      * @param string $cdnSecretKey
      * @param LoggerInterface $logger
      * @param CdnHasher $cdnHasher
      */
     public function __construct(
-        int $cdnProjectId,
+        string $cdnProjectId,
         string $cdnSecretKey,
         LoggerInterface $logger,
         CdnHasher $cdnHasher
