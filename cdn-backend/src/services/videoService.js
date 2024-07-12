@@ -43,7 +43,7 @@ exports.getVideoUrl = async (videoId) => {
     }
 
     const objectName = `${video.id}/${video.hash}${video.extension}`;
-    const url = await minioClient.presignedUrl('GET', 'videos', objectName, 24 * 60 * 60); // 24 hour
+    const url = await minioClient.presignedUrl('GET', 'videos', objectName, 24 * 60 * 60); // 24 hours
 
     return url;
 };
