@@ -6,6 +6,7 @@ const videoRoutes = require('./routes/videos');
 const projectRoutes = require('./routes/projects');
 const uploadRoutes = require('./routes/upload');
 const sequelize = require('./config/db');
+const minioClient = require('./config/minio');
 const videoQueue = require('./libs/video/videoProcessor');
 
 const Video = require('./entities/video');

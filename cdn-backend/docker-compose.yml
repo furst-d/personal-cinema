@@ -13,7 +13,7 @@ services:
       - .:/var/www
     command: npm run dev
     networks:
-      - cdn
+      - cdn-backend
 
   minio:
     image: minio/minio
@@ -21,19 +21,19 @@ services:
     ports:
       - "9000:9000"
     environment:
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
       - minio_data:/data
     networks:
-      - cdn
+      - cdn-backend
 
   redis:
     image: redis
     ports:
       - "6379:6379"
     networks:
-      - cdn
+      - cdn-backend
 
   postgres-cdn:
     image: postgres:13
@@ -46,10 +46,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - cdn
+      - cdn-backend
 
 networks:
-  cdn:
+  cdn-backend:
     driver: bridge
 
 volumes:

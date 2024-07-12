@@ -40,14 +40,14 @@ const Video = sequelize.define('Video', {
     },
     length: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
     },
     resolution: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     parameters: {
-        type: DataTypes.JSONB,
+        type: DataTypes.JSON,
         allowNull: true,
     },
     md5Id: {
