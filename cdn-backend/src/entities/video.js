@@ -18,7 +18,15 @@ const Video = sequelize.define('Video', {
         allowNull: false,
         defaultValue: 'pending',
     },
-    url: {
+    originalUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    hlsUrl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    hash: {
         type: DataTypes.STRING,
         allowNull: true,
     },

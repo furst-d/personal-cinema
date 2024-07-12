@@ -1,31 +1,42 @@
 const Video = require('../entities/video');
 const Md5 = require('../entities/md5');
+const Minio = require('minio');
 const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+const crypto = require('crypto');
 
-exports.uploadVideo = async (data) => {
-    let md5Entry = await Md5.findOne({ where: { md5: data.md5 } });
-    if (!md5Entry) {
-        md5Entry = await Md5.create({
-            id: uuidv4(),
-            md5: data.md5,
-            isBlacklisted: false
-        });
-    }
+const minioClient = new Minio.Client({
+    endPoint: process.env.MINIO_ENDPOINT,
+    port: parseInt(process.env.MINIO_PORT),
+    useSSL: process.env.MINIO_USE_SSL === 'true',
+    accessKey: process.env.MINIO_ACCESS_KEY,
+    secretKey: process.env.MINIO_SECRET_KEY
+});
 
-    const video = await Video.create({
-        id: uuidv4(),
-        title: data.title,
-        status: 'processing',
-        extension: data.extension,
-        size: data.size,
-        length: data.length,
-        resolution: data.resolution,
-        parameters: data.parameters,
-        md5Id: md5Entry.id
+exports.uploadVideo = async (file, params) => {
+    const { originalname, buffer, mimetype, size } = file;
+
+    const extension = path.extname(originalname);
+    const hash = crypto.createHash('md5').update(buffer).digest('hex');
+
+    const videoId = uuidv4();
+    const objectName = `${videoId}/${hash}${extension}`;
+    const url = `http://${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}/${objectName}`;
+
+    await minioClient.putObject('videos', objectName, buffer, size, {
+        'Content-Type': mimetype
     });
 
-    // Add logic to upload the video to MinIO and process it
-    return video;
+    return await Video.create({
+        id: videoId,
+        title: params.name,
+        status: 'uploaded-original',
+        originalUrl: url,
+        hash: hash,
+        extension: extension,
+        size: size,
+        projectId: params.project_id
+    });
 };
 
 exports.getVideo = async (id) => {
