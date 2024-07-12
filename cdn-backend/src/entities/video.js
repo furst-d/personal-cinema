@@ -18,11 +18,11 @@ const Video = sequelize.define('Video', {
         allowNull: false,
         defaultValue: 'pending',
     },
-    originalUrl: {
+    originalPath: {
         type: DataTypes.STRING,
         allowNull: true,
     },
-    hlsUrl: {
+    hlsPath: {
         type: DataTypes.STRING,
         allowNull: true,
     },

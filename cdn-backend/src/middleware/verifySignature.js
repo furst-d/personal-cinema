@@ -12,17 +12,15 @@ const http_build_query = require('../utils/http_build_query');
  */
 const verifySignature = async (req, res, next) => {
     const { nonce, params, signature, project_id } = req.body;
-    // console.log("Body: ");
-    // console.log(req.body);
 
     if (!nonce || !params || !signature || !project_id) {
         return res.status(400).json({ error: 'Missing required parameters' });
     }
 
-    // const existingNonce = await Nonce.findOne({ where: { value: nonce } });
-    // if (existingNonce) {
-    //     return res.status(400).json({ error: 'Nonce already used' });
-    // }
+    const existingNonce = await Nonce.findOne({ where: { value: nonce } });
+    if (existingNonce) {
+        return res.status(400).json({ error: 'Nonce already used' });
+    }
 
     const project = await Project.findByPk(project_id);
 
@@ -39,7 +37,7 @@ const verifySignature = async (req, res, next) => {
         return res.status(400).json({ error: 'Invalid signature' });
     }
 
-    // await Nonce.create({ value: nonce });
+    await Nonce.create({ value: nonce });
 
     next();
 };

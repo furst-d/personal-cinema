@@ -12,11 +12,10 @@ exports.uploadVideo = async (file, params, project_id) => {
     const hash = crypto.createHash('md5').update(buffer).digest('hex');
 
     const videoId = uuidv4();
-    const objectName = `${videoId}/${hash}${extension}`;
-    const url = `http://${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}/${objectName}`;
+    const urlPath = `${videoId}/${hash}${extension}`;
 
     try {
-        await minioClient.putObject('videos', objectName, buffer, size, {
+        await minioClient.putObject('videos', urlPath, buffer, size, {
             'Content-Type': mimetype
         });
     } catch (error) {
@@ -28,13 +27,25 @@ exports.uploadVideo = async (file, params, project_id) => {
         id: videoId,
         title: originalname,
         status: 'uploaded-original',
-        originalUrl: url,
+        originalPath: urlPath,
         hash: hash,
         extension: extension,
         size: size,
         projectId: project_id,
         parameters: JSON.parse(params)
     });
+};
+
+exports.getVideoUrl = async (videoId) => {
+    const video = await Video.findByPk(videoId);
+    if (!video) {
+        throw new Error('Video not found');
+    }
+
+    const objectName = `${video.id}/${video.hash}${video.extension}`;
+    const url = await minioClient.presignedUrl('GET', 'videos', objectName, 24 * 60 * 60); // 24 hour
+
+    return url;
 };
 
 exports.getVideo = async (id) => {

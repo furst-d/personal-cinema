@@ -8,3 +8,13 @@ exports.getVideo = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+exports.getVideoUrl = async (req, res) => {
+    try {
+        const videoId = req.params.id;
+        const url = await videoService.getVideoUrl(videoId);
+        res.status(200).json({ url });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
