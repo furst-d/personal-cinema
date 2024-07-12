@@ -19,21 +19,27 @@ services:
 
   minio:
     image: minio/minio
-    command: server /data
+    command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      MINIO_SERVER_URL: https://file.soukromekino.cz
     volumes:
       - minio_data:/data
     networks:
       - cdn-backend
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.cdn-files.rule=Host(`file.soukromekino.cz`)"
-      - "traefik.http.routers.cdn-files.entrypoints=websecure"
-      - "traefik.http.routers.cdn-files.tls.certresolver=letsencrypt"
-      - "traefik.http.services.cdn-files.loadbalancer.server.port=9000"
+      - "traefik.http.routers.minio.rule=Host(`file.soukromekino.cz`)"
+      - "traefik.http.routers.minio.entrypoints=websecure"
+      - "traefik.http.routers.minio.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.minio.service=minio"
+      - "traefik.http.services.minio.loadbalancer.server.port=9000"
+
+      - "traefik.http.routers.minio-console.rule=Host(`admin.file.soukromekino.cz`)"
+      - "traefik.http.routers.minio-console.entrypoints=websecure"
+      - "traefik.http.routers.minio-console.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.minio-console.service=minio-console"
+      - "traefik.http.services.minio-console.loadbalancer.server.port=9001"
       - "traefik.docker.network=cdn-backend"
 
   redis:
