@@ -1,11 +1,11 @@
-const Minio = require('minio');
+import { Client } from 'minio';
 
-const minioClient = new Minio.Client({
-    endPoint: process.env.MINIO_ENDPOINT,
-    port: parseInt(process.env.MINIO_PORT),
+const minioClient = new Client({
+    endPoint: process.env.MINIO_ENDPOINT as string,
+    port: parseInt(process.env.MINIO_PORT as string, 10),
     useSSL: process.env.MINIO_USE_SSL === 'true',
-    accessKey: process.env.MINIO_ROOT_USER,
-    secretKey: process.env.MINIO_ROOT_PASSWORD
+    accessKey: process.env.MINIO_ROOT_USER as string,
+    secretKey: process.env.MINIO_ROOT_PASSWORD as string
 });
 
 const bucketName = 'videos';
@@ -25,4 +25,4 @@ const initMinio = async () => {
 
 initMinio();
 
-module.exports = minioClient;
+export default minioClient;

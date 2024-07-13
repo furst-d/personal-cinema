@@ -2,10 +2,11 @@
   "name": "cdn",
   "version": "1.0.0",
   "description": "A CDN application for video processing",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "start": "node dist/index.js",
+    "dev": "nodemon --watch src --exec ts-node src/index.ts",
+    "build": "tsc"
   },
   "author": "Dominik Furst",
   "license": "ISC",
@@ -17,10 +18,19 @@
     "minio": "^8.0.1",
     "multer": "^1.4.5-lts.1",
     "pg": "^8.12.0",
+    "reflect-metadata": "^0.2.2",
     "sequelize": "^6.37.3",
+    "sequelize-typescript": "^2.1.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.14.10",
+    "@types/uuid": "^10.0.0",
+    "@types/validator": "^13.12.0",
     "nodemon": "^3.1.4"
   }
 }
