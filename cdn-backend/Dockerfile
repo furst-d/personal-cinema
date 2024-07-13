@@ -19,5 +19,5 @@ RUN npm install -g nodemon
 # Expose the port the app runs on
 EXPOSE 4000
 
-# Start the app using nodemon for development
-CMD ["nodemon", "src/index.js"]
+# Start the app using npm run dev
+CMD ["npm", "run", "dev"]

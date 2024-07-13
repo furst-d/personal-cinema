@@ -1,11 +1,11 @@
-const Video = require('../entities/video');
-const Md5 = require('../entities/md5');
-const minioClient = require('../config/minio');
-const { v4: uuidv4 } = require('uuid');
-const path = require('path');
-const crypto = require('crypto');
+import { v4 as uuidv4 } from 'uuid';
+import path from 'path';
+import crypto from 'crypto';
+import Video from '../entities/video';
+import Md5 from '../entities/md5';
+import minioClient from '../config/minio';
 
-exports.uploadVideo = async (file, params, project_id) => {
+export const uploadVideo = async (file: Express.Multer.File, params: string, project_id: string) => {
     const { originalname, buffer, mimetype, size } = file;
 
     const extension = path.extname(originalname);
@@ -16,7 +16,7 @@ exports.uploadVideo = async (file, params, project_id) => {
 
     try {
         await minioClient.putObject('videos', urlPath, buffer, size, {
-            'Content-Type': mimetype
+            'Content-Type': mimetype,
         });
     } catch (error) {
         console.error('Error uploading to Minio:', error);
@@ -32,24 +32,22 @@ exports.uploadVideo = async (file, params, project_id) => {
         extension: extension,
         size: size,
         projectId: project_id,
-        parameters: JSON.parse(params)
+        parameters: JSON.parse(params),
     });
 };
 
-exports.getVideoUrl = async (videoId) => {
-    const video = await Video.findByPk(videoId);
+export const getVideoUrl = async (videoId: string) => {
+    const video = await Video.findByPk(videoId) as any;
     if (!video) {
         throw new Error('Video not found');
     }
 
     const objectName = `${video.id}/${video.hash}${video.extension}`;
-    const url = await minioClient.presignedUrl('GET', 'videos', objectName, 24 * 60 * 60); // 24 hours
-
-    return url;
+    return  await minioClient.presignedUrl('GET', 'videos', objectName, 24 * 60 * 60); // 24 hours
 };
 
-exports.getVideo = async (id) => {
-    const video = await Video.findByPk(id, { include: Md5 });
+export const getVideo = async (id: string) => {
+    const video = await Video.findByPk(id, { include: Md5 }) as any;
     if (!video) {
         throw new Error('Video not found');
     }
