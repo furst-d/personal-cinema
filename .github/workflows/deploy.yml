@@ -33,8 +33,11 @@ jobs:
           sed -i 's|db_name|${{ secrets.POSTGRES_CDN_DB }}|' cdn-backend/.env
           sed -i 's|db_user|${{ secrets.POSTGRES_CDN_USER }}|' cdn-backend/.env
           sed -i 's|db_password|${{ secrets.POSTGRES_CDN_PASSWORD }}|' cdn-backend/.env
-          sed -i 's|minio_access_key|${{ secrets.MINIO_ACCESS_KEY }}|' cdn-backend/.env
-          sed -i 's|minio_secret_key|${{ secrets.MINIO_SECRET_KEY }}|' cdn-backend/.env
+          sed -i 's|minio_endpoint|${{ secrets.MINIO_ENDPOINT }}|' cdn-backend/.env
+          sed -i 's|minio_port|${{ secrets.MINIO_PORT }}|' cdn-backend/.env
+          sed -i 's|minio_use_ssl|${{ secrets.MINIO_USE_SSL }}|' cdn-backend/.env
+          sed -i 's|minio_root_user|${{ secrets.MINIO_ROOT_USER }}|' cdn-backend/.env
+          sed -i 's|minio_root_password|${{ secrets.MINIO_ROOT_PASSWORD }}|' cdn-backend/.env
 
       - name: Create JWT key files
         run: |
