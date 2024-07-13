@@ -11,6 +11,7 @@ const sequelize = new Sequelize({
     database: process.env.POSTGRES_DB,
     username: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
+    timezone: 'Europe/Prague',
     models: [Project, Callback, Md5, Nonce, Video],
 });
 
