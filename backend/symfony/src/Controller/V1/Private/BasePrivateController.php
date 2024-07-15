@@ -3,17 +3,31 @@
 namespace App\Controller\V1\Private;
 
 use App\Controller\ApiController;
-use App\Entity\Account\Account;
-use Symfony\Component\HttpFoundation\Request;
+use App\Service\Auth\AuthService;
+use App\Service\Locator\BaseControllerLocator;
 
 class BasePrivateController extends ApiController
 {
     /**
-     * @param Request $request
-     * @return Account|null
+     * @var BaseControllerLocator $locator
      */
-    protected function getAccount(Request $request): ?Account
+    protected BaseControllerLocator $locator;
+
+    /**
+     * @var AuthService $authService
+     */
+    protected AuthService $authService;
+
+    /**
+     * @param BaseControllerLocator $locator
+     * @param AuthService $authService
+     */
+    public function __construct(
+        BaseControllerLocator $locator,
+        AuthService $authService
+    )
     {
-        return $request->attributes->get('account');
+        parent::__construct($locator);
+        $this->authService = $authService;
     }
 }

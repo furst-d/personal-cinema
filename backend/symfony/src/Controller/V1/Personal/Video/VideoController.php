@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Controller\V1\Private\Video;
+namespace App\Controller\V1\Personal\Video;
 
-use App\Controller\V1\Private\BasePrivateController;
+use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Video\UploadRequest;
 use App\Exception\InternalException;
 use App\Helper\Jwt\JwtUsage;
@@ -13,8 +13,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/private/videos')]
-class VideoController extends BasePrivateController
+#[Route('/personal/videos')]
+class VideoController extends BasePersonalController
 {
     /**
      * @var JwtService $jwtService
