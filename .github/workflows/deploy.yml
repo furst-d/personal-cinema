@@ -47,7 +47,7 @@ jobs:
           echo "${{ secrets.JWT_PUBLIC_KEY }}" > backend/symfony/config/jwt/public.pem
 
       - name: Upload .env files as artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: env-files
           path: |
@@ -68,10 +68,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Download .env files artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: env-files
 
@@ -107,7 +107,7 @@ jobs:
           docker push ${{ env.DOCKER_IMAGE_PREFIX }}_backend_cdn:latest
 
       - name: Upload Docker images as artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: docker-images
           path: |
@@ -128,10 +128,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Download Docker images artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: docker-images
 
@@ -151,10 +151,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Download .env files artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: env-files
 
