@@ -48,7 +48,7 @@ class TokenValidatorListener
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
-        if ($this->isPrivateRoute($path)) {
+        if ($this->isPersonalRoute($path)) {
             $token = $request->headers->get('Authorization');
 
             if (!$token || !preg_match('/Bearer\s(\S+)/', $token, $matches)) {
@@ -77,8 +77,8 @@ class TokenValidatorListener
      * @param string $path
      * @return bool
      */
-    private function isPrivateRoute(string $path): bool
+    private function isPersonalRoute(string $path): bool
     {
-        return str_starts_with($path, '/v1/private/');
+        return str_starts_with($path, '/v1/personal/');
     }
 }

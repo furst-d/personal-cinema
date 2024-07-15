@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Controller\V1\Private\Folder;
+namespace App\Controller\V1\Personal\Folder;
 
-use App\Controller\V1\Private\BasePrivateController;
+use App\Controller\V1\Personal\BasePersonalController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/private/folders')]
-class FolderController extends BasePrivateController
+#[Route('/personal/folders')]
+class FolderController extends BasePersonalController
 {
     #[Route('', name: 'user_folders')]
     public function index(Request $request): JsonResponse

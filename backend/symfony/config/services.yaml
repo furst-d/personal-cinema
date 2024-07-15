@@ -47,6 +47,7 @@ services:
         arguments:
             $cdnProjectId: '%env(CDN_PROJECT_ID)%'
             $cdnSecretKey: '%env(CDN_API_KEY)%'
+            $cdnCallbackKey: '%env(CDN_CALLBACK_KEY)%'
             $logger: '@monolog.logger.cdn'
 
     sendgrid:

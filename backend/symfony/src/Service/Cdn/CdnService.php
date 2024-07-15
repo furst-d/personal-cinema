@@ -20,6 +20,11 @@ class CdnService
     private string $cdnSecretKey;
 
     /**
+     * @var string $cdnCallbackKey
+     */
+    private string $cdnCallbackKey;
+
+    /**
      * @var LoggerInterface $logger
      */
     private LoggerInterface $logger;
@@ -32,20 +37,31 @@ class CdnService
     /**
      * @param string $cdnProjectId
      * @param string $cdnSecretKey
+     * @param string $cdnCallbackKey
      * @param LoggerInterface $logger
      * @param CdnHasher $cdnHasher
      */
     public function __construct(
         string $cdnProjectId,
         string $cdnSecretKey,
+        string $cdnCallbackKey,
         LoggerInterface $logger,
         CdnHasher $cdnHasher
     )
     {
         $this->cdnProjectId = $cdnProjectId;
         $this->cdnSecretKey = $cdnSecretKey;
+        $this->cdnCallbackKey = $cdnCallbackKey;
         $this->logger = $logger;
         $this->cdnHasher = $cdnHasher;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCdnCallbackKey(): string
+    {
+        return $this->cdnCallbackKey;
     }
 
     /**
@@ -64,5 +80,14 @@ class CdnService
         } catch (Exception) {
             throw new InternalException("Failed to generate nonce.");
         }
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function synchronizeVideo(array $data): void
+    {
+        $this->logger->info('Synchronized video.', $data);
     }
 }
