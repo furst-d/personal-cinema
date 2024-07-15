@@ -24,8 +24,8 @@ class Video
     private Account $account;
 
     #[ORM\ManyToOne(inversedBy: 'videos')]
-    #[ORM\JoinColumn(nullable: false)]
-    private MD5 $md5;
+    #[ORM\JoinColumn(nullable: true)]
+    private ?MD5 $md5;
 
     #[ORM\ManyToOne(inversedBy: 'videos')]
     private ?Folder $folder = null;
@@ -36,26 +36,23 @@ class Video
     #[ORM\Column(length: 255)]
     private string $extension;
 
-    #[ORM\Column(length: 255)]
-    private string $type;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $type = null;
 
     #[ORM\Column(type: Types::BIGINT)]
     private string $size;
 
-    #[ORM\Column(type: Types::BIGINT)]
-    private string $length;
+    #[ORM\Column(type: Types::BIGINT, nullable: true)]
+    private ?string $length = null;
 
     #[ORM\Column(unique: true)]
-    private int $cdnId;
+    private string $cdnId;
 
-    #[ORM\Column(length: 255, unique: true)]
-    private string $cdnLink;
+    #[ORM\Column(nullable: true)]
+    private ?int $originalWidth = null;
 
-    #[ORM\Column]
-    private int $originalWidth;
-
-    #[ORM\Column]
-    private int $originalHeight;
+    #[ORM\Column(nullable: true)]
+    private ?int $originalHeight = null;
 
     #[ORM\Column]
     private int $thumbsCount;
@@ -118,18 +115,18 @@ class Video
     }
 
     /**
-     * @return MD5
+     * @return MD5|null
      */
-    public function getMd5(): MD5
+    public function getMd5(): ?MD5
     {
         return $this->md5;
     }
 
     /**
-     * @param MD5 $md5
+     * @param MD5|null $md5
      * @return void
      */
-    public function setMd5(MD5 $md5): void
+    public function setMd5(?MD5 $md5): void
     {
         $this->md5 = $md5;
     }
@@ -177,18 +174,18 @@ class Video
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getType(): string
+    public function getType(): ?string
     {
         return $this->type;
     }
 
     /**
-     * @param string $type
+     * @param string|null $type
      * @return void
      */
-    public function setType(string $type): void
+    public function setType(?string $type): void
     {
         $this->type = $type;
     }
@@ -211,86 +208,69 @@ class Video
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getLength(): string
+    public function getLength(): ?string
     {
         return $this->length;
     }
 
     /**
-     * @param string $length
+     * @param string|null $length
      * @return void
      */
-    public function setLength(string $length): void
+    public function setLength(?string $length): void
     {
         $this->length = $length;
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getCdnId(): int
+    public function getCdnId(): string
     {
         return $this->cdnId;
     }
 
     /**
-     * @param int $cdnId
+     * @param string $cdnId
      * @return void
      */
-    public function setCdnId(int $cdnId): void
+    public function setCdnId(string $cdnId): void
     {
         $this->cdnId = $cdnId;
     }
 
     /**
-     * @return string
+     * @return int|null
      */
-    public function getCdnLink(): string
-    {
-        return $this->cdnLink;
-    }
-
-    /**
-     * @param string $cdnLink
-     * @return void
-     */
-    public function setCdnLink(string $cdnLink): void
-    {
-        $this->cdnLink = $cdnLink;
-    }
-
-    /**
-     * @return int
-     */
-    public function getOriginalWidth(): int
+    public function getOriginalWidth(): ?int
     {
         return $this->originalWidth;
     }
 
     /**
-     * @param int $originalWidth
+     * @param int|null $originalWidth
      * @return void
      */
-    public function setOriginalWidth(int $originalWidth): void
+    public function setOriginalWidth(?int $originalWidth): void
     {
         $this->originalWidth = $originalWidth;
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getOriginalHeight(): int
+    public function getOriginalHeight(): ?int
     {
         return $this->originalHeight;
     }
 
     /**
-     * @param int $originalHeight
+     * @param int|null $originalHeight
      * @return void
      */
-    public function setOriginalHeight(int $originalHeight): void
+    public function setOriginalHeight(?int $originalHeight): void
     {
         $this->originalHeight = $originalHeight;
     }

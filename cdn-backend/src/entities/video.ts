@@ -40,7 +40,7 @@ class Video extends Model {
         type: DataType.STRING,
         allowNull: true,
     })
-    hash!: string;
+    type!: string;
 
     @Column({
         type: DataType.STRING,
@@ -61,10 +61,16 @@ class Video extends Model {
     length!: number;
 
     @Column({
-        type: DataType.STRING,
+        type: DataType.INTEGER,
         allowNull: true,
     })
-    resolution!: string;
+    originalWidth!: number;
+
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: true,
+    })
+    originalHeight!: number;
 
     @Column({
         type: DataType.JSON,

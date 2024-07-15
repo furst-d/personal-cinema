@@ -1,38 +1,31 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import Video from "../entities/video";
 import Project from "../entities/project";
 import Callback from "../entities/callback";
 import { callbackLogger } from "../config/logger"
+import { prepareVideoData } from "./videoService";
 
 /**
  * Send a callback to a given URL with the given data
  * @param url
  * @param data
  */
-const sendCallback = async (url: string, data: object): Promise<void> => {
+async function sendCallback(url: string, data: object): Promise<AxiosResponse> {
     try {
-        callbackLogger.info(`Attempting to send callback to ${url}`);
-        await axios.post(url, null, { timeout: 5000 });
-        callbackLogger.info(`Callback sent to ${url} with data: ${JSON.stringify(data)}`);
+        return await axios.post(url, data, { timeout: 5000 });
     } catch (error) {
         if (axios.isAxiosError(error)) {
             if (error.response) {
-                // Server responded with a status other than 200 range
-                // callbackLogger.error(`Failed to send callback to ${url}: ${error.message} | Response: ${JSON.stringify(error.response.data)}`);
-            } else if (error.request) {
-                // No response was received from server
-                console.log(error.request)
-                callbackLogger.error(`Failed to send callback to ${url}: No response received`);
+                callbackLogger.error(`Failed to send callback to ${url}: ${error.message} | Response body: ${JSON.stringify(error.response.data)}`);
             } else {
-                // Something happened in setting up the request
-                callbackLogger.error(`Failed to send callback to ${url}: ${error.message}`);
+                callbackLogger.error(`Failed to send callback to ${url}: No response received`);
             }
         } else {
-            // Generic error
             callbackLogger.error(`Failed to send callback to ${url}: ${error}`);
         }
+        throw error;
     }
-};
+}
 
 /**
  * Get the callback for a given project
@@ -63,5 +56,10 @@ export const sendNotificationCallback = async (video: Video): Promise<void> => {
         return;
     }
 
-    await sendCallback(callback.notificationUrl, { video });
+    const data = await prepareVideoData(video);
+
+    try {
+        const response = await sendCallback(callback.notificationUrl, { video: data });
+        callbackLogger.info(`Sent notification callback for video ${video.id}, response: ${response.status}, ${JSON.stringify(response.data)}`);
+    } catch (error) {}
 }

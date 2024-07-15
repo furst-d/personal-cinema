@@ -3,6 +3,9 @@
 namespace App\Controller\V1\Private\Cdn;
 
 use App\Controller\V1\Private\BasePrivateController;
+use App\DTO\Video\CdnRequest;
+use App\Exception\BadRequestException;
+use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
 use App\Service\Auth\AuthService;
 use App\Service\Cdn\CdnService;
@@ -35,24 +38,15 @@ class CdnController extends BasePrivateController
     }
 
     #[Route('/notification', name: 'cdn_notification', methods: ['POST'])]
-    public function actionNotification(Request $request): JsonResponse
+    public function actionNotification(Request $request, CdnRequest $cdnRequest): JsonResponse
     {
-        $response = new JsonResponse();
-        $response->setData([
-            'message' => 'Received'
-        ]);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, DELETE');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        return $response;
-
-//        try {
-//            $this->authService->authCdn($request);
-//            $this->cdnService->synchronizeVideo($request, []);
-//            return $this->re->withMessage('Notification processed.');
-//        } catch (UnauthorizedException $e) {
-//            return $this->re->withException($e);
-//        }
+        try {
+            $this->authService->authCdn($request);
+            $this->cdnService->synchronizeVideo($cdnRequest->video);
+            return $this->re->withMessage('Notification processed.');
+        } catch (UnauthorizedException|BadRequestException|NotFoundException $e) {
+            return $this->re->withException($e);
+        }
     }
 
     #[Route('/thumb', name: 'cdn_thumb', methods: ['POST'])]
