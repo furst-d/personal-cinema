@@ -23,7 +23,7 @@ class TokenValidatorListenerTest extends TestCase
     private $userProvider;
     private $listener;
 
-    private const MOCK_ROUTE = '/v1/private/some-route';
+    private const MOCK_ROUTE = '/v1/personal/some-route';
 
     protected function setUp(): void
     {

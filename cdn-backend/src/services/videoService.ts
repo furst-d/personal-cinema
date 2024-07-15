@@ -28,7 +28,6 @@ export const uploadVideo = async (file: Express.Multer.File, params: string, pro
         title: originalname,
         status: 'uploaded-original',
         originalPath: urlPath,
-        hash: hash,
         extension: extension,
         size: size,
         projectId: project_id,
@@ -53,3 +52,27 @@ export const getVideo = async (id: string) => {
     }
     return video;
 };
+
+/**
+ * Prepare video data for sending in a callback
+ * @param video
+ */
+export const prepareVideoData = async (video: Video) => {
+    return {
+        id: video.id,
+        title: video.title,
+        status: video.status,
+        type: video.type,
+        extension: video.extension,
+        size: video.size,
+        length: video.length,
+        resolution: {
+            width: video.originalWidth,
+            height: video.originalHeight,
+        },
+        md5: video.md5 ? video.md5.md5 : null,
+        createdAt: video.createdAt,
+        updatedAt: video.updatedAt,
+        parameters: video.parameters
+    };
+}

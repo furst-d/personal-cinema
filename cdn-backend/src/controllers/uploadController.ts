@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { uploadVideo } from '../services/videoService';
+import { sendNotificationCallback } from "../services/callbackService";
 
 export const uploadVideoRoute = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -11,7 +12,9 @@ export const uploadVideoRoute = async (req: Request, res: Response): Promise<voi
         }
 
         const video = await uploadVideo(file, req.body.params, req.body.project_id);
-        res.status(201).json(video);
+        await sendNotificationCallback(video);
+
+        res.status(201).json({ message: 'Video uploaded successfully' });
     } catch (error) {
         res.status(500).json({ error: (error as Error).message });
     }
