@@ -6,6 +6,7 @@ use App\Exception\InternalException;
 use App\Helper\Cdn\CdnHasher;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class CdnService
 {
@@ -83,10 +84,11 @@ class CdnService
     }
 
     /**
+     * @param Request $request
      * @param array $data
      * @return void
      */
-    public function synchronizeVideo(array $data): void
+    public function synchronizeVideo(Request $request, array $data): void
     {
         $this->logger->info('Synchronized video.', $data);
     }

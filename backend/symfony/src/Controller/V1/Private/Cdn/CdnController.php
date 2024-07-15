@@ -37,13 +37,22 @@ class CdnController extends BasePrivateController
     #[Route('/notification', name: 'cdn_notification', methods: ['POST'])]
     public function actionNotification(Request $request): JsonResponse
     {
-        try {
-            $this->authService->authCdn($request);
-            $this->cdnService->synchronizeVideo([]);
-            return $this->re->withMessage('Notification processed.');
-        } catch (UnauthorizedException $e) {
-            return $this->re->withException($e);
-        }
+        $response = new JsonResponse();
+        $response->setData([
+            'message' => 'Received'
+        ]);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, DELETE');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        return $response;
+
+//        try {
+//            $this->authService->authCdn($request);
+//            $this->cdnService->synchronizeVideo($request, []);
+//            return $this->re->withMessage('Notification processed.');
+//        } catch (UnauthorizedException $e) {
+//            return $this->re->withException($e);
+//        }
     }
 
     #[Route('/thumb', name: 'cdn_thumb', methods: ['POST'])]
