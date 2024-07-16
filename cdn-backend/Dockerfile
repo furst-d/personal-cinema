@@ -16,6 +16,9 @@ COPY . .
 # Install nodemon globally
 RUN npm install -g nodemon
 
+# Install ffmpeg
+RUN apk add --no-cache ffmpeg
+
 # Expose the port the app runs on
 EXPOSE 4000
 

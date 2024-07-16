@@ -40,7 +40,7 @@ class Video extends Model {
         type: DataType.STRING,
         allowNull: true,
     })
-    type!: string;
+    codec!: string;
 
     @Column({
         type: DataType.STRING,

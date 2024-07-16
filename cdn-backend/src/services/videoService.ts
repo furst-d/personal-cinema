@@ -3,9 +3,15 @@ import path from 'path';
 import crypto from 'crypto';
 import Video from '../entities/video';
 import Md5 from '../entities/md5';
-import minioClient from '../config/minio';
+import minioClient, {bucketName} from '../config/minio';
 import { videoUploadQueue } from "../config/bull";
 
+/**
+ * Upload a video
+ * @param file
+ * @param params
+ * @param project_id
+ */
 export const uploadVideo = async (file: Express.Multer.File, params: string, project_id: string) => {
     const { originalname, buffer, mimetype, size } = file;
 
@@ -17,7 +23,7 @@ export const uploadVideo = async (file: Express.Multer.File, params: string, pro
 
     await videoUploadQueue.add({
         videoId,
-        buffer: buffer.toString('base64'),
+        buffer,
         urlPath,
         mimetype,
         size
@@ -35,16 +41,18 @@ export const uploadVideo = async (file: Express.Multer.File, params: string, pro
     });
 };
 
-export const getVideoUrl = async (videoId: string) => {
-    const video = await Video.findByPk(videoId) as any;
-    if (!video) {
-        throw new Error('Video not found');
-    }
-
-    const objectName = `${video.id}/${video.hash}${video.extension}`;
-    return  await minioClient.presignedUrl('GET', 'videos', objectName, 24 * 60 * 60); // 24 hours
+/**
+ * Get a presigned URL for a video
+ * @param path
+ */
+export const getVideoUrl = async (path: string) => {
+    return await minioClient.presignedUrl('GET', bucketName, path, 24 * 60 * 60); // 24 hours
 };
 
+/**
+ * Get a video by ID
+ * @param id
+ */
 export const getVideo = async (id: string) => {
     const video = await Video.findByPk(id, { include: Md5 }) as any;
     if (!video) {
@@ -62,7 +70,7 @@ export const prepareVideoData = async (video: Video) => {
         id: video.id,
         title: video.title,
         status: video.status,
-        type: video.type,
+        codec: video.codec,
         extension: video.extension,
         size: video.size,
         length: video.length,
@@ -76,3 +84,17 @@ export const prepareVideoData = async (video: Video) => {
         parameters: video.parameters
     };
 }
+
+/**
+ * Get or create an MD5 hash
+ * @param hash
+ */
+export const getOrCreateMd5 = async (hash: string): Promise<Md5> => {
+    let md5 = await Md5.findOne({ where: { md5: hash } });
+
+    if (!md5) {
+        md5 = await Md5.create({ md5: hash });
+    }
+
+    return md5;
+};

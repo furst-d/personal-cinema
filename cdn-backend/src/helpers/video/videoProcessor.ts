@@ -1,13 +1,16 @@
-import {videoConversionQueue, videoProcessQueue, videoThumbnailQueue, videoUploadQueue} from '../../config/bull';
-import minioClient from '../../config/minio';
+import { videoConversionQueue, videoProcessQueue, videoThumbnailQueue, videoUploadQueue } from '../../config/bull';
+import minioClient, { bucketName } from '../../config/minio';
 import Video from '../../entities/video';
-import {Job} from "bull";
+import { Job } from 'bull';
+import ffmpeg from 'fluent-ffmpeg';
+import { PassThrough } from 'stream';
+import { getOrCreateMd5, getVideoUrl } from '../../services/videoService';
 
 const processVideoUpload = async (job: Job) => {
     const { videoId, buffer, urlPath, mimetype, size } = job.data;
 
     try {
-        await minioClient.putObject('videos', urlPath, buffer, size, {
+        await minioClient.putObject(bucketName, urlPath, Buffer.from(buffer, 'base64'), size, {
             'Content-Type': mimetype,
         });
 
@@ -31,7 +34,6 @@ const processVideoUpload = async (job: Job) => {
     }
 };
 
-
 const processVideoInfo = async (job: Job) => {
     const { videoId } = job.data;
     const video = await Video.findByPk(videoId);
@@ -40,16 +42,44 @@ const processVideoInfo = async (job: Job) => {
         throw new Error('Video not found');
     }
 
-    // Přidejte logiku pro zjištění informací o videu (délka, šířka, výška, atd.)
-    // Příklad: Použití ffmpeg pro získání metadat
+    const videoPath = video.originalPath;
 
-    // Aktualizujte video v databázi s novými informacemi
-    // video.length = 120; // délka videa v sekundách
-    // video.originalWidth = 1920; // šířka videa
-    // video.originalHeight = 1080; // výška videa
-    await video.save();
+    try {
+        const videoUrl = await getVideoUrl(videoPath);
+
+        ffmpeg(videoUrl)
+            .ffprobe(async (err, metadata) => {
+                if (err) {
+                    console.error('Error probing video:', err);
+                    throw err;
+                }
+
+                const videoStream = metadata.streams.find((stream) => stream.codec_type === 'video');
+                if (videoStream) {
+                    if (metadata.format.duration && videoStream.width && videoStream.height && videoStream.codec_name) {
+                        video.length = Math.round(metadata.format.duration);
+                        video.originalWidth = videoStream.width;
+                        video.originalHeight = videoStream.height;
+                        video.codec = videoStream.codec_name;
+
+                        const md5Hash = await calculateMd5(videoUrl);
+                        const md5 = await getOrCreateMd5(md5Hash);
+
+                        video.md5Id = md5.id;
+                        video.status = 'processed-info';
+                        await video.save();
+                    } else {
+                        throw new Error('Cannot get video info');
+                    }
+                } else {
+                    throw new Error('No video stream found');
+                }
+            });
+    } catch (error) {
+        console.error('Error processing video info:', error);
+        throw error;
+    }
 };
-
 
 const processVideoConversion = async (job: Job) => {
     const { videoId } = job.data;
@@ -67,7 +97,6 @@ const processVideoConversion = async (job: Job) => {
     await video.save();
 };
 
-
 const processVideoThumbnail = async (job: Job) => {
     const { videoId } = job.data;
     const video = await Video.findByPk(videoId);
@@ -84,7 +113,34 @@ const processVideoThumbnail = async (job: Job) => {
     await video.save();
 };
 
+/**
+ * Calculate MD5 hash of a video
+ * @param videoUrl
+ */
+const calculateMd5 = (videoUrl: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        let md5Hash = '';
+        ffmpeg(videoUrl)
+            .outputOptions('-f', 'md5')
+            .on('end', () => {
+                resolve(md5Hash);
+            })
+            .on('error', (err) => {
+                console.error('Error calculating MD5 hash:', err);
+                reject(err);
+            })
+            .pipe(new PassThrough().on('data', (chunk) => {
+                md5Hash += chunk.toString().split('=')[1]?.trim();
+            }));
+    });
+};
+
+
+
+// Procesory front
 videoUploadQueue.process(processVideoUpload);
 videoProcessQueue.process(processVideoInfo);
 videoConversionQueue.process(processVideoConversion);
 videoThumbnailQueue.process(processVideoThumbnail);
+
+export { processVideoUpload, processVideoInfo, processVideoConversion, processVideoThumbnail };

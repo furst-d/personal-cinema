@@ -13,6 +13,9 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
+# Install ffmpeg
+RUN apk add --no-cache ffmpeg
+
 # Build the TypeScript code
 RUN npm run build
 
