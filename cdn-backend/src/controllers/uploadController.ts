@@ -7,7 +7,7 @@ export const uploadVideoRoute = async (req: Request, res: Response): Promise<voi
         const file = req.file;
 
         if (!file) {
-            res.status(400).json({ error: 'No file uploaded' });
+            res.status(400).json({ error:  'No file uploaded', tag: 'NO_FILE'});
             return;
         }
 
