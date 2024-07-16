@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import Video from '../entities/video';
 import Md5 from '../entities/md5';
 import minioClient from '../config/minio';
+import videoQueue from "../config/bull";
 
 export const uploadVideo = async (file: Express.Multer.File, params: string, project_id: string) => {
     const { originalname, buffer, mimetype, size } = file;
@@ -14,19 +15,18 @@ export const uploadVideo = async (file: Express.Multer.File, params: string, pro
     const videoId = uuidv4();
     const urlPath = `${videoId}/${hash}${extension}`;
 
-    try {
-        await minioClient.putObject('videos', urlPath, buffer, size, {
-            'Content-Type': mimetype,
-        });
-    } catch (error) {
-        console.error('Error uploading to Minio:', error);
-        throw new Error('Error uploading to storage server');
-    }
+    await videoQueue.add({
+        videoId,
+        buffer: buffer.toString('base64'),
+        urlPath,
+        mimetype,
+        size
+    });
 
     return await Video.create({
         id: videoId,
         title: originalname,
-        status: 'uploaded-original',
+        status: 'uploading',
         originalPath: urlPath,
         extension: extension,
         size: size,
