@@ -8,7 +8,7 @@ const minioClient = new Client({
     secretKey: process.env.MINIO_ROOT_PASSWORD as string
 });
 
-const bucketName = 'videos';
+export const bucketName = 'videos';
 const region = 'eu-central-1';
 
 const initMinio = async () => {

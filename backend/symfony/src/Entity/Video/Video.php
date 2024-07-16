@@ -37,7 +37,7 @@ class Video
     private string $extension;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $type = null;
+    private ?string $codec = null;
 
     #[ORM\Column(type: Types::BIGINT)]
     private string $size;
@@ -47,6 +47,9 @@ class Video
 
     #[ORM\Column(unique: true)]
     private string $cdnId;
+
+    #[ORM\Column(nullable: true)]
+    private ?string $path = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $originalWidth = null;
@@ -176,18 +179,18 @@ class Video
     /**
      * @return string|null
      */
-    public function getType(): ?string
+    public function getCodec(): ?string
     {
-        return $this->type;
+        return $this->codec;
     }
 
     /**
-     * @param string|null $type
+     * @param string|null $codec
      * @return void
      */
-    public function setType(?string $type): void
+    public function setCodec(?string $codec): void
     {
-        $this->type = $type;
+        $this->codec = $codec;
     }
 
     /**
@@ -239,6 +242,23 @@ class Video
     public function setCdnId(string $cdnId): void
     {
         $this->cdnId = $cdnId;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPath(): ?string
+    {
+        return $this->path;
+    }
+
+    /**
+     * @param string|null $path
+     * @return void
+     */
+    public function setPath(?string $path): void
+    {
+        $this->path = $path;
     }
 
     /**

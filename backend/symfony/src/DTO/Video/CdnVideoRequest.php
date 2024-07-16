@@ -21,7 +21,7 @@ class CdnVideoRequest extends AbstractRequest
     public string $status;
 
     #[Assert\Type('string')]
-    public ?string $type = null;
+    public ?string $codec = null;
 
     #[Assert\NotBlank]
     #[Assert\Type('string')]
@@ -33,6 +33,9 @@ class CdnVideoRequest extends AbstractRequest
 
     #[Assert\Type('integer')]
     public ?int $length = null;
+
+    #[Assert\Type('string')]
+    public ?string $path = null;
 
     #[Assert\Valid]
     public CdnVideoResolutionRequest $resolution;

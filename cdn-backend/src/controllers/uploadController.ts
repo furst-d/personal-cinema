@@ -7,7 +7,7 @@ export const uploadVideoRoute = async (req: Request, res: Response): Promise<voi
         const file = req.file;
 
         if (!file) {
-            res.status(400).json({ error: 'No file uploaded' });
+            res.status(400).json({ error:  'No file uploaded', tag: 'NO_FILE'});
             return;
         }
 
@@ -16,6 +16,11 @@ export const uploadVideoRoute = async (req: Request, res: Response): Promise<voi
 
         res.status(201).json({ message: 'Video uploaded successfully' });
     } catch (error) {
-        res.status(500).json({ error: (error as Error).message });
+        const err = error as any;
+        if (err.message === 'Only video files are allowed') {
+            res.status(400).json({ error: err.message });
+        } else {
+            res.status(500).json({ error: (error as Error).message });
+        }
     }
 };

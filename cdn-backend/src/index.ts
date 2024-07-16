@@ -7,6 +7,7 @@ import videoRoutes from './routes/videos';
 import projectRoutes from './routes/projects';
 import uploadRoutes from './routes/upload';
 import sequelize from './config/db';
+import './helpers/video/videoProcessor';
 
 const app = express();
 app.use(bodyParser.json());
