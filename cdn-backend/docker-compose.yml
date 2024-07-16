@@ -33,6 +33,11 @@ services:
     image: redis
     ports:
       - "6379:6379"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    volumes:
+      - ./scripts/init-redis.sh:/usr/local/bin/init-redis.sh
+    command: [ "sh", "/usr/local/bin/init-redis.sh" ]
     networks:
       - cdn-backend
 

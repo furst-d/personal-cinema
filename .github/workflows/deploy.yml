@@ -39,6 +39,7 @@ jobs:
           sed -i 's|minio_use_ssl|${{ secrets.MINIO_USE_SSL }}|' cdn-backend/.env
           sed -i 's|minio_root_user|${{ secrets.MINIO_ROOT_USER }}|' cdn-backend/.env
           sed -i 's|minio_root_password|${{ secrets.MINIO_ROOT_PASSWORD }}|' cdn-backend/.env
+          sed -i 's|redis_password|${{ secrets.REDIS_PASSWORD }}|' cdn-backend/.env
 
       - name: Create JWT key files
         run: |
