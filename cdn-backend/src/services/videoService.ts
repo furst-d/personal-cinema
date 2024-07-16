@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import Video from '../entities/video';
 import Md5 from '../entities/md5';
 import minioClient from '../config/minio';
-import videoQueue from "../config/bull";
+import { videoUploadQueue } from "../config/bull";
 
 export const uploadVideo = async (file: Express.Multer.File, params: string, project_id: string) => {
     const { originalname, buffer, mimetype, size } = file;
@@ -15,7 +15,7 @@ export const uploadVideo = async (file: Express.Multer.File, params: string, pro
     const videoId = uuidv4();
     const urlPath = `${videoId}/${hash}${extension}`;
 
-    await videoQueue.add({
+    await videoUploadQueue.add({
         videoId,
         buffer: buffer.toString('base64'),
         urlPath,
