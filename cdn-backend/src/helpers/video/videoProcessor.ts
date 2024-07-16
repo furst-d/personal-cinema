@@ -5,6 +5,7 @@ import { Job } from 'bull';
 import ffmpeg from 'fluent-ffmpeg';
 import { PassThrough } from 'stream';
 import { getOrCreateMd5, getVideoUrl } from '../../services/videoService';
+import {sendNotificationCallback} from "../../services/callbackService";
 
 const processVideoUpload = async (job: Job) => {
     const { videoId, buffer, urlPath, mimetype, size } = job.data;
@@ -63,11 +64,11 @@ const processVideoInfo = async (job: Job) => {
                         video.codec = videoStream.codec_name;
 
                         const md5Hash = await calculateMd5(videoUrl);
-                        const md5 = await getOrCreateMd5(md5Hash);
+                        video.md5 = await getOrCreateMd5(md5Hash);
 
-                        video.md5Id = md5.id;
                         video.status = 'processed-info';
                         await video.save();
+                        await sendNotificationCallback(video);
                     } else {
                         throw new Error('Cannot get video info');
                     }

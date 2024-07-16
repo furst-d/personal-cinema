@@ -115,10 +115,11 @@ class CdnSynchronizer
      */
     private function updateVideoDetails(Video $video, CdnVideoRequest $videoData): void
     {
-        $video->setType($videoData->type);
+        $video->setCodec($videoData->codec);
         $video->setExtension($videoData->extension);
         $video->setSize($videoData->size);
         $video->setLength($videoData->length);
+        $video->setPath($videoData->path);
         $this->updateVideoResolution($video, $videoData);
         $this->updateVideoMd5($video, $videoData);
     }

@@ -78,6 +78,7 @@ export const prepareVideoData = async (video: Video) => {
             width: video.originalWidth,
             height: video.originalHeight,
         },
+        path: video.hlsPath,
         md5: video.md5 ? video.md5.md5 : null,
         createdAt: video.createdAt,
         updatedAt: video.updatedAt,
@@ -95,6 +96,8 @@ export const getOrCreateMd5 = async (hash: string): Promise<Md5> => {
     if (!md5) {
         md5 = await Md5.create({ md5: hash });
     }
+
+    await md5.save();
 
     return md5;
 };

@@ -18,6 +18,9 @@ class MD5
     #[ORM\Column(length: 255, unique: true)]
     private string $md5;
 
+    #[ORM\Column]
+    private bool $isBlacklisted;
+
     /**
      * @var Collection<int, Video>
      */
@@ -30,6 +33,7 @@ class MD5
     public function __construct(string $md5)
     {
         $this->md5 = $md5;
+        $this->isBlacklisted = false;
         $this->videos = new ArrayCollection();
     }
 
@@ -55,5 +59,22 @@ class MD5
     public function getVideos(): Collection
     {
         return $this->videos;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBlacklisted(): bool
+    {
+        return $this->isBlacklisted;
+    }
+
+    /**
+     * @param bool $isBlacklisted
+     * @return void
+     */
+    public function setIsBlacklisted(bool $isBlacklisted): void
+    {
+        $this->isBlacklisted = $isBlacklisted;
     }
 }
