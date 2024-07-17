@@ -38,6 +38,15 @@ class CdnManager
     }
 
     /**
+     * @param Client $client
+     * @return void
+     */
+    public function setClient(Client $client): void
+    {
+        $this->client = $client;
+    }
+
+    /**
      * @param Video $video
      * @return string
      * @throws InternalException
