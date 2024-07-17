@@ -9,4 +9,5 @@ enum JwtUsage: int
     case USAGE_ACCOUNT_ACTIVATION = 3;
     case USAGE_PASSWORD_RESET = 4;
     case USAGE_UPLOAD = 5;
+    case USAGE_VIDEO_ACCESS = 6;
 }

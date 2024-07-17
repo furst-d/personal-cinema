@@ -353,4 +353,29 @@ class Video
         $this->isDeleted = true;
         $this->deletedAt = new DateTimeImmutable();
     }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'md5' => $this->md5?->getMd5(),
+            'folder' => $this->folder?->getId(),
+            'hash' => $this->hash,
+            'extension' => $this->extension,
+            'codec' => $this->codec,
+            'size' => (int) $this->size,
+            'length' => (int) $this->length,
+            'cdnId' => $this->cdnId,
+            'originalWidth' => $this->originalWidth,
+            'originalHeight' => $this->originalHeight,
+            'thumbsCount' => $this->thumbsCount,
+            'isDeleted' => $this->isDeleted,
+            'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
+            'deletedAt' => $this->deletedAt?->format('Y-m-d H:i:s'),
+        ];
+    }
 }

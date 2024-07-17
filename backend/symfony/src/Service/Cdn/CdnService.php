@@ -3,13 +3,16 @@
 namespace App\Service\Cdn;
 
 use App\DTO\Video\CdnVideoRequest;
+use App\Entity\Video\Video;
 use App\Exception\BadRequestException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Helper\Cdn\CdnHasher;
+use App\Helper\Cdn\CdnManager;
 use App\Helper\Cdn\CdnSynchronizer;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Log\LoggerInterface;
 
 class CdnService
@@ -45,6 +48,11 @@ class CdnService
     private CdnSynchronizer $cdnSynchronizer;
 
     /**
+     * @var CdnManager $cdnManager
+     */
+    private CdnManager $cdnManager;
+
+    /**
      * @var EntityManagerInterface $em
      */
     private EntityManagerInterface $em;
@@ -56,6 +64,7 @@ class CdnService
      * @param LoggerInterface $logger
      * @param CdnHasher $cdnHasher
      * @param CdnSynchronizer $cdnSynchronizer
+     * @param CdnManager $cdnManager
      * @param EntityManagerInterface $em
      */
     public function __construct(
@@ -65,6 +74,7 @@ class CdnService
         LoggerInterface $logger,
         CdnHasher $cdnHasher,
         CdnSynchronizer $cdnSynchronizer,
+        CdnManager $cdnManager,
         EntityManagerInterface $em
     )
     {
@@ -74,6 +84,7 @@ class CdnService
         $this->logger = $logger;
         $this->cdnHasher = $cdnHasher;
         $this->cdnSynchronizer = $cdnSynchronizer;
+        $this->cdnManager = $cdnManager;
         $this->em = $em;
     }
 
@@ -101,6 +112,17 @@ class CdnService
         } catch (Exception) {
             throw new InternalException("Failed to generate nonce.");
         }
+    }
+
+    /**
+     * @param Video $video
+     * @return string
+     * @throws InternalException
+     * @throws GuzzleException
+     */
+    public function getManifest(Video $video): string
+    {
+        return $this->cdnManager->getManifestContent($video);
     }
 
     /**
