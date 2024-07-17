@@ -5,6 +5,6 @@ import authMiddleware from '../middleware/auth';
 const router: Router = express.Router();
 
 router.get('/:id', authMiddleware, getVideoRoute);
-router.get('/:id/sign', authMiddleware, getVideoUrlRoute);
+router.get('/:id/file.m3u8', authMiddleware, getVideoUrlRoute);
 
 export default router;

@@ -6,6 +6,10 @@ import ffmpeg from 'fluent-ffmpeg';
 import { PassThrough } from 'stream';
 import { getOrCreateMd5, getVideoUrl } from '../../services/videoService';
 import {sendNotificationCallback} from "../../services/callbackService";
+import path from "path";
+import { mkdirSync } from 'fs';
+import * as fs from 'fs/promises';
+import crypto from 'crypto';
 
 const processVideoUpload = async (job: Job) => {
     const { videoId, buffer, urlPath, mimetype, size } = job.data;
@@ -90,12 +94,71 @@ const processVideoConversion = async (job: Job) => {
         throw new Error('Video not found');
     }
 
-    // Přidejte logiku pro konverzi videa do HLS formátu
-    // Příklad: Použití ffmpeg pro konverzi do HLS
+    const videoPath = video.originalPath;
+    const videoUrl = await getVideoUrl(videoPath);
 
-    // Aktualizujte video v databázi s novým HLS URL
-    // video.hlsPath = 'path/to/hls';
-    await video.save();
+    const hlsHash = crypto.createHash('md5').update(videoUrl).digest('hex');
+    const hlsDir = `${path.dirname(videoPath)}/hls/segments`;
+    const hlsManifest = `${path.dirname(videoPath)}/hls/${hlsHash}.m3u8`;
+
+    // Create the directory if it doesn't exist
+    mkdirSync(hlsDir, { recursive: true });
+
+    try {
+        await new Promise((resolve, reject) => {
+            ffmpeg(videoUrl)
+                .outputOptions([
+                    '-profile:v baseline', // HLS requires baseline profile
+                    '-level 3.0',
+                    '-start_number 0',
+                    '-hls_time 10', // Segment length in seconds
+                    '-hls_list_size 0',
+                    '-hls_segment_filename', `${hlsDir}/%03d.ts`,
+                    '-f hls'
+                ])
+                .output(hlsManifest)
+                .on('end', resolve)
+                .on('error', (err, stdout, stderr) => {
+                    console.error('Error: ' + err.message);
+                    console.error('ffmpeg stdout: ' + stdout);
+                    console.error('ffmpeg stderr: ' + stderr);
+                    reject(err);
+                })
+                .run();
+        });
+
+        // Read the manifest file and all segment files
+        const hlsBuffer = await fs.readFile(hlsManifest);
+        const segmentFiles = await fs.readdir(hlsDir);
+
+        // Upload manifest file
+        await minioClient.putObject(bucketName, `${path.dirname(videoPath)}/hls/${hlsHash}.m3u8`, hlsBuffer);
+
+        // Upload segment files
+        for (const segment of segmentFiles) {
+            if (segment.endsWith('.ts')) {
+                const segmentBuffer = await fs.readFile(path.join(hlsDir, segment));
+                await minioClient.putObject(bucketName, `${path.dirname(videoPath)}/hls/segments/${segment}`, segmentBuffer);
+            }
+        }
+
+        // Delete the local HLS files after upload
+        await fs.unlink(hlsManifest);
+        for (const segment of segmentFiles) {
+            if (segment.endsWith('.ts')) {
+                await fs.unlink(path.join(hlsDir, segment));
+            }
+        }
+
+        video.hlsPath = `${path.dirname(videoPath)}/hls/${hlsHash}.m3u8`;
+        video.status = 'converted';
+        await video.save();
+    } catch (error) {
+        console.error('Error converting video to HLS:', error);
+        video.status = 'conversion-error';
+        await video.save();
+        throw error;
+    }
 };
 
 const processVideoThumbnail = async (job: Job) => {

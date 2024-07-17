@@ -2,9 +2,11 @@
 
 namespace App\Service\Video;
 
+use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
 use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
+use App\Exception\NotFoundException;
 use App\Repository\Video\FolderRepository;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
@@ -49,6 +51,39 @@ class VideoService
     public function getVideoByCdnId(string $cdnId): ?Video
     {
         return $this->videoRepository->findOneBy(['cdnId' => $cdnId]);
+    }
+
+    /**
+     * @param Account $account
+     * @param int $id
+     * @return Video
+     * @throws NotFoundException
+     */
+    public function getAccountVideoById(Account $account, int $id): Video
+    {
+        $video = $this->videoRepository->findOneBy(['account' => $account, 'id' => $id]);
+
+        if (!$video) {
+            throw new NotFoundException('Video not found');
+        }
+
+        return $video;
+    }
+
+    /**
+     * @param int $videoId
+     * @return Video
+     * @throws NotFoundException
+     */
+    public function getVideoById(int $videoId): Video
+    {
+        $video = $this->videoRepository->find($videoId);
+
+        if (!$video) {
+            throw new NotFoundException('Video not found');
+        }
+
+        return $video;
     }
 
     /**
