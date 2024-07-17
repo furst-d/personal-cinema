@@ -1,33 +1,45 @@
-// components/VideoPlayer.tsx
-import React, { useEffect, useRef } from 'react';
-import videojs from 'video.js';
-import 'video.js/dist/video-js.css';
+import * as React from "react";
+import videojs from "video.js";
+import "video.js/dist/video-js.css";
 
-const VideoPlayer: React.FC<{ src: string }> = ({ src }) => {
-    const videoRef = useRef<HTMLVideoElement>(null);
+interface IVideoPlayerProps {
+    options: videojs.PlayerOptions;
+}
 
-    useEffect(() => {
-        if (videoRef.current) {
-            const player = videojs(videoRef.current, {
-                autoplay: true,
-                controls: true,
-                sources: [{
-                    src: src,
-                    type: 'application/x-mpegURL'
-                }]
-            });
-
-            return () => {
-                player.dispose();
-            };
+const initialOptions: videojs.PlayerOptions = {
+    controls: true,
+    fluid: true,
+    controlBar: {
+        volumePanel: {
+            inline: false
         }
-    }, [src]);
+    }
+};
 
-    return (
-        <div data-vjs-player>
-            <video ref={videoRef} className="video-js vjs-big-play-centered" />
-        </div>
-    );
+const VideoPlayer: React.FC<IVideoPlayerProps> = ({ options }) => {
+    const videoNode = React.useRef<HTMLVideoElement | null>(null);
+    const player = React.useRef<videojs.Player | null>(null);
+
+    React.useEffect(() => {
+        if (videoNode.current) {
+            player.current = videojs(videoNode.current!, {
+                ...initialOptions,
+                ...options
+            }).ready(function () {
+                console.log("Ready");
+            });
+        }
+
+        return () => {
+            if (player.current) {
+                if ("dispose" in player.current) {
+                    player.current.dispose();
+                }
+            }
+        };
+    }, [options]);
+
+    return <video ref={videoNode} className="video-js" style={{ width: "600px" }} />;
 };
 
 export default VideoPlayer;

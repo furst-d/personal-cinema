@@ -89,7 +89,7 @@ class VideoController extends BasePersonalController
 
             $videoData = $video->toArray();
             $backendUrl = $_ENV['BACKEND_URL'];
-            $videoData['url'] = "$backendUrl/private/video/url?token=$token";
+            $videoData['url'] = "$backendUrl/v1/private/videos/url?token=$token";
 
             return $this->re->withData($videoData);
         } catch (NotFoundException|InternalException $e) {
