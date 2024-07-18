@@ -101,3 +101,25 @@ export const getOrCreateMd5 = async (hash: string): Promise<Md5> => {
 
     return md5;
 };
+
+/**
+ * Get signed URLs for video thumbnails
+ * @param videoId
+ */
+export const getSignedThumbnails = async (videoId: string) => {
+    const video = await getVideo(videoId);
+
+    if (!video.thumbnailPath) {
+        throw new Error('Thumbnails not processed');
+    }
+
+    const thumbnailPath = `${videoId}/thumbs`;
+
+    const thumbnailUrls: { [key: number]: string } = {};
+    for (let i = 1; i <= 20; i++) {
+        const thumbnailFileName = `thumb_${i}.png`;
+        thumbnailUrls[i] =  await minioClient.presignedUrl('GET', bucketName, `${thumbnailPath}/${thumbnailFileName}`, 24 * 60 * 60); // 24 hours
+    }
+
+    return thumbnailUrls;
+};

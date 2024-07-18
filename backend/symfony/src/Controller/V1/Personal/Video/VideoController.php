@@ -4,6 +4,7 @@ namespace App\Controller\V1\Personal\Video;
 
 use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Video\UploadRequest;
+use App\Exception\ApiException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Helper\Jwt\JwtUsage;
@@ -71,7 +72,7 @@ class VideoController extends BasePersonalController
             ]);
 
             return $this->re->withData($data);
-        } catch (InternalException $e) {
+        } catch (ApiException $e) {
             return $this->re->withException($e);
         }
     }
@@ -92,7 +93,7 @@ class VideoController extends BasePersonalController
             $videoData['url'] = "$backendUrl/v1/private/videos/url?token=$token";
 
             return $this->re->withData($videoData);
-        } catch (NotFoundException|InternalException $e) {
+        } catch (ApiException $e) {
             return $this->re->withException($e);
         }
     }

@@ -6,6 +6,7 @@ use App\DTO\Video\CdnVideoRequest;
 use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
 use App\Exception\BadRequestException;
+use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
 use App\Helper\Jwt\JwtUsage;
@@ -37,17 +38,30 @@ class CdnSynchronizer
     private EntityManagerInterface $em;
 
     /**
+     * @var CdnManager $cdnManager
+     */
+    private CdnManager $cdnManager;
+
+    /**
      * @param VideoService $videoService
      * @param JwtService $jwtService
      * @param AccountService $accountService
      * @param EntityManagerInterface $em
+     * @param CdnManager $cdnManager
      */
-    public function __construct(VideoService $videoService, JwtService $jwtService, AccountService $accountService, EntityManagerInterface $em)
+    public function __construct(
+        VideoService $videoService,
+        JwtService $jwtService,
+        AccountService $accountService,
+        EntityManagerInterface $em,
+        CdnManager $cdnManager
+    )
     {
         $this->videoService = $videoService;
         $this->jwtService = $jwtService;
         $this->accountService = $accountService;
         $this->em = $em;
+        $this->cdnManager = $cdnManager;
     }
 
 
@@ -62,6 +76,25 @@ class CdnSynchronizer
         try {
             $video = $this->findOrCreateVideo($videoData);
             $this->updateVideoDetails($video, $videoData);
+            return $video;
+        } catch (UnauthorizedException) {
+            throw new BadRequestException("Cannot decode video token");
+        }
+    }
+
+    /**
+     * @param CdnVideoRequest $videoData
+     * @return Video
+     * @throws BadRequestException
+     * @throws InternalException
+     * @throws NotFoundException
+     */
+    public function synchronizeThumbnail(CdnVideoRequest $videoData): Video
+    {
+        try {
+            $video = $this->findOrCreateVideo($videoData);
+            $thumbnailContent = $this->cdnManager->getThumbnailContent($video, 1);
+            $video->setThumbnail(base64_encode($thumbnailContent));
             return $video;
         } catch (UnauthorizedException) {
             throw new BadRequestException("Cannot decode video token");
@@ -164,4 +197,5 @@ class CdnSynchronizer
             $video->setMd5($md5);
         }
     }
+
 }

@@ -40,6 +40,12 @@ class Video extends Model {
         type: DataType.STRING,
         allowNull: true,
     })
+    thumbnailPath!: string;
+
+    @Column({
+        type: DataType.STRING,
+        allowNull: true,
+    })
     codec!: string;
 
     @Column({

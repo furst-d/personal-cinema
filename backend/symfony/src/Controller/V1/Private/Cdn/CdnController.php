@@ -3,10 +3,9 @@
 namespace App\Controller\V1\Private\Cdn;
 
 use App\Controller\V1\Private\BasePrivateController;
-use App\DTO\Video\CdnRequest;
-use App\Exception\BadRequestException;
-use App\Exception\NotFoundException;
-use App\Exception\UnauthorizedException;
+use App\DTO\Video\CdnNotificationRequest;
+use App\DTO\Video\CdnThumbnailRequest;
+use App\Exception\ApiException;
 use App\Service\Auth\AuthService;
 use App\Service\Cdn\CdnService;
 use App\Service\Locator\BaseControllerLocator;
@@ -38,24 +37,25 @@ class CdnController extends BasePrivateController
     }
 
     #[Route('/notification', name: 'cdn_notification', methods: ['POST'])]
-    public function actionNotification(Request $request, CdnRequest $cdnRequest): JsonResponse
+    public function actionNotification(Request $request, CdnNotificationRequest $notificationRequest): JsonResponse
     {
         try {
             $this->authService->authCdn($request);
-            $this->cdnService->synchronizeVideo($cdnRequest->video);
+            $this->cdnService->synchronizeVideo($notificationRequest->video);
             return $this->re->withMessage('Notification processed.');
-        } catch (UnauthorizedException|BadRequestException|NotFoundException $e) {
+        } catch (ApiException $e) {
             return $this->re->withException($e);
         }
     }
 
     #[Route('/thumb', name: 'cdn_thumb', methods: ['POST'])]
-    public function actionThumb(Request $request): JsonResponse
+    public function actionThumb(Request $request, CdnThumbnailRequest $thumbnailRequest): JsonResponse
     {
         try {
             $this->authService->authCdn($request);
+            $this->cdnService->synchronizeThumbnail($thumbnailRequest->video, $thumbnailRequest->thumbs);
             return $this->re->withMessage('Thumb processed.');
-        } catch (UnauthorizedException $e) {
+        } catch (ApiException $e) {
             return $this->re->withException($e);
         }
     }

@@ -1,17 +1,27 @@
 import { Request, Response } from 'express';
-import { getVideo } from "../services/videoService";
+import {getSignedThumbnails, getVideo, prepareVideoData} from "../services/videoService";
 import Video from "../entities/video";
 import minioClient, { bucketName } from "../config/minio";
 import path from "path";
+import {StreamUtils} from "../helpers/video/StreamUtils";
 
 export const getVideoRoute = async (req: Request, res: Response): Promise<void> => {
     try {
         const video = await getVideo(req.params.id);
-        res.status(200).json(video);
+        res.status(200).json(await prepareVideoData(video));
     } catch (error) {
         res.status(500).json({ error: (error as Error).message });
     }
 };
+
+export const getThumbsRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const thumbs = await getSignedThumbnails(req.params.id);
+        res.status(200).json({ thumbs });
+    } catch (error) {
+        res.status(500).json({ error: (error as Error).message });
+    }
+}
 
 export const getVideoUrlRoute = async (req: Request, res: Response): Promise<void> => {
     const videoId = req.params.id;
@@ -28,23 +38,22 @@ export const getVideoUrlRoute = async (req: Request, res: Response): Promise<voi
     }
 
     try {
-        // Načíst manifestový soubor z Minio
+        // Load manifest file from Minio
         const manifestStream = await minioClient.getObject(bucketName, video.hlsPath);
-        const manifestBuffer = await streamToBuffer(manifestStream);
+        const manifestBuffer = await StreamUtils.streamToBuffer(manifestStream);
         const manifestContent = manifestBuffer.toString('utf-8');
 
-        // Načíst seznam segmentů
+        // Load segment files from manifest
         const segmentFiles = manifestContent.match(/(\d+\.ts)/g) || [];
 
-        // Generovat podepsané URL pro segmenty
+        // Generate signed URLs for segment files
         const signedUrls: Record<string, string> = {};
         for (const segment of segmentFiles) {
             const segmentPath = `${path.dirname(video.hlsPath)}/segments/${segment}`;
-            const signedUrl = await minioClient.presignedUrl('GET', bucketName, segmentPath, 24 * 60 * 60);
-            signedUrls[segment] = signedUrl;
+            signedUrls[segment] =  await minioClient.presignedUrl('GET', bucketName, segmentPath, 24 * 60 * 60);
         }
 
-        // Aktualizovat manifestový soubor s podepsanými URL
+        // Update manifest file with signed URLs
         let updatedContent = manifestContent;
         for (const [segment, signedUrl] of Object.entries(signedUrls)) {
             updatedContent = updatedContent.replace(new RegExp(segment, 'g'), signedUrl);
@@ -58,12 +67,35 @@ export const getVideoUrlRoute = async (req: Request, res: Response): Promise<voi
     }
 };
 
-const streamToBuffer = async (stream: NodeJS.ReadableStream): Promise<Buffer> => {
-    return new Promise((resolve, reject) => {
-        const chunks: Buffer[] = [];
-        stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-        stream.on('end', () => resolve(Buffer.concat(chunks)));
-        stream.on('error', (err) => reject(err));
-    });
-};
+export const getThumbnailRoute = async (req: Request, res: Response): Promise<void> => {
+    const videoId = req.params.id;
+    const thumbNumber = req.params.thumbNumber;
 
+    try {
+        const video = await getVideo(videoId);
+
+        if (!video || !video.thumbnailPath) {
+            res.status(404).json({ error: "Thumbnail not found" });
+            return;
+        }
+
+        const thumbnailPath = `${video.thumbnailPath}/thumb_${thumbNumber}.png`;
+
+        // Fetch the thumbnail from Minio
+        const objectStream = await minioClient.getObject(bucketName, thumbnailPath);
+
+        // Convert stream to buffer
+        const chunks = [];
+        for await (const chunk of objectStream) {
+            chunks.push(chunk);
+        }
+        const buffer = Buffer.concat(chunks);
+
+        // Set the appropriate content type
+        res.set('Content-Type', 'image/png');
+        res.send(buffer);
+    } catch (error) {
+        console.error('Error fetching thumbnail:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};

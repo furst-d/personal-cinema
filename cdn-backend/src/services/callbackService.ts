@@ -3,7 +3,7 @@ import Video from "../entities/video";
 import Project from "../entities/project";
 import Callback from "../entities/callback";
 import { callbackLogger } from "../config/logger"
-import { prepareVideoData } from "./videoService";
+import {getSignedThumbnails, prepareVideoData} from "./videoService";
 
 /**
  * Send a callback to a given URL with the given data
@@ -61,5 +61,26 @@ export const sendNotificationCallback = async (video: Video): Promise<void> => {
     try {
         const response = await sendCallback(callback.notificationUrl, { video: data });
         callbackLogger.info(`Sent notification callback for video ${video.id}, response: ${response.status}, ${JSON.stringify(response.data)}`);
+    } catch (error) {}
+}
+
+/**
+ * Send a thumbnail callback for a given video
+ * @param video
+ */
+export const sendThumbnailCallback = async (video: Video): Promise<void> => {
+    const callback = await getCallback(video.projectId);
+
+    if (!callback) {
+        callbackLogger.error(`No callback found for project ${video.projectId}`);
+        return;
+    }
+
+    const videoData = await prepareVideoData(video);
+    const thumbs = await getSignedThumbnails(video.id);
+
+    try {
+        const response = await sendCallback(callback.thumbUrl, { video: videoData, thumbs: thumbs });
+        callbackLogger.info(`Sent thumbnail callback for video ${video.id}, response: ${response.status}, ${JSON.stringify(response.data)}`);
     } catch (error) {}
 }

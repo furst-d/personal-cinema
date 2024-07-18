@@ -1,18 +1,21 @@
+// src/processors/videoProcessors.ts
+
 import { videoConversionQueue, videoProcessQueue, videoThumbnailQueue, videoUploadQueue } from '../../config/bull';
 import minioClient, { bucketName } from '../../config/minio';
 import Video from '../../entities/video';
 import { Job } from 'bull';
 import ffmpeg from 'fluent-ffmpeg';
-import { PassThrough } from 'stream';
 import { getOrCreateMd5, getVideoUrl } from '../../services/videoService';
-import {sendNotificationCallback} from "../../services/callbackService";
+import {sendNotificationCallback, sendThumbnailCallback} from "../../services/callbackService";
 import path from "path";
-import { mkdirSync } from 'fs';
 import * as fs from 'fs/promises';
 import crypto from 'crypto';
+import {mkdirSync} from "fs";
+import {VideoProcessingUtils} from "./VideoProcessingUtils";
 
 const processVideoUpload = async (job: Job) => {
     const { videoId, buffer, urlPath, mimetype, size } = job.data;
+    VideoProcessingUtils.ensureTempDir(videoId);
 
     try {
         await minioClient.putObject(bucketName, urlPath, Buffer.from(buffer, 'base64'), size, {
@@ -62,13 +65,14 @@ const processVideoInfo = async (job: Job) => {
                 const videoStream = metadata.streams.find((stream) => stream.codec_type === 'video');
                 if (videoStream) {
                     if (metadata.format.duration && videoStream.width && videoStream.height && videoStream.codec_name) {
+                        const md5Hash = await VideoProcessingUtils.calculateMd5(videoUrl);
+                        const md5 = await getOrCreateMd5(md5Hash);
+                        video.md5Id = md5.id;
+
                         video.length = Math.round(metadata.format.duration);
                         video.originalWidth = videoStream.width;
                         video.originalHeight = videoStream.height;
                         video.codec = videoStream.codec_name;
-
-                        const md5Hash = await calculateMd5(videoUrl);
-                        video.md5 = await getOrCreateMd5(md5Hash);
 
                         video.status = 'processed-info';
                         await video.save();
@@ -89,6 +93,7 @@ const processVideoInfo = async (job: Job) => {
 const processVideoConversion = async (job: Job) => {
     const { videoId } = job.data;
     const video = await Video.findByPk(videoId);
+    const videoTempDir = VideoProcessingUtils.ensureTempDir(videoId);
 
     if (!video) {
         throw new Error('Video not found');
@@ -98,8 +103,8 @@ const processVideoConversion = async (job: Job) => {
     const videoUrl = await getVideoUrl(videoPath);
 
     const hlsHash = crypto.createHash('md5').update(videoUrl).digest('hex');
-    const hlsDir = `${path.dirname(videoPath)}/hls/segments`;
-    const hlsManifest = `${path.dirname(videoPath)}/hls/${hlsHash}.m3u8`;
+    const hlsDir = `${videoTempDir}/hls/segments`;
+    const hlsManifest = `${videoTempDir}/hls/${hlsHash}.m3u8`;
 
     // Create the directory if it doesn't exist
     mkdirSync(hlsDir, { recursive: true });
@@ -150,9 +155,13 @@ const processVideoConversion = async (job: Job) => {
             }
         }
 
+        // Clean up HLS temp directory
+        await VideoProcessingUtils.cleanUpTempSubDir(videoId, 'hls');
+
         video.hlsPath = `${path.dirname(videoPath)}/hls/${hlsHash}.m3u8`;
         video.status = 'converted';
         await video.save();
+        await sendNotificationCallback(video);
     } catch (error) {
         console.error('Error converting video to HLS:', error);
         video.status = 'conversion-error';
@@ -164,47 +173,77 @@ const processVideoConversion = async (job: Job) => {
 const processVideoThumbnail = async (job: Job) => {
     const { videoId } = job.data;
     const video = await Video.findByPk(videoId);
+    const videoTempDir = VideoProcessingUtils.ensureTempDir(videoId);
 
     if (!video) {
         throw new Error('Video not found');
     }
 
-    // Přidejte logiku pro generování náhledových obrázků
-    // Příklad: Použití ffmpeg pro generování náhledových obrázků
+    const videoPath = video.originalPath;
+    const videoUrl = await getVideoUrl(videoPath);
 
-    // Aktualizujte video v databázi s novými informacemi
-    // video.thumbnailPath = 'path/to/thumbnail';
-    await video.save();
+    const thumbnailDir = `${videoTempDir}/thumbs`;
+
+    // Create the directory if it doesn't exist
+    mkdirSync(thumbnailDir, { recursive: true });
+
+    try {
+        await new Promise((resolve, reject) => {
+            ffmpeg(videoUrl)
+                .on('filenames', function (filenames) {
+                    console.log('Will generate ' + filenames.join(', '));
+                })
+                .on('end', function () {
+                    console.log('Screenshots taken');
+                    resolve(true);
+                })
+                .on('error', function (err) {
+                    console.error('Error taking screenshots:', err.message);
+                    reject(err);
+                })
+                .screenshots({
+                    count: 20,
+                    folder: thumbnailDir,
+                    filename: 'thumb.png'
+                });
+        });
+
+        // Read the thumbnail files
+        const thumbnailFiles = await fs.readdir(thumbnailDir);
+
+        // Upload thumbnail files
+        for (const thumbnail of thumbnailFiles) {
+            const thumbnailPath = path.join(thumbnailDir, thumbnail);
+            const thumbnailBuffer = await fs.readFile(thumbnailPath);
+            const stats = await fs.stat(thumbnailPath);
+            const size = stats.size;
+
+            await minioClient.putObject(bucketName, `${path.dirname(videoPath)}/thumbs/${thumbnail}`, thumbnailBuffer, size, {
+                'Content-Type': 'image/png'
+            });
+        }
+
+        // Delete the local thumbnail files after upload
+        for (const thumbnail of thumbnailFiles) {
+            await fs.unlink(path.join(thumbnailDir, thumbnail));
+        }
+
+        // Clean up thumbnails temp directory
+        await VideoProcessingUtils.cleanUpTempSubDir(videoId, 'thumbs');
+
+        video.thumbnailPath = `${videoId}/thumbs`;
+        video.status = 'thumbnails-generated';
+        await video.save();
+        await sendThumbnailCallback(video);
+    } catch (error) {
+        console.error('Error generating thumbnails:', error);
+        video.status = 'thumbnail-error';
+        await video.save();
+        throw error;
+    }
 };
 
-/**
- * Calculate MD5 hash of a video
- * @param videoUrl
- */
-const calculateMd5 = (videoUrl: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        let md5Hash = '';
-        ffmpeg(videoUrl)
-            .outputOptions('-f', 'md5')
-            .on('end', () => {
-                resolve(md5Hash);
-            })
-            .on('error', (err) => {
-                console.error('Error calculating MD5 hash:', err);
-                reject(err);
-            })
-            .pipe(new PassThrough().on('data', (chunk) => {
-                md5Hash += chunk.toString().split('=')[1]?.trim();
-            }));
-    });
-};
-
-
-
-// Procesory front
 videoUploadQueue.process(processVideoUpload);
 videoProcessQueue.process(processVideoInfo);
 videoConversionQueue.process(processVideoConversion);
 videoThumbnailQueue.process(processVideoThumbnail);
-
-export { processVideoUpload, processVideoInfo, processVideoConversion, processVideoThumbnail };
