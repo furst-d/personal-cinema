@@ -57,8 +57,8 @@ class Video
     #[ORM\Column(nullable: true)]
     private ?int $originalHeight = null;
 
-    #[ORM\Column]
-    private int $thumbsCount;
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $thumbnail = null;
 
     #[ORM\Column]
     private bool $isDeleted;
@@ -67,7 +67,7 @@ class Video
     private DateTimeImmutable $createdAt;
 
     #[ORM\Column(nullable: true)]
-    private ?DateTimeImmutable $deletedAt;
+    private ?DateTimeImmutable $deletedAt = null;
 
     /**
      * @param string $name
@@ -78,10 +78,8 @@ class Video
         $this->name = $name;
         $this->account = $account;
         $this->hash = uniqid();
-        $this->thumbsCount = 0;
         $this->isDeleted = false;
         $this->createdAt = new DateTimeImmutable();
-        $this->deletedAt = null;
     }
 
     /**
@@ -296,20 +294,20 @@ class Video
     }
 
     /**
-     * @return int
+     * @return string|null
      */
-    public function getThumbsCount(): int
+    public function getThumbnail(): ?string
     {
-        return $this->thumbsCount;
+        return $this->thumbnail;
     }
 
     /**
-     * @param int $thumbsCount
+     * @param string|null $thumbnail
      * @return void
      */
-    public function setThumbsCount(int $thumbsCount): void
+    public function setThumbnail(?string $thumbnail): void
     {
-        $this->thumbsCount = $thumbsCount;
+        $this->thumbnail = $thumbnail;
     }
 
     /**
@@ -372,7 +370,7 @@ class Video
             'cdnId' => $this->cdnId,
             'originalWidth' => $this->originalWidth,
             'originalHeight' => $this->originalHeight,
-            'thumbsCount' => $this->thumbsCount,
+            'thumbnail' => $this->thumbnail,
             'isDeleted' => $this->isDeleted,
             'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
             'deletedAt' => $this->deletedAt?->format('Y-m-d H:i:s'),

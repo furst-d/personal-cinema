@@ -5,7 +5,7 @@ namespace App\DTO\Video;
 use App\DTO\AbstractRequest;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class CdnRequest extends AbstractRequest
+class CdnNotificationRequest extends AbstractRequest
 {
     #[Assert\NotBlank]
     #[Assert\Valid]

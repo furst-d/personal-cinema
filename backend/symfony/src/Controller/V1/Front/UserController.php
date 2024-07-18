@@ -6,11 +6,7 @@ use App\Controller\ApiController;
 use App\DTO\Account\LoginRequest;
 use App\DTO\Account\RegisterRequest;
 use App\DTO\Account\TokenRequest;
-use App\Exception\BadGatewayException;
-use App\Exception\BadRequestException;
-use App\Exception\ConflictException;
-use App\Exception\InternalException;
-use App\Exception\NotFoundException;
+use App\Exception\ApiException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
@@ -77,7 +73,7 @@ class UserController extends ApiController
                 'User registered successfully. Please check your email to activate your account.',
                 Response::HTTP_CREATED
             );
-        } catch (ConflictException|InternalException|NotFoundException|BadGatewayException $e) {
+        } catch (ApiException $e) {
             return $this->re->withException($e);
         }
     }
@@ -99,7 +95,7 @@ class UserController extends ApiController
                 'user' => $this->serialize($user)
             ]);
 
-        } catch (BadRequestException|InternalException $e) {
+        } catch (ApiException $e) {
             return $this->re->withException($e);
         }
     }
@@ -113,7 +109,7 @@ class UserController extends ApiController
                     'access_token' =>  $this->jwtService->refreshToken($tokenRequest->token)
                 ],
             ]);
-        } catch (BadRequestException|InternalException $e) {
+        } catch (ApiException $e) {
             return $this->re->withException($e);
         }
     }

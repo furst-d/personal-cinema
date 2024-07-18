@@ -118,7 +118,6 @@ class CdnService
      * @param Video $video
      * @return string
      * @throws InternalException
-     * @throws GuzzleException
      */
     public function getManifest(Video $video): string
     {
@@ -141,6 +140,31 @@ class CdnService
             $this->em->flush();
         } catch (BadRequestException|NotFoundException $e) {
             $this->logger->error("Error synchronizing video.", [
+                "message" => $e->getMessage(),
+                "cdnId" => $videoData->id
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * @param CdnVideoRequest $videoData
+     * @param array $thumbs
+     * @return void
+     * @throws BadRequestException
+     * @throws NotFoundException
+     * @throws InternalException
+     */
+    public function synchronizeThumbnail(CdnVideoRequest $videoData, array $thumbs): void
+    {
+        try {
+            $this->cdnSynchronizer->synchronizeThumbnail($videoData, $thumbs);
+            $this->logger->info("Synchronized thumbnail.", [
+                "cdnId" => $videoData->id
+            ]);
+            $this->em->flush();
+        } catch (BadRequestException|NotFoundException $e) {
+            $this->logger->error("Error synchronizing thumb.", [
                 "message" => $e->getMessage(),
                 "cdnId" => $videoData->id
             ]);

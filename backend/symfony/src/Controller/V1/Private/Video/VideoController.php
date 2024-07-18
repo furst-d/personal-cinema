@@ -3,14 +3,10 @@
 namespace App\Controller\V1\Private\Video;
 
 use App\Controller\V1\Private\BasePrivateController;
-use App\Exception\InternalException;
-use App\Exception\NotFoundException;
-use App\Exception\UnauthorizedException;
+use App\Exception\ApiException;
 use App\Service\Auth\AuthService;
 use App\Service\Cdn\CdnService;
 use App\Service\Locator\BaseControllerLocator;
-use GuzzleHttp\Exception\GuzzleException;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -46,7 +42,7 @@ class VideoController extends BasePrivateController
             $manifestContent = $this->cdnService->getManifest($video);
 
             return new Response($manifestContent, 200, ['Content-Type' => 'application/vnd.apple.mpegurl']);
-        } catch (UnauthorizedException|NotFoundException|InternalException|GuzzleException $e) {
+        } catch (ApiException $e) {
             return $this->re->withException($e);
         }
     }

@@ -50,7 +50,6 @@ class CdnManager
      * @param Video $video
      * @return string
      * @throws InternalException
-     * @throws GuzzleException
      */
     public function getManifestContent(Video $video): string
     {
@@ -71,7 +70,37 @@ class CdnManager
             }
 
             return $body;
-        } catch (RequestException $e) {
+        } catch (RequestException|GuzzleException $e) {
+            throw new InternalException('Error communicating with CDN: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * @param Video $video
+     * @param int $thumbNumber
+     * @return string
+     * @throws InternalException
+     */
+    public function getThumbnailContent(Video $video, int $thumbNumber): string
+    {
+        try {
+            $response = $this->client->get("{$this->cdnUrl}/videos/{$video->getCdnId()}/thumbs/{$thumbNumber}", [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->cdnSecretKey,
+                ],
+            ]);
+
+            if ($response->getStatusCode() !== 200) {
+                throw new InternalException('Error retrieving thumbnail from CDN');
+            }
+
+            $body = $response->getBody()->getContents();
+            if ($response->getStatusCode() !== 200 || empty($body)) {
+                throw new InternalException('Invalid response from CDN');
+            }
+
+            return $body;
+        } catch (RequestException|GuzzleException $e) {
             throw new InternalException('Error communicating with CDN: ' . $e->getMessage());
         }
     }

@@ -5,11 +5,7 @@ namespace App\Controller\V1\Front;
 use App\Controller\ApiController;
 use App\DTO\Account\EmailRequest;
 use App\DTO\Account\PasswordResetRequest;
-use App\Exception\BadGatewayException;
-use App\Exception\BadRequestException;
-use App\Exception\InternalException;
-use App\Exception\NotFoundException;
-use App\Exception\UnauthorizedException;
+use App\Exception\ApiException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
@@ -67,7 +63,7 @@ class PasswordResetController extends ApiController
             $this->accountService->changePassword($account, $passwordResetRequest->password);
 
             return $this->re->withMessage('Password was successfully changed.');
-        } catch (UnauthorizedException|NotFoundException $e) {
+        } catch (ApiException $e) {
             return $this->re->withException($e);
         }
     }
@@ -88,7 +84,7 @@ class PasswordResetController extends ApiController
             );
 
             return $this->re->withMessage('Email for password change was sent successfully.');
-        } catch (NotFoundException|BadGatewayException|InternalException $e) {
+        } catch (ApiException $e) {
             return $this->re->withException($e);
         }
     }
