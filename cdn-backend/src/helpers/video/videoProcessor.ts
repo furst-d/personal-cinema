@@ -76,7 +76,7 @@ const processVideoInfo = async (job: Job) => {
 
                         video.status = 'processed-info';
                         await video.save();
-                        await sendNotificationCallback(video);
+                        await sendNotificationCallback(video.id);
                     } else {
                         throw new Error('Cannot get video info');
                     }
@@ -161,7 +161,7 @@ const processVideoConversion = async (job: Job) => {
         video.hlsPath = `${path.dirname(videoPath)}/hls/${hlsHash}.m3u8`;
         video.status = 'converted';
         await video.save();
-        await sendNotificationCallback(video);
+        await sendNotificationCallback(video.id);
     } catch (error) {
         console.error('Error converting video to HLS:', error);
         video.status = 'conversion-error';
@@ -234,7 +234,7 @@ const processVideoThumbnail = async (job: Job) => {
         video.thumbnailPath = `${videoId}/thumbs`;
         video.status = 'thumbnails-generated';
         await video.save();
-        await sendThumbnailCallback(video);
+        await sendThumbnailCallback(video.id);
     } catch (error) {
         console.error('Error generating thumbnails:', error);
         video.status = 'thumbnail-error';

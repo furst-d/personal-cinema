@@ -1,9 +1,8 @@
 import axios, { AxiosResponse } from 'axios';
-import Video from "../entities/video";
 import Project from "../entities/project";
 import Callback from "../entities/callback";
 import { callbackLogger } from "../config/logger"
-import {getSignedThumbnails, prepareVideoData} from "./videoService";
+import {getSignedThumbnails, getVideo, prepareVideoData} from "./videoService";
 
 /**
  * Send a callback to a given URL with the given data
@@ -46,9 +45,11 @@ const getCallback = async (projectId: string): Promise<Callback | null> => {
 
 /**
  * Send a notification callback for a given video
- * @param video
+ * @param videoId
  */
-export const sendNotificationCallback = async (video: Video): Promise<void> => {
+export const sendNotificationCallback = async (videoId: string): Promise<void> => {
+    const video = await getVideo(videoId);
+
     const callback = await getCallback(video.projectId);
 
     if (!callback) {
@@ -66,9 +67,11 @@ export const sendNotificationCallback = async (video: Video): Promise<void> => {
 
 /**
  * Send a thumbnail callback for a given video
- * @param video
+ * @param videoId
  */
-export const sendThumbnailCallback = async (video: Video): Promise<void> => {
+export const sendThumbnailCallback = async (videoId: string): Promise<void> => {
+    const video = await getVideo(videoId);
+
     const callback = await getCallback(video.projectId);
 
     if (!callback) {
