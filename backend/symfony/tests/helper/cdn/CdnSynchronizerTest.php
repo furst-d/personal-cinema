@@ -8,6 +8,7 @@ use App\Entity\Account\Account;
 use App\Entity\Video\Video;
 use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
+use App\Helper\Cdn\CdnManager;
 use App\Helper\Cdn\CdnSynchronizer;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
@@ -22,6 +23,7 @@ class CdnSynchronizerTest extends TestCase
     private $mockJwtService;
     private $mockAccountService;
     private $mockEntityManager;
+    private $cdnManager;
 
     protected function setUp(): void
     {
@@ -29,12 +31,14 @@ class CdnSynchronizerTest extends TestCase
         $this->mockJwtService = $this->createMock(JwtService::class);
         $this->mockAccountService = $this->createMock(AccountService::class);
         $this->mockEntityManager = $this->createMock(EntityManagerInterface::class);
+        $this->cdnManager = $this->createMock(CdnManager::class);
 
         $this->cdnSynchronizer = new CdnSynchronizer(
             $this->mockVideoService,
             $this->mockJwtService,
             $this->mockAccountService,
-            $this->mockEntityManager
+            $this->mockEntityManager,
+            $this->cdnManager
         );
     }
 
