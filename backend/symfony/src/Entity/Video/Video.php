@@ -7,6 +7,7 @@ use App\Repository\Video\VideoRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: VideoRepository::class)]
 class Video
@@ -14,9 +15,11 @@ class Video
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['video:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['video:read'])]
     private string $name;
 
     #[ORM\ManyToOne(inversedBy: 'videos')]
@@ -25,45 +28,57 @@ class Video
 
     #[ORM\ManyToOne(inversedBy: 'videos')]
     #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['video:read'])]
     private ?MD5 $md5;
 
     #[ORM\ManyToOne(inversedBy: 'videos')]
+    #[Groups(['video:read'])]
     private ?Folder $folder = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Groups(['video:read'])]
     private string $hash;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['video:read'])]
     private string $extension;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['video:read'])]
     private ?string $codec = null;
 
     #[ORM\Column(type: Types::BIGINT)]
+    #[Groups(['video:read'])]
     private string $size;
 
     #[ORM\Column(type: Types::BIGINT, nullable: true)]
+    #[Groups(['video:read'])]
     private ?string $length = null;
 
     #[ORM\Column(unique: true)]
+    #[Groups(['video:read'])]
     private string $cdnId;
 
     #[ORM\Column(nullable: true)]
     private ?string $path = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['video:read'])]
     private ?int $originalWidth = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['video:read'])]
     private ?int $originalHeight = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['video:read'])]
     private ?string $thumbnail = null;
 
     #[ORM\Column]
     private bool $isDeleted;
 
     #[ORM\Column]
+    #[Groups(['video:read'])]
     private DateTimeImmutable $createdAt;
 
     #[ORM\Column(nullable: true)]
@@ -350,30 +365,5 @@ class Video
     {
         $this->isDeleted = true;
         $this->deletedAt = new DateTimeImmutable();
-    }
-
-    /**
-     * @return array
-     */
-    public function toArray(): array
-    {
-        return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'md5' => $this->md5?->getMd5(),
-            'folder' => $this->folder?->getId(),
-            'hash' => $this->hash,
-            'extension' => $this->extension,
-            'codec' => $this->codec,
-            'size' => (int) $this->size,
-            'length' => (int) $this->length,
-            'cdnId' => $this->cdnId,
-            'originalWidth' => $this->originalWidth,
-            'originalHeight' => $this->originalHeight,
-            'thumbnail' => $this->thumbnail,
-            'isDeleted' => $this->isDeleted,
-            'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
-            'deletedAt' => $this->deletedAt?->format('Y-m-d H:i:s'),
-        ];
     }
 }

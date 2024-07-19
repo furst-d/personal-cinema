@@ -3,9 +3,11 @@
 namespace App\Service\Video;
 
 use App\Entity\Account\Account;
+use App\Entity\Video\Folder;
 use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
 use App\Exception\NotFoundException;
+use App\Helper\Paginator\PaginatorResult;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 
@@ -83,5 +85,17 @@ class VideoService
     public function getMd5ByHash(string $hash): ?MD5
     {
         return $this->md5Repository->findOneBy(['md5' => $hash]);
+    }
+
+    /**
+     * @param Account $account
+     * @param Folder|null $folder
+     * @param int|null $limit
+     * @param int|null $offset
+     * @return PaginatorResult<Video>
+     */
+    public function getVideos(Account $account, ?Folder $folder, ?int $limit, ?int $offset): PaginatorResult
+    {
+        return $this->videoRepository->findAccountVideos($account, $folder, $limit, $offset);
     }
 }

@@ -3,13 +3,11 @@
 namespace App\Helper\Api;
 
 use App\Exception\ApiException;
-use App\Serializer\MaxDepthHandler;
+use App\Helper\Paginator\PaginatorResult;
 use Countable;
-use Doctrine\Common\Collections\Collection;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class ResponseEntity
@@ -51,12 +49,27 @@ class ResponseEntity
      */
     public function withData(object|array $payload, array $groups = [], int $code = Response::HTTP_OK): JsonResponse
     {
-        return $this->send($code, $this->getHeader($code) + [
-                'payload' => [
-                    'count' => $this->getCount($payload),
-                    'data' => $payload
-                ]
-            ], $groups);
+        $payloadData = $payload;
+        $totalCount = null;
+
+        if ($payload instanceof PaginatorResult) {
+            $payloadData = $payload->getData();
+            $totalCount = $payload->getTotal();
+        }
+
+        $count = $this->getCount($payloadData);
+
+        $responsePayload = [
+            'count' => $count,
+        ];
+
+        if ($totalCount !== null && $totalCount !== $count) {
+            $responsePayload['totalCount'] = $totalCount;
+        }
+
+        $responsePayload['data'] = $payloadData;
+
+        return $this->send($code, $this->getHeader($code) + ['payload' => $responsePayload], $groups);
     }
 
     /**
@@ -120,8 +133,7 @@ class ResponseEntity
     {
         return new JsonResponse($this->serializer->serialize($payload, 'json', [
             'groups' => $groups,
-            AbstractObjectNormalizer::ENABLE_MAX_DEPTH => true,
-            'max_depth' => 1
+            AbstractObjectNormalizer::ENABLE_MAX_DEPTH => true
         ]), $code, [], true);
     }
 }
