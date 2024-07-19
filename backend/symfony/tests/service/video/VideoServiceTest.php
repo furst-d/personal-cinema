@@ -7,7 +7,7 @@ use App\Entity\Video\Folder;
 use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
 use App\Exception\NotFoundException;
-use App\Repository\Video\FolderRepository;
+use App\Helper\Paginator\PaginatorResult;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 use App\Service\Video\VideoService;
@@ -17,18 +17,15 @@ class VideoServiceTest extends TestCase
 {
     private $videoService;
     private $mockVideoRepository;
-    private $mockFolderRepository;
     private $mockMd5Repository;
 
     protected function setUp(): void
     {
         $this->mockVideoRepository = $this->createMock(VideoRepository::class);
-        $this->mockFolderRepository = $this->createMock(FolderRepository::class);
         $this->mockMd5Repository = $this->createMock(MD5Repository::class);
 
         $this->videoService = new VideoService(
             $this->mockVideoRepository,
-            $this->mockFolderRepository,
             $this->mockMd5Repository
         );
     }
@@ -113,22 +110,51 @@ class VideoServiceTest extends TestCase
         $this->assertNull($result);
     }
 
-    public function testGetFolderById()
+    public function testGetVideos()
     {
-        $folder = new Folder('testFolder', new Account('email@example.com', 'password', 'salt'));
-        $this->mockFolderRepository->method('find')->willReturn($folder);
+        $account = new Account('email@example.com', 'password', 'salt');
+        $folder = new Folder('Test Folder', $account);
+        $videos = [new Video('Video 1', $account), new Video('Video 2', $account)];
+        $paginatorResult = new PaginatorResult($videos, 2);
 
-        $result = $this->videoService->getFolderById(1);
+        $this->mockVideoRepository
+            ->expects($this->once())
+            ->method('findAccountVideos')
+            ->with($account, $folder, 10, 0)
+            ->willReturn($paginatorResult);
 
-        $this->assertSame($folder, $result);
+        $result = $this->videoService->getVideos($account, $folder, 10, 0);
+
+        $this->assertSame($paginatorResult, $result);
     }
 
-    public function testGetFolderByIdNotFound()
+    public function testUpdateVideo()
     {
-        $this->mockFolderRepository->method('find')->willReturn(null);
+        $account = new Account('email@example.com', 'password', 'salt');
+        $video = new Video('Old Video', $account);
+        $folder = new Folder('Test Folder', $account);
 
-        $result = $this->videoService->getFolderById(1);
+        $this->mockVideoRepository
+            ->expects($this->once())
+            ->method('save')
+            ->with($video);
 
-        $this->assertNull($result);
+        $this->videoService->updateVideo($video, 'Updated Video', $folder);
+
+        $this->assertSame('Updated Video', $video->getName());
+        $this->assertSame($folder, $video->getFolder());
+    }
+
+    public function testDeleteVideo()
+    {
+        $account = new Account('email@example.com', 'password', 'salt');
+        $video = new Video('testVideo', $account);
+
+        $this->mockVideoRepository
+            ->expects($this->once())
+            ->method('delete')
+            ->with($video);
+
+        $this->videoService->deleteVideo($video);
     }
 }

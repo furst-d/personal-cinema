@@ -6,6 +6,7 @@ use App\Helper\Api\ResponseEntity;
 use App\Service\Locator\BaseControllerLocator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class ApiController extends AbstractController
@@ -37,10 +38,14 @@ class ApiController extends AbstractController
 
     /**
      * @param mixed $data
+     * @param array $groups
      * @return mixed
      */
-    protected function serialize(mixed $data): mixed
+    protected function serialize(mixed $data, array $groups = []): mixed
     {
-        return json_decode($this->serializer->serialize($data, 'json', ['groups' => 'serialize']), true);
+        return json_decode($this->serializer->serialize($data, 'json', [
+            'groups' => $groups,
+            'enable_max_depth' => true
+        ]), true);
     }
 }

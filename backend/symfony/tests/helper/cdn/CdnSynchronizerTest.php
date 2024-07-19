@@ -12,6 +12,7 @@ use App\Helper\Cdn\CdnManager;
 use App\Helper\Cdn\CdnSynchronizer;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
+use App\Service\Video\FolderService;
 use App\Service\Video\VideoService;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
@@ -20,6 +21,7 @@ class CdnSynchronizerTest extends TestCase
 {
     private $cdnSynchronizer;
     private $mockVideoService;
+    private $mockFolderService;
     private $mockJwtService;
     private $mockAccountService;
     private $mockEntityManager;
@@ -28,6 +30,7 @@ class CdnSynchronizerTest extends TestCase
     protected function setUp(): void
     {
         $this->mockVideoService = $this->createMock(VideoService::class);
+        $this->mockFolderService = $this->createMock(FolderService::class);
         $this->mockJwtService = $this->createMock(JwtService::class);
         $this->mockAccountService = $this->createMock(AccountService::class);
         $this->mockEntityManager = $this->createMock(EntityManagerInterface::class);
@@ -35,6 +38,7 @@ class CdnSynchronizerTest extends TestCase
 
         $this->cdnSynchronizer = new CdnSynchronizer(
             $this->mockVideoService,
+            $this->mockFolderService,
             $this->mockJwtService,
             $this->mockAccountService,
             $this->mockEntityManager,

@@ -117,8 +117,7 @@ class JwtService
             $sessionId,
             $user
         );
-        $this->em->persist($refreshToken);
-        $this->em->flush();
+        $this->apiTokenRepository->save($refreshToken);
 
         return $refreshToken;
     }

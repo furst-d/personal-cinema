@@ -64,12 +64,14 @@ class ResponseEntityTest extends TestCase
             ->with($payload, 'json')
             ->willReturn(json_encode($payload));
 
-        $response = $this->responseEntity->withData($data, self::TEST_CODE);
+        // Correct the order of parameters, moving the status code to the third position
+        $response = $this->responseEntity->withData($data, [], self::TEST_CODE);
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(self::TEST_CODE, $response->getStatusCode());
         $this->assertJsonStringEqualsJsonString(json_encode($payload), $response->getContent());
     }
+
 
     public function testWithException()
     {

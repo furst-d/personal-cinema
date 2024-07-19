@@ -10,9 +10,9 @@ class BasePersonalController extends ApiController
 {
     /**
      * @param Request $request
-     * @return Account|null
+     * @return Account
      */
-    protected function getAccount(Request $request): ?Account
+    protected function getAccount(Request $request): Account
     {
         return $request->attributes->get('account');
     }

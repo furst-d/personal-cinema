@@ -18,4 +18,15 @@ class AccountRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Account::class);
     }
+
+    /**
+     * @param Account $user
+     * @return void
+     */
+    public function save(Account $user): void
+    {
+        $em = $this->getEntityManager();
+        $em->persist($user);
+        $em->flush();
+    }
 }

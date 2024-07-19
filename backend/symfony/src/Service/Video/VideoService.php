@@ -7,7 +7,7 @@ use App\Entity\Video\Folder;
 use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
 use App\Exception\NotFoundException;
-use App\Repository\Video\FolderRepository;
+use App\Helper\Paginator\PaginatorResult;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 
@@ -19,28 +19,20 @@ class VideoService
     private VideoRepository $videoRepository;
 
     /**
-     * @var FolderRepository $folderRepository
-     */
-    private FolderRepository $folderRepository;
-
-    /**
      * @var MD5Repository $md5Repository
      */
     private MD5Repository $md5Repository;
 
     /**
      * @param VideoRepository $videoRepository
-     * @param FolderRepository $folderRepository
      * @param MD5Repository $md5Repository
      */
     public function __construct(
         VideoRepository $videoRepository,
-        FolderRepository $folderRepository,
         MD5Repository $md5Repository
     )
     {
         $this->videoRepository = $videoRepository;
-        $this->folderRepository = $folderRepository;
         $this->md5Repository = $md5Repository;
     }
 
@@ -96,11 +88,36 @@ class VideoService
     }
 
     /**
-     * @param int $id
-     * @return Folder|null
+     * @param Account $account
+     * @param Folder|null $folder
+     * @param int|null $limit
+     * @param int|null $offset
+     * @return PaginatorResult<Video>
      */
-    public function getFolderById(int $id): ?Folder
+    public function getVideos(Account $account, ?Folder $folder, ?int $limit, ?int $offset): PaginatorResult
     {
-        return $this->folderRepository->find($id);
+        return $this->videoRepository->findAccountVideos($account, $folder, $limit, $offset);
+    }
+
+    /**
+     * @param Video $video
+     * @param string $name
+     * @param Folder|null $folder
+     * @return void
+     */
+    public function updateVideo(Video $video, string $name, ?Folder $folder): void
+    {
+        $video->setName($name);
+        $video->setFolder($folder);
+        $this->videoRepository->save($video);
+    }
+
+    /**
+     * @param Video $video
+     * @return void
+     */
+    public function deleteVideo(Video $video): void
+    {
+        $this->videoRepository->delete($video);
     }
 }

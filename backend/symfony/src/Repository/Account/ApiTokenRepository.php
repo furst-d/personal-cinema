@@ -37,15 +37,13 @@ class ApiTokenRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param string $token
-     * @return ApiToken|null
+     * @param ApiToken $refreshToken
+     * @return void
      */
-    public function findToken(string $token): ?ApiToken
+    public function save(ApiToken $refreshToken): void
     {
-        return $this->createQueryBuilder('t')
-            ->andWhere('t.refreshToken = :token')
-            ->setParameter('token', $token)
-            ->getQuery()
-            ->getOneOrNullResult();
+        $em = $this->getEntityManager();
+        $em->persist($refreshToken);
+        $em->flush();
     }
 }

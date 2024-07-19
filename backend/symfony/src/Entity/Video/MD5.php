@@ -6,6 +6,7 @@ use App\Repository\Video\MD5Repository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: MD5Repository::class)]
 class MD5
@@ -16,6 +17,7 @@ class MD5
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Groups(['video:read'])]
     private string $md5;
 
     #[ORM\Column]
