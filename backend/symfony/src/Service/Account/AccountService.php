@@ -74,9 +74,7 @@ class AccountService
             $user = new Account($email, $password, $salt);
             $this->roleService->addDefaultRole($user);
 
-            $this->em->persist($user);
-            $this->em->flush();
-
+            $this->accountRepository->save($user);
         } catch (Exception) {
             throw new InternalException("Failed to register user.");
         }

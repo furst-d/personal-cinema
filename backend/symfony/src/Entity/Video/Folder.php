@@ -8,6 +8,8 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: FolderRepository::class)]
 class Folder
@@ -15,23 +17,28 @@ class Folder
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['folder:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['folder:read'])]
     private string $name;
 
     #[ORM\ManyToOne(inversedBy: 'folders')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['folder:read'])]
     private Account $owner;
 
     #[ORM\Column]
+    #[Groups(['folder:read'])]
     private DateTimeImmutable $createdAt;
 
     #[ORM\Column]
+    #[Groups(['folder:read'])]
     private DateTimeImmutable $updatedAt;
 
     #[ORM\ManyToOne(inversedBy: 'folders')]
-    private ?Folder $parent = null;
+    private ?Folder $parent;
 
     /**
      * @var Collection<int, Video>
@@ -40,16 +47,25 @@ class Folder
     private Collection $videos;
 
     /**
+     * @var Collection<int, Folder>
+     */
+    #[ORM\OneToMany(targetEntity: Folder::class, mappedBy: 'parent')]
+    private Collection $subFolders;
+
+    /**
      * @param string $name
      * @param Account $owner
+     * @param Folder|null $parent
      */
-    public function __construct(string $name, Account $owner)
+    public function __construct(string $name, Account $owner, ?Folder $parent = null)
     {
         $this->name = $name;
         $this->owner = $owner;
         $this->createdAt = new DateTimeImmutable();
-        $this->updatedAt = new DateTimeImmutable();
         $this->videos = new ArrayCollection();
+        $this->subFolders = new ArrayCollection();
+        $this->parent = $parent;
+        $this->update();
     }
 
     /**
@@ -75,6 +91,7 @@ class Folder
     public function setName(string $name): void
     {
         $this->name = $name;
+        $this->update();
     }
 
     /**
@@ -102,20 +119,27 @@ class Folder
     }
 
     /**
-     * @param DateTimeImmutable $updatedAt
-     * @return void
-     */
-    public function setUpdatedAt(DateTimeImmutable $updatedAt): void
-    {
-        $this->updatedAt = $updatedAt;
-    }
-
-    /**
      * @return Folder|null
      */
     public function getParent(): ?Folder
     {
         return $this->parent;
+    }
+
+    #[Groups(['folder:read'])]
+    public function getParentId(): ?int
+    {
+        return $this->parent?->getId();
+    }
+
+    /**
+     * @param Folder|null $parent
+     * @return void
+     */
+    public function setParent(?Folder $parent): void
+    {
+        $this->parent = $parent;
+        $this->update();
     }
 
     /**
@@ -124,5 +148,25 @@ class Folder
     public function getVideos(): Collection
     {
         return $this->videos;
+    }
+
+    /**
+     * @return Collection<int, Folder>
+     */
+    public function getSubFolders(): Collection
+    {
+        return $this->subFolders;
+    }
+
+    /**
+     * Update the folder and its parent
+     * @return void
+     */
+    private function update(): void
+    {
+        $this->updatedAt = new DateTimeImmutable();
+
+        $parent = $this->getParent();
+        $parent?->update();
     }
 }

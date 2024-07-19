@@ -3,11 +3,9 @@
 namespace App\Tests\Service\Video;
 
 use App\Entity\Account\Account;
-use App\Entity\Video\Folder;
 use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
 use App\Exception\NotFoundException;
-use App\Repository\Video\FolderRepository;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 use App\Service\Video\VideoService;
@@ -17,18 +15,15 @@ class VideoServiceTest extends TestCase
 {
     private $videoService;
     private $mockVideoRepository;
-    private $mockFolderRepository;
     private $mockMd5Repository;
 
     protected function setUp(): void
     {
         $this->mockVideoRepository = $this->createMock(VideoRepository::class);
-        $this->mockFolderRepository = $this->createMock(FolderRepository::class);
         $this->mockMd5Repository = $this->createMock(MD5Repository::class);
 
         $this->videoService = new VideoService(
             $this->mockVideoRepository,
-            $this->mockFolderRepository,
             $this->mockMd5Repository
         );
     }
@@ -109,25 +104,6 @@ class VideoServiceTest extends TestCase
         $this->mockMd5Repository->method('findOneBy')->willReturn(null);
 
         $result = $this->videoService->getMd5ByHash('hash');
-
-        $this->assertNull($result);
-    }
-
-    public function testGetFolderById()
-    {
-        $folder = new Folder('testFolder', new Account('email@example.com', 'password', 'salt'));
-        $this->mockFolderRepository->method('find')->willReturn($folder);
-
-        $result = $this->videoService->getFolderById(1);
-
-        $this->assertSame($folder, $result);
-    }
-
-    public function testGetFolderByIdNotFound()
-    {
-        $this->mockFolderRepository->method('find')->willReturn(null);
-
-        $result = $this->videoService->getFolderById(1);
 
         $this->assertNull($result);
     }

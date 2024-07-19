@@ -3,8 +3,13 @@
 namespace App\Helper\Api;
 
 use App\Exception\ApiException;
+use App\Serializer\MaxDepthHandler;
+use Countable;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class ResponseEntity
@@ -40,17 +45,18 @@ class ResponseEntity
     /**
      * Return a response with a JSON data
      * @param object|array $payload
+     * @param array $groups
      * @param int $code
      * @return JsonResponse
      */
-    public function withData(object|array $payload, int $code = Response::HTTP_OK): JsonResponse
+    public function withData(object|array $payload, array $groups = [], int $code = Response::HTTP_OK): JsonResponse
     {
         return $this->send($code, $this->getHeader($code) + [
                 'payload' => [
                     'count' => $this->getCount($payload),
-                    'data' => $payload,
+                    'data' => $payload
                 ]
-            ]);
+            ], $groups);
     }
 
     /**
@@ -96,22 +102,26 @@ class ResponseEntity
      */
     private function getCount(object|array $payload): int
     {
-        // Object or an associative array (custom payloads)
-        if (is_object($payload) || !array_is_list($payload)) {
-            return 1;
+        if (is_array($payload) || $payload instanceof Countable) {
+            return count($payload);
         }
 
-        return count($payload);
+        return 1;
     }
 
     /**
      * Send a response with a JSON payload
      * @param int $code
      * @param array $payload
+     * @param array $groups
      * @return JsonResponse
      */
-    private function send(int $code, array $payload): JsonResponse
+    private function send(int $code, array $payload, array $groups = []): JsonResponse
     {
-        return new JsonResponse($this->serializer->serialize($payload, 'json'), $code, [], true);
+        return new JsonResponse($this->serializer->serialize($payload, 'json', [
+            'groups' => $groups,
+            AbstractObjectNormalizer::ENABLE_MAX_DEPTH => true,
+            'max_depth' => 1
+        ]), $code, [], true);
     }
 }

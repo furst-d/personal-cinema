@@ -19,10 +19,11 @@ class Account implements UserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['account:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['serialize'])]
+    #[Groups(['account:read'])]
     private string $email;
 
     #[ORM\Column(length: 255)]
@@ -32,22 +33,22 @@ class Account implements UserInterface
     private string $salt;
 
     #[ORM\Column]
-    #[Groups(['serialize'])]
+    #[Groups(['account:read'])]
     private DateTimeImmutable $createdAt;
 
     #[ORM\Column]
-    #[Groups(['serialize'])]
+    #[Groups(['account:read'])]
     private bool $isActive = false;
 
     #[ORM\Column]
-    #[Groups(['serialize'])]
+    #[Groups(['account:read'])]
     private bool $isDeleted = false;
 
     /**
      * @var Collection<int, Role>
      */
     #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: "users")]
-    #[Groups(['serialize'])]
+    #[Groups(['account:read'])]
     private Collection $roles;
 
     /**

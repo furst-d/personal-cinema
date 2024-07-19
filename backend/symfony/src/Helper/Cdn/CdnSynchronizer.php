@@ -12,6 +12,7 @@ use App\Exception\UnauthorizedException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
+use App\Service\Video\FolderService;
 use App\Service\Video\VideoService;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -21,6 +22,11 @@ class CdnSynchronizer
      * @var VideoService $videoService
      */
     private VideoService $videoService;
+
+    /**
+     * @var FolderService $folderService
+     */
+    private FolderService $folderService;
 
     /**
      * @var JwtService $jwtService
@@ -44,6 +50,7 @@ class CdnSynchronizer
 
     /**
      * @param VideoService $videoService
+     * @param FolderService $folderService
      * @param JwtService $jwtService
      * @param AccountService $accountService
      * @param EntityManagerInterface $em
@@ -51,6 +58,7 @@ class CdnSynchronizer
      */
     public function __construct(
         VideoService $videoService,
+        FolderService $folderService,
         JwtService $jwtService,
         AccountService $accountService,
         EntityManagerInterface $em,
@@ -58,6 +66,7 @@ class CdnSynchronizer
     )
     {
         $this->videoService = $videoService;
+        $this->folderService = $folderService;
         $this->jwtService = $jwtService;
         $this->accountService = $accountService;
         $this->em = $em;
@@ -165,8 +174,11 @@ class CdnSynchronizer
     private function updateFolder(Video $video, ?int $folderId): void
     {
         if ($folderId) {
-            $folder = $this->videoService->getFolderById($folderId);
-            $video->setFolder($folder ?? null);
+            try {
+                $video->setFolder($this->folderService->getFolderById($folderId));
+            } catch (NotFoundException) {
+                $video->setFolder(null);
+            }
         }
     }
 

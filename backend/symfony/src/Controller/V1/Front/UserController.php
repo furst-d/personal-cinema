@@ -92,7 +92,7 @@ class UserController extends ApiController
                     'access_token' => $accessToken,
                     'refresh_token' => $refreshToken
                 ],
-                'user' => $this->serialize($user)
+                'user' => $this->serialize($user, ['account:read'])
             ]);
 
         } catch (ApiException $e) {
