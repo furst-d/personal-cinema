@@ -3,9 +3,11 @@
 namespace App\Tests\Service\Video;
 
 use App\Entity\Account\Account;
+use App\Entity\Video\Folder;
 use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
 use App\Exception\NotFoundException;
+use App\Helper\Paginator\PaginatorResult;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 use App\Service\Video\VideoService;
@@ -106,5 +108,53 @@ class VideoServiceTest extends TestCase
         $result = $this->videoService->getMd5ByHash('hash');
 
         $this->assertNull($result);
+    }
+
+    public function testGetVideos()
+    {
+        $account = new Account('email@example.com', 'password', 'salt');
+        $folder = new Folder('Test Folder', $account);
+        $videos = [new Video('Video 1', $account), new Video('Video 2', $account)];
+        $paginatorResult = new PaginatorResult($videos, 2);
+
+        $this->mockVideoRepository
+            ->expects($this->once())
+            ->method('findAccountVideos')
+            ->with($account, $folder, 10, 0)
+            ->willReturn($paginatorResult);
+
+        $result = $this->videoService->getVideos($account, $folder, 10, 0);
+
+        $this->assertSame($paginatorResult, $result);
+    }
+
+    public function testUpdateVideo()
+    {
+        $account = new Account('email@example.com', 'password', 'salt');
+        $video = new Video('Old Video', $account);
+        $folder = new Folder('Test Folder', $account);
+
+        $this->mockVideoRepository
+            ->expects($this->once())
+            ->method('save')
+            ->with($video);
+
+        $this->videoService->updateVideo($video, 'Updated Video', $folder);
+
+        $this->assertSame('Updated Video', $video->getName());
+        $this->assertSame($folder, $video->getFolder());
+    }
+
+    public function testDeleteVideo()
+    {
+        $account = new Account('email@example.com', 'password', 'salt');
+        $video = new Video('testVideo', $account);
+
+        $this->mockVideoRepository
+            ->expects($this->once())
+            ->method('delete')
+            ->with($video);
+
+        $this->videoService->deleteVideo($video);
     }
 }

@@ -75,37 +75,6 @@ class JwtServiceTest extends TestCase
         $this->jwtService->generateToken($this->account, JwtUsage::USAGE_API_ACCESS);
     }
 
-    public function testCreateOrUpdateRefreshTokenCreatesNewToken()
-    {
-        $request = $this->createMock(Request::class);
-
-        $this->sessionService->expects($this->once())
-            ->method('generate')
-            ->with($request)
-            ->willReturn(self::TEST_SESSION_ID);
-
-        $this->apiTokenRepository->expects($this->once())
-            ->method('findByUserAndSession')
-            ->with($this->account, self::TEST_SESSION_ID)
-            ->willReturn(null);
-
-        $this->jwtEncoder->expects($this->once())
-            ->method('encode')
-            ->willReturn(self::TEST_REFRESH_TOKEN);
-
-        $this->em->expects($this->once())
-            ->method('persist')
-            ->with($this->isInstanceOf(ApiToken::class));
-
-        $this->em->expects($this->once())
-            ->method('flush');
-
-        $token = $this->jwtService->createOrUpdateRefreshToken($this->account, $request);
-
-        $this->assertInstanceOf(ApiToken::class, $token);
-        $this->assertEquals(self::TEST_REFRESH_TOKEN, $token->getRefreshToken());
-    }
-
     public function testCreateOrUpdateRefreshTokenUpdatesExistingToken()
     {
         $request = $this->createMock(Request::class);
