@@ -13,24 +13,12 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
-use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ValidationResolver implements ValueResolverInterface
 {
-    /**
-     * @var DenormalizerInterface $denormalizer
-     */
     private DenormalizerInterface $denormalizer;
-
-    /**
-     * @var ValidatorInterface $validator
-     */
     private ValidatorInterface $validator;
-
-    /**
-     * @var ResponseEntity $re
-     */
     private ResponseEntity $re;
 
     public function __construct(
@@ -45,7 +33,6 @@ class ValidationResolver implements ValueResolverInterface
     }
 
     /**
-     * Is used to serialize and validate the DTO objects
      * @param Request $request
      * @param ArgumentMetadata $argument
      * @return iterable
@@ -53,10 +40,25 @@ class ValidationResolver implements ValueResolverInterface
      */
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
-        if (!is_subclass_of($argument->getType(), 'App\DTO\AbstractRequest')) {
-            return [];
+        if (is_subclass_of($argument->getType(), 'App\DTO\AbstractQueryRequest')) {
+            return $this->resolveQuery($request, $argument);
         }
 
+        if (is_subclass_of($argument->getType(), 'App\DTO\AbstractRequest')) {
+            return $this->resolveBody($request, $argument);
+        }
+
+        return [];
+    }
+
+    /**
+     * @param Request $request
+     * @param ArgumentMetadata $argument
+     * @return iterable
+     * @throws ExceptionInterface
+     */
+    private function resolveBody(Request $request, ArgumentMetadata $argument): iterable
+    {
         $data = json_decode($request->getContent(), true);
 
         if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
@@ -76,7 +78,6 @@ class ValidationResolver implements ValueResolverInterface
         if (count($errors) > 0) {
             $errorDetails = [];
             foreach ($errors as $error) {
-                /** @var ConstraintViolation $error */
                 $errorDetails[] = [
                     'property' => $error->getPropertyPath(),
                     'value' => $error->getInvalidValue(),
@@ -87,6 +88,54 @@ class ValidationResolver implements ValueResolverInterface
         }
 
         yield $object;
+    }
+
+    /**
+     * @param Request $request
+     * @param ArgumentMetadata $argument
+     * @return iterable
+     * @throws ExceptionInterface
+     */
+    private function resolveQuery(Request $request, ArgumentMetadata $argument): iterable
+    {
+        $data = $this->convertQueryParameters($request->query->all());
+
+        try {
+            $object = $this->denormalizer->denormalize($data, $argument->getType());
+        } catch (NotNormalizableValueException $e) {
+            $this->sendErrorResponse(new BadRequestException($e->getMessage()));
+        }
+
+        $errors = $this->validator->validate($object);
+
+        if (count($errors) > 0) {
+            $errorDetails = [];
+            foreach ($errors as $error) {
+                $errorDetails[] = [
+                    'property' => $error->getPropertyPath(),
+                    'value' => $error->getInvalidValue(),
+                    'message' => $error->getMessage(),
+                ];
+            }
+            $this->sendErrorResponse(new BadRequestException('Validation failed', $errorDetails));
+        }
+
+        yield $object;
+    }
+
+    /**
+     * @param array $queryParameters
+     * @return array
+     */
+    private function convertQueryParameters(array $queryParameters): array
+    {
+        foreach ($queryParameters as $key => $value) {
+            if (is_numeric($value)) {
+                $queryParameters[$key] = (int) $value;
+            }
+        }
+
+        return $queryParameters;
     }
 
     /**

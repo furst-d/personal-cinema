@@ -7,6 +7,7 @@ use App\Entity\Video\Folder;
 use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
 use App\Helper\Folder\FolderDeletionMode;
+use App\Helper\Paginator\PaginatorResult;
 use App\Repository\Video\FolderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -108,6 +109,18 @@ class FolderService
     public function deleteFolder(Folder $folder): void
     {
         $this->folderRepository->delete($folder);
+    }
+
+    /**
+     * @param Account $account
+     * @param Folder|null $parentFolder
+     * @param int $limit
+     * @param int $offset
+     * @return PaginatorResult
+     */
+    public function getFolders(Account $account, ?Folder $parentFolder, int $limit, int $offset): PaginatorResult
+    {
+        return $this->folderRepository->findAccountFolders($account, $parentFolder, $limit, $offset);
     }
 
     /**

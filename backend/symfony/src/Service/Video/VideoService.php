@@ -98,4 +98,26 @@ class VideoService
     {
         return $this->videoRepository->findAccountVideos($account, $folder, $limit, $offset);
     }
+
+    /**
+     * @param Video $video
+     * @param string $name
+     * @param Folder|null $folder
+     * @return void
+     */
+    public function updateVideo(Video $video, string $name, ?Folder $folder): void
+    {
+        $video->setName($name);
+        $video->setFolder($folder);
+        $this->videoRepository->save($video);
+    }
+
+    /**
+     * @param Video $video
+     * @return void
+     */
+    public function deleteVideo(Video $video): void
+    {
+        $this->videoRepository->delete($video);
+    }
 }

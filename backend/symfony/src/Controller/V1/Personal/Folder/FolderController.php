@@ -3,6 +3,8 @@
 namespace App\Controller\V1\Personal\Folder;
 
 use App\Controller\V1\Personal\BasePersonalController;
+use App\DTO\PaginatorRequest;
+use App\DTO\Video\FolderQueryRequest;
 use App\DTO\Video\FolderRequest;
 use App\Exception\ApiException;
 use App\Helper\Folder\FolderDeletionMode;
@@ -35,12 +37,22 @@ class FolderController extends BasePersonalController
     }
 
     #[Route('', name: 'user_folders', methods: ['GET'])]
-    public function getFolders(Request $request): JsonResponse
+    public function getFolders(Request $request, FolderQueryRequest $folderQueryRequest): JsonResponse
     {
-        $account = $this->getAccount($request);
-        $folders = $account->getFolders();
+        try {
+            $account = $this->getAccount($request);
+            $parentFolderId = $folderQueryRequest->parentId;
 
-        return $this->re->withData($folders, ['folder:read']);
+            $parentFolder = null;
+            if ($parentFolderId) {
+                $parentFolder = $this->folderService->getAccountFolderById($account, $parentFolderId);
+            }
+
+            $folders = $this->folderService->getFolders($account, $parentFolder, $folderQueryRequest->getLimit(), $folderQueryRequest->getOffset());
+            return $this->re->withData($folders, ['folder:read']);
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
     }
 
     #[Route('', name: 'user_create_folder', methods: ['POST'])]

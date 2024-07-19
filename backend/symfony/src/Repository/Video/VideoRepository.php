@@ -21,6 +21,18 @@ class VideoRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param Video $video
+     * @return void
+     */
+    public function save(Video $video): void
+    {
+        $em = $this->getEntityManager();
+
+        $em->persist($video);
+        $em->flush();
+    }
+
+    /**
      * @param Account $account
      * @param Folder|null $folder
      * @param int|null $limit
@@ -37,7 +49,7 @@ class VideoRepository extends ServiceEntityRepository
             $qb->andWhere('v.folder = :folder')->setParameter('folder', $folder);
         }
 
-        if ($limit !== null && $offset !== null) {
+        if (!is_null($limit) && !is_null($offset)) {
             $qb->setMaxResults($limit)
                 ->setFirstResult($offset);
         }
@@ -46,5 +58,17 @@ class VideoRepository extends ServiceEntityRepository
         $totalItems = $paginator->count();
 
         return new PaginatorResult(iterator_to_array($paginator), $totalItems);
+    }
+
+    /**
+     * @param Video $video
+     * @return void
+     */
+    public function delete(Video $video): void
+    {
+        $em = $this->getEntityManager();
+
+        $em->remove($video);
+        $em->flush();
     }
 }

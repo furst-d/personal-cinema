@@ -2,10 +2,13 @@
 
 namespace App\Repository\Video;
 
+use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
 use App\Helper\Folder\FolderDeletionMode;
+use App\Helper\Paginator\PaginatorResult;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -27,6 +30,33 @@ class FolderRepository extends ServiceEntityRepository
         $em = $this->getEntityManager();
         $em->persist($folder);
         $em->flush();
+    }
+
+    /**
+     * @param Account $account
+     * @param Folder|null $parent
+     * @param int|null $limit
+     * @param int|null $offset
+     * @return PaginatorResult<Folder>
+     */
+    public function findAccountFolders(Account $account, ?Folder $parent, ?int $limit, ?int $offset): PaginatorResult
+    {
+        $qb = $this->createQueryBuilder('f')
+            ->where('f.owner = :account')->setParameter('account', $account);
+
+        if ($parent) {
+            $qb->andWhere('f.parent = :parent')->setParameter('parent', $parent);
+        }
+
+        if (!is_null($limit) && !is_null($offset)) {
+            $qb->setMaxResults($limit)
+                ->setFirstResult($offset);
+        }
+
+        $paginator = new Paginator($qb);
+        $totalItems = $paginator->count();
+
+        return new PaginatorResult(iterator_to_array($paginator), $totalItems);
     }
 
     /**

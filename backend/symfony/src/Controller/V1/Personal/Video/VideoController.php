@@ -4,6 +4,8 @@ namespace App\Controller\V1\Personal\Video;
 
 use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Video\UploadRequest;
+use App\DTO\Video\VideoQueryRequest;
+use App\DTO\Video\VideoRequest;
 use App\Exception\ApiException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Cdn\CdnService;
@@ -85,20 +87,18 @@ class VideoController extends BasePersonalController
     }
 
     #[Route('', name: 'user_videos', methods: ['GET'])]
-    public function getVideos(Request $request): JsonResponse
+    public function getVideos(Request $request, VideoQueryRequest $videoQueryRequest): JsonResponse
     {
         try {
             $account = $this->getAccount($request);
-            $limit = $this->getLimit($request);
-            $offset = $this->getOffset($request);
-            $folderId = $request->query->get('folderId');
+            $folderId = $videoQueryRequest->folderId;
 
             $folder = null;
             if ($folderId) {
                 $folder = $this->folderService->getAccountFolderById($account, $folderId);
             }
 
-            $videos = $this->videoService->getVideos($account, $folder, $limit, $offset);
+            $videos = $this->videoService->getVideos($account, $folder, $videoQueryRequest->getLimit(), $videoQueryRequest->getOffset());
 
             return $this->re->withData($videos, ['video:read']);
         } catch (ApiException $e) {
@@ -122,6 +122,38 @@ class VideoController extends BasePersonalController
                 'video' => $this->serialize($video, ['video:read']),
                 'url' => "$backendUrl/v1/private/videos/url?token=$token"
             ]);
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('/{id<\d+>}', 'user_update_video', methods: ['PUT'])]
+    public function updateVideo(Request $request, VideoRequest $videoRequest, int $id): JsonResponse
+    {
+        try {
+            $account = $this->getAccount($request);
+            $video = $this->videoService->getAccountVideoById($account, $id);
+
+            $folder = null;
+            if ($videoRequest->folderId) {
+                $folder = $this->folderService->getAccountFolderById($account, $videoRequest->folderId);
+            }
+
+            $this->videoService->updateVideo($video, $videoRequest->name, $folder);
+            return $this->re->withMessage('Video updated.');
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('/{id<\d+>}', name: 'user_delete_video', methods: ['DELETE'])]
+    public function deleteVideo(Request $request, int $id): JsonResponse
+    {
+        try {
+            $account = $this->getAccount($request);
+            $video = $this->videoService->getAccountVideoById($account, $id);
+            $this->videoService->deleteVideo($video);
+            return $this->re->withMessage('Video deleted.');
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }

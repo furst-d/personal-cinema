@@ -37,24 +37,6 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @param Request $request
-     * @return int
-     */
-    protected function getLimit(Request $request): int
-    {
-        return (int) $request->query->get('limit', 32);
-    }
-
-    /**
-     * @param Request $request
-     * @return int
-     */
-    protected function getOffset(Request $request): int
-    {
-        return (int) $request->query->get('offset', 0);
-    }
-
-    /**
      * @param mixed $data
      * @param array $groups
      * @return mixed
