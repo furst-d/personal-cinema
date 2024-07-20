@@ -32,6 +32,45 @@ class RoleService
     }
 
     /**
+     * @param Account $account
+     * @return bool
+     */
+    public function isAdmin(Account $account): bool
+    {
+        return $this->hasRole($account, 'ROLE_ADMIN');
+    }
+
+    /**
+     * @param Account $user
+     * @param array $roles
+     * @return bool
+     */
+    public function hasRoles(Account $user, array $roles): bool
+    {
+        foreach ($roles as $role) {
+            if (!$this->hasRole($user, $role)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param Account $account
+     * @param string $keyword
+     * @return bool
+     */
+    private function hasRole(Account $account, string $keyword): bool
+    {
+        foreach ($account->getRoles() as $role) {
+            if ($role['key'] === $keyword) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param Account $user
      * @param string $keyword
      * @return Account

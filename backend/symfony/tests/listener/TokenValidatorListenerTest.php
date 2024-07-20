@@ -3,10 +3,12 @@
 namespace listener;
 
 use App\Entity\Account\Account;
+use App\Entity\Account\Role;
 use App\Exception\UnauthorizedException;
 use App\Helper\Api\ResponseEntity;
 use App\Helper\Jwt\JwtUsage;
 use App\Listener\TokenValidatorListener;
+use App\Service\Account\RoleService;
 use App\Service\Account\TokenUserProvider;
 use App\Service\Jwt\JwtService;
 use PHPUnit\Framework\TestCase;
@@ -19,6 +21,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 class TokenValidatorListenerTest extends TestCase
 {
     private $jwtService;
+    private $roleService;
     private $responseEntity;
     private $userProvider;
     private $listener;
@@ -28,9 +31,10 @@ class TokenValidatorListenerTest extends TestCase
     protected function setUp(): void
     {
         $this->jwtService = $this->createMock(JwtService::class);
+        $this->roleService = $this->createMock(RoleService::class);
         $this->responseEntity = $this->createMock(ResponseEntity::class);
         $this->userProvider = $this->createMock(TokenUserProvider::class);
-        $this->listener = new TokenValidatorListener($this->jwtService, $this->responseEntity, $this->userProvider);
+        $this->listener = new TokenValidatorListener($this->jwtService, $this->roleService, $this->responseEntity, $this->userProvider);
     }
 
     public function testOnKernelRequestWithValidToken()
@@ -43,6 +47,8 @@ class TokenValidatorListenerTest extends TestCase
 
         $decodedToken = ['user_id' => 1];
         $user = new Account('test@example.com', 'password', 'salt');
+        $user->setActive(true);
+        $user->addRole(new Role('User', 'ROLE_USER'));
 
         $this->jwtService->expects($this->once())
             ->method('decodeToken')
@@ -53,6 +59,8 @@ class TokenValidatorListenerTest extends TestCase
             ->method('loadUserByIdentifier')
             ->with(1)
             ->willReturn($user);
+
+        $this->roleService->method('isAdmin')->with($user)->willReturn(true); // Mock kontrolu admin role
 
         $this->listener->onKernelRequest($event);
 

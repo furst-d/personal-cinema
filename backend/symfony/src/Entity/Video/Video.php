@@ -24,6 +24,7 @@ class Video
 
     #[ORM\ManyToOne(inversedBy: 'videos')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['video:read'])]
     private Account $account;
 
     #[ORM\ManyToOne(inversedBy: 'videos')]

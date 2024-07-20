@@ -7,7 +7,9 @@ use App\Exception\BadRequestException;
 use App\Exception\ConflictException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
+use App\Exception\UnauthorizedException;
 use App\Helper\Authenticator\Authenticator;
+use App\Helper\Paginator\PaginatorResult;
 use App\Repository\Account\AccountRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -59,15 +61,15 @@ class AccountService
      * @param string $email
      * @param string $password
      * @return Account
-     * @throws InternalException
+     * @throws InternalException|ConflictException
      */
     public function registerUser(string $email, string $password): Account
     {
-        try {
-            if ($this->accountRepository->findOneBy(['email' => $email])) {
-                throw new ConflictException('Account already exists.');
-            }
+        if ($this->accountRepository->findOneBy(['email' => $email])) {
+            throw new ConflictException('Account already exists.');
+        }
 
+        try {
             $salt = $this->authenticator->generateSalt();
             $password = $this->authenticator->combinePassword($password, $salt);
 
@@ -85,15 +87,24 @@ class AccountService
     /**
      * @param string $email
      * @param string $password
+     * @param array $roles
      * @return Account
-     * @throws BadRequestException
+     * @throws BadRequestException|UnauthorizedException
      */
-    public function loginUser(string $email, string $password): Account
+    public function loginUser(string $email, string $password, array $roles): Account
     {
         $user = $this->accountRepository->findOneBy(['email' => $email, 'isDeleted' => false]);
 
         if (!$user || !$this->authenticator->verifyPassword($password, $user->getPassword(), $user->getSalt())) {
             throw new BadRequestException('Invalid email or password.');
+        }
+
+        if (!$user->isActive()) {
+            throw new BadRequestException('Account is not activated.');
+        }
+
+        if (!$this->roleService->hasRoles($user, $roles)) {
+            throw new UnauthorizedException('User does not have sufficient permissions.');
         }
 
         return $user;
@@ -169,5 +180,15 @@ class AccountService
         }
 
         return $user;
+    }
+
+    /**
+     * @param int|null $limit
+     * @param int|null $offset
+     * @return PaginatorResult<Account>
+     */
+    public function getAccounts(?int $limit, ?int $offset): PaginatorResult
+    {
+        return $this->accountRepository->findAccounts($limit, $offset);
     }
 }

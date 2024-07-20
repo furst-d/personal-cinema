@@ -1,16 +1,42 @@
+import React from 'react';
 import {
-  Admin,
-  Resource,
-  ListGuesser,
-  EditGuesser,
-  ShowGuesser,
-} from "react-admin";
-import { Layout } from "./Layout";
-import { dataProvider } from "./dataProvider";
+    Admin,
+    Resource,
+    EditGuesser,
+    ShowGuesser,
+} from 'react-admin';
+import { Layout } from './Layout';
+import { UserList } from './components/users/UserList';
+import { VideoList } from './components/videos/VideoList';
+import dataProvider from "./providers/dataProvider";
+import authProvider from "./providers/authProvider";
+import LoginPage from './components/login/LoginPage';
+import polyglotI18nProvider from 'ra-i18n-polyglot';
+import czechMessages from "ra-language-czech";
 
-export const App = () => (
-  <Admin layout={Layout} dataProvider={dataProvider}>
-    <Resource name="posts" list={ListGuesser} />
-    <Resource name="comments" list={ListGuesser} />
-  </Admin>
+const i18nProvider = polyglotI18nProvider(() => czechMessages, 'cs', { allowMissing: true });
+
+export const App: React.FC = () => (
+    <Admin
+        layout={Layout}
+        dataProvider={dataProvider}
+        authProvider={authProvider}
+        loginPage={LoginPage}
+        i18nProvider={i18nProvider}
+    >
+        <Resource
+            name="users"
+            list={UserList}
+            show={ShowGuesser}
+            edit={EditGuesser}
+            options={{ label: 'Uživatelé' }}
+        />
+        <Resource
+            name="videos"
+            list={VideoList}
+            show={ShowGuesser}
+            edit={EditGuesser}
+            options={{ label: 'Videa' }}
+        />
+    </Admin>
 );

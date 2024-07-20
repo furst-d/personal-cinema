@@ -19,11 +19,11 @@ class Account implements UserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['account:read'])]
+    #[Groups(['account:read', 'video:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['account:read'])]
+    #[Groups(['account:read', 'video:read'])]
     private string $email;
 
     #[ORM\Column(length: 255)]
@@ -184,7 +184,10 @@ class Account implements UserInterface
     public function getRolesAsStringArray(): array
     {
         return $this->roles->map(function (Role $role) {
-            return $role->getKeyName();
+            return [
+                'key' => $role->getKeyName(),
+                'name' => $role->getName(),
+            ];
         })->toArray();
     }
 

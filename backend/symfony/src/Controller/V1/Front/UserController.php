@@ -82,7 +82,29 @@ class UserController extends ApiController
     public function login(LoginRequest $loginRequest, Request $request): JsonResponse
     {
         try {
-            $user = $this->accountService->loginUser($loginRequest->email, $loginRequest->password);
+            $user = $this->accountService->loginUser($loginRequest->email, $loginRequest->password, ['ROLE_USER']);
+
+            $accessToken = $this->jwtService->generateToken($user, JwtUsage::USAGE_API_ACCESS);
+            $refreshToken = $this->jwtService->createOrUpdateRefreshToken($user, $request)->getRefreshToken();
+
+            return $this->re->withData([
+                'tokens' => [
+                    'access_token' => $accessToken,
+                    'refresh_token' => $refreshToken
+                ],
+                'user' => $this->serialize($user, ['account:read'])
+            ]);
+
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('/login/admin', name: 'user_admin_login', methods: ['POST'])]
+    public function adminLogin(LoginRequest $loginRequest, Request $request): JsonResponse
+    {
+        try {
+            $user = $this->accountService->loginUser($loginRequest->email, $loginRequest->password, ['ROLE_USER', 'ROLE_ADMIN']);
 
             $accessToken = $this->jwtService->generateToken($user, JwtUsage::USAGE_API_ACCESS);
             $refreshToken = $this->jwtService->createOrUpdateRefreshToken($user, $request)->getRefreshToken();
