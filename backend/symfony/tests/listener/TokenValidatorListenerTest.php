@@ -7,6 +7,7 @@ use App\Exception\UnauthorizedException;
 use App\Helper\Api\ResponseEntity;
 use App\Helper\Jwt\JwtUsage;
 use App\Listener\TokenValidatorListener;
+use App\Service\Account\RoleService;
 use App\Service\Account\TokenUserProvider;
 use App\Service\Jwt\JwtService;
 use PHPUnit\Framework\TestCase;
@@ -19,6 +20,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 class TokenValidatorListenerTest extends TestCase
 {
     private $jwtService;
+    private $roleService;
     private $responseEntity;
     private $userProvider;
     private $listener;
@@ -28,9 +30,10 @@ class TokenValidatorListenerTest extends TestCase
     protected function setUp(): void
     {
         $this->jwtService = $this->createMock(JwtService::class);
+        $this->roleService = $this->createMock(RoleService::class);
         $this->responseEntity = $this->createMock(ResponseEntity::class);
         $this->userProvider = $this->createMock(TokenUserProvider::class);
-        $this->listener = new TokenValidatorListener($this->jwtService, $this->responseEntity, $this->userProvider);
+        $this->listener = new TokenValidatorListener($this->jwtService, $this->roleService, $this->responseEntity, $this->userProvider);
     }
 
     public function testOnKernelRequestWithValidToken()

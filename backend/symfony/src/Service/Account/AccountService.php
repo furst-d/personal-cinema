@@ -8,6 +8,7 @@ use App\Exception\ConflictException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Helper\Authenticator\Authenticator;
+use App\Helper\Paginator\PaginatorResult;
 use App\Repository\Account\AccountRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -59,15 +60,15 @@ class AccountService
      * @param string $email
      * @param string $password
      * @return Account
-     * @throws InternalException
+     * @throws InternalException|ConflictException
      */
     public function registerUser(string $email, string $password): Account
     {
-        try {
-            if ($this->accountRepository->findOneBy(['email' => $email])) {
-                throw new ConflictException('Account already exists.');
-            }
+        if ($this->accountRepository->findOneBy(['email' => $email])) {
+            throw new ConflictException('Account already exists.');
+        }
 
+        try {
             $salt = $this->authenticator->generateSalt();
             $password = $this->authenticator->combinePassword($password, $salt);
 
@@ -169,5 +170,15 @@ class AccountService
         }
 
         return $user;
+    }
+
+    /**
+     * @param int|null $limit
+     * @param int|null $offset
+     * @return PaginatorResult<Account>
+     */
+    public function getAccounts(?int $limit, ?int $offset): PaginatorResult
+    {
+        return $this->accountRepository->findAccounts($limit, $offset);
     }
 }

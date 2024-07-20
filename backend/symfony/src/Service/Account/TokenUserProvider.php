@@ -50,7 +50,7 @@ class TokenUserProvider implements UserProviderInterface
     {
         $user = $this->accountRepository->find($identifier);
 
-        if (!$user) {
+        if (!$user || $user->isDeleted()) {
             throw new NotFoundException('User not found.');
         }
 

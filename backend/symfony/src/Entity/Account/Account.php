@@ -184,7 +184,10 @@ class Account implements UserInterface
     public function getRolesAsStringArray(): array
     {
         return $this->roles->map(function (Role $role) {
-            return $role->getKeyName();
+            return [
+                'key' => $role->getKeyName(),
+                'name' => $role->getName(),
+            ];
         })->toArray();
     }
 
