@@ -41,6 +41,21 @@ class RoleService
     }
 
     /**
+     * @param Account $user
+     * @param array $roles
+     * @return bool
+     */
+    public function hasRoles(Account $user, array $roles): bool
+    {
+        foreach ($roles as $role) {
+            if (!$this->hasRole($user, $role)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * @param Account $account
      * @param string $keyword
      * @return bool

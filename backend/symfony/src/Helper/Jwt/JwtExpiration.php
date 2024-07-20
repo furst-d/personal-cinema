@@ -4,6 +4,7 @@ namespace App\Helper\Jwt;
 
 enum JwtExpiration: int
 {
+    case EXPIRATION_10_SECONDS = 10;
     case EXPIRATION_30_SECONDS = 30;
     case EXPIRATION_1_MINUTE = 60;
     case EXPIRATION_10_MINUTES = 600;

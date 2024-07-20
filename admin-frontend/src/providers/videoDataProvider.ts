@@ -1,10 +1,9 @@
-import { fetchUtils, DataProvider } from 'react-admin';
+import { fetchJsonWithAuth } from './authProvider';
 import { stringify } from 'query-string';
 
 const apiUrl = import.meta.env.VITE_API_URL;
-const httpClient = fetchUtils.fetchJson;
 
-export const videoDataProvider: DataProvider = {
+export const videoDataProvider = {
     getList: (resource, params) => {
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort;
@@ -16,73 +15,96 @@ export const videoDataProvider: DataProvider = {
         };
         const url = `${apiUrl}/v1/admin/videos?${stringify(query)}`;
 
-        return httpClient(url).then(({ headers, json }) => ({
-            data: json.payload.data,
-            total: json.payload.totalCount,
+        return fetchJsonWithAuth(url).then(response => {
+            const { data, totalCount } = response.data.payload;
+            return {
+                data,
+                total: totalCount,
+            };
+        });
+    },
+    getOne: (resource, params) => {
+        const url = `${apiUrl}/v1/admin/videos/${params.id}`;
+        return fetchJsonWithAuth(url).then(response => ({
+            data: response.data.payload,
         }));
     },
-
-    getOne: (resource, params) =>
-        httpClient(`${apiUrl}/v1/admin/videos/${params.id}`).then(({ json }) => ({ data: json })),
-
     getMany: (resource, params) => {
         const query = {
             filter: JSON.stringify({ id: params.ids }),
         };
         const url = `${apiUrl}/v1/admin/videos?${stringify(query)}`;
-        return httpClient(url).then(({ json }) => ({ data: json.payload.data }));
+        return fetchJsonWithAuth(url).then(response => ({
+            data: response.data.payload,
+        }));
     },
-
     getManyReference: (resource, params) => {
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort;
         const query = {
-            sort: JSON.stringify([field, order]),
-            range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
+            limit: perPage,
+            offset: (page - 1) * perPage,
+            sort: field,
+            order: order,
             filter: JSON.stringify({
                 ...params.filter,
                 [params.target]: params.id,
             }),
         };
         const url = `${apiUrl}/v1/admin/videos?${stringify(query)}`;
-        return httpClient(url).then(({ json }) => ({ data: json.payload.data }));
+
+        return fetchJsonWithAuth(url).then(response => ({
+            data: response.data.payload,
+            total: response.data.payload.length,
+        }));
     },
-
-    update: (resource, params) =>
-        httpClient(`${apiUrl}/v1/admin/videos/${params.id}`, {
+    update: (resource, params) => {
+        const url = `${apiUrl}/v1/admin/videos/${params.id}`;
+        return fetchJsonWithAuth(url, {
             method: 'PUT',
-            body: JSON.stringify(params.data),
-        }).then(({ json }) => ({ data: json })),
-
+            data: params.data,
+        }).then(response => ({
+            data: response.data.payload,
+        }));
+    },
     updateMany: (resource, params) => {
         const query = {
             filter: JSON.stringify({ id: params.ids }),
         };
-        return httpClient(`${apiUrl}/v1/admin/videos?${stringify(query)}`, {
+        const url = `${apiUrl}/v1/admin/videos?${stringify(query)}`;
+        return fetchJsonWithAuth(url, {
             method: 'PUT',
-            body: JSON.stringify(params.data),
-        }).then(({ json }) => ({ data: json.payload.data }));
+            data: params.data,
+        }).then(response => ({
+            data: response.data.payload,
+        }));
     },
-
-    create: (resource, params) =>
-        httpClient(`${apiUrl}/v1/admin/videos`, {
+    create: (resource, params) => {
+        const url = `${apiUrl}/v1/admin/videos`;
+        return fetchJsonWithAuth(url, {
             method: 'POST',
-            body: JSON.stringify(params.data),
-        }).then(({ json }) => ({
-            data: { ...params.data, id: json.id },
-        })),
-
-    delete: (resource, params) =>
-        httpClient(`${apiUrl}/v1/admin/videos/${params.id}`, {
+            data: params.data,
+        }).then(response => ({
+            data: { ...params.data, id: response.data.payload.id },
+        }));
+    },
+    delete: (resource, params) => {
+        const url = `${apiUrl}/v1/admin/videos/${params.id}`;
+        return fetchJsonWithAuth(url, {
             method: 'DELETE',
-        }).then(({ json }) => ({ data: json })),
-
+        }).then(response => ({
+            data: response.data.payload,
+        }));
+    },
     deleteMany: (resource, params) => {
         const query = {
             filter: JSON.stringify({ id: params.ids }),
         };
-        return httpClient(`${apiUrl}/v1/admin/videos?${stringify(query)}`, {
+        const url = `${apiUrl}/v1/admin/videos?${stringify(query)}`;
+        return fetchJsonWithAuth(url, {
             method: 'DELETE',
-        }).then(({ json }) => ({ data: json.payload.data }));
+        }).then(response => ({
+            data: response.data.payload,
+        }));
     },
 };

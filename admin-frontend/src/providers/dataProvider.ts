@@ -1,6 +1,6 @@
 import { DataProvider } from 'react-admin';
-import { userDataProvider } from './providers/userDataProvider';
-import { videoDataProvider } from './providers/videoDataProvider';
+import { userDataProvider } from './userDataProvider';
+import { videoDataProvider } from './videoDataProvider';
 
 const combinedDataProvider: DataProvider = {
     getList: (resource, params) => {
@@ -23,6 +23,7 @@ const combinedDataProvider: DataProvider = {
         return Promise.reject(new Error(`Unknown resource: ${resource}`));
     },
 
+    // Implement other methods similarly...
     getMany: (resource, params) => {
         if (resource === 'users') {
             return userDataProvider.getMany(resource, params);

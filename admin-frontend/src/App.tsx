@@ -8,10 +8,22 @@ import {
 import { Layout } from './Layout';
 import { UserList } from './components/users/UserList';
 import { VideoList } from './components/videos/VideoList';
-import dataProvider from "./dataProvider";
+import dataProvider from "./providers/dataProvider";
+import authProvider from "./providers/authProvider";
+import LoginPage from './components/login/LoginPage';
+import polyglotI18nProvider from 'ra-i18n-polyglot';
+import czechMessages from "ra-language-czech";
+
+const i18nProvider = polyglotI18nProvider(() => czechMessages, 'cs', { allowMissing: true });
 
 export const App: React.FC = () => (
-    <Admin layout={Layout} dataProvider={dataProvider}>
+    <Admin
+        layout={Layout}
+        dataProvider={dataProvider}
+        authProvider={authProvider}
+        loginPage={LoginPage}
+        i18nProvider={i18nProvider}
+    >
         <Resource
             name="users"
             list={UserList}

@@ -83,6 +83,12 @@ class TokenValidatorListener
                     return;
                 }
 
+                if (!$user->isActive()) {
+                    $response = $this->re->withException(new UnauthorizedException('User is not active. Please check your email for activation.'));
+                    $event->setResponse($response);
+                    return;
+                }
+
                 $request->attributes->set('account', $user);
 
                 if ($this->isAdminRoute($path) && !$this->roleService->isAdmin($user)) {
