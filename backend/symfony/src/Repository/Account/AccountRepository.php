@@ -4,6 +4,7 @@ namespace App\Repository\Account;
 
 use App\Entity\Account\Account;
 use App\Helper\Paginator\PaginatorResult;
+use App\Repository\PaginatorHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
@@ -13,6 +14,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class AccountRepository extends ServiceEntityRepository
 {
+    use PaginatorHelper;
+
     /**
      * @param ManagerRegistry $registry
      */
@@ -42,14 +45,6 @@ class AccountRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('a')
             ->where('a.isDeleted = false');
 
-        if (!is_null($limit) && !is_null($offset)) {
-            $qb->setMaxResults($limit)
-                ->setFirstResult($offset);
-        }
-
-        $paginator = new Paginator($qb);
-        $totalItems = $paginator->count();
-
-        return new PaginatorResult(iterator_to_array($paginator), $totalItems);
+        return $this->getPaginatorResult($qb, $limit, $offset);
     }
 }

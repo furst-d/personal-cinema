@@ -88,15 +88,15 @@ class VideoService
     }
 
     /**
-     * @param Account $account
+     * @param Account|null $account
      * @param Folder|null $folder
      * @param int|null $limit
      * @param int|null $offset
      * @return PaginatorResult<Video>
      */
-    public function getVideos(Account $account, ?Folder $folder, ?int $limit, ?int $offset): PaginatorResult
+    public function getVideos(?Account $account, ?Folder $folder, ?int $limit, ?int $offset): PaginatorResult
     {
-        return $this->videoRepository->findAccountVideos($account, $folder, $limit, $offset);
+        return $this->videoRepository->findVideos($account, $folder, $limit, $offset);
     }
 
     /**

@@ -119,7 +119,7 @@ class VideoServiceTest extends TestCase
 
         $this->mockVideoRepository
             ->expects($this->once())
-            ->method('findAccountVideos')
+            ->method('findVideos')
             ->with($account, $folder, 10, 0)
             ->willReturn($paginatorResult);
 

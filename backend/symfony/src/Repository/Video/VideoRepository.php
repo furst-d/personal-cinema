@@ -6,8 +6,8 @@ use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
 use App\Entity\Video\Video;
 use App\Helper\Paginator\PaginatorResult;
+use App\Repository\PaginatorHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -15,6 +15,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class VideoRepository extends ServiceEntityRepository
 {
+    use PaginatorHelper;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Video::class);
@@ -33,31 +35,26 @@ class VideoRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param Account $account
+     * @param Account|null $account
      * @param Folder|null $folder
      * @param int|null $limit
      * @param int|null $offset
      * @return PaginatorResult<Video>
      */
-    public function findAccountVideos(Account $account, ?Folder $folder, ?int $limit, ?int $offset): PaginatorResult
+    public function findVideos(?Account $account, ?Folder $folder, ?int $limit, ?int $offset): PaginatorResult
     {
         $qb = $this->createQueryBuilder('v')
-            ->where('v.account = :account')->setParameter('account', $account)
-            ->andWhere('v.isDeleted = false');
+            ->where('v.isDeleted = false');
+
+        if ($account) {
+            $qb->andWhere('v.account = :account')->setParameter('account', $account);
+        }
 
         if ($folder) {
             $qb->andWhere('v.folder = :folder')->setParameter('folder', $folder);
         }
 
-        if (!is_null($limit) && !is_null($offset)) {
-            $qb->setMaxResults($limit)
-                ->setFirstResult($offset);
-        }
-
-        $paginator = new Paginator($qb);
-        $totalItems = $paginator->count();
-
-        return new PaginatorResult(iterator_to_array($paginator), $totalItems);
+        return $this->getPaginatorResult($qb, $limit, $offset);
     }
 
     /**

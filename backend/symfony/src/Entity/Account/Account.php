@@ -19,11 +19,11 @@ class Account implements UserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['account:read'])]
+    #[Groups(['account:read', 'video:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['account:read'])]
+    #[Groups(['account:read', 'video:read'])]
     private string $email;
 
     #[ORM\Column(length: 255)]
