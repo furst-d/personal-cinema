@@ -3,6 +3,7 @@
 namespace listener;
 
 use App\Entity\Account\Account;
+use App\Entity\Account\Role;
 use App\Exception\UnauthorizedException;
 use App\Helper\Api\ResponseEntity;
 use App\Helper\Jwt\JwtUsage;
@@ -46,6 +47,8 @@ class TokenValidatorListenerTest extends TestCase
 
         $decodedToken = ['user_id' => 1];
         $user = new Account('test@example.com', 'password', 'salt');
+        $user->setActive(true);
+        $user->addRole(new Role('User', 'ROLE_USER'));
 
         $this->jwtService->expects($this->once())
             ->method('decodeToken')
@@ -56,6 +59,8 @@ class TokenValidatorListenerTest extends TestCase
             ->method('loadUserByIdentifier')
             ->with(1)
             ->willReturn($user);
+
+        $this->roleService->method('isAdmin')->with($user)->willReturn(true); // Mock kontrolu admin role
 
         $this->listener->onKernelRequest($event);
 

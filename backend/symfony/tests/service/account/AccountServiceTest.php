@@ -3,6 +3,7 @@
 namespace App\Tests\Service\Account;
 
 use App\Entity\Account\Account;
+use App\Entity\Account\Role;
 use App\Exception\BadRequestException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
@@ -74,15 +75,19 @@ class AccountServiceTest extends TestCase
     public function testLoginUserSuccess()
     {
         $account = new Account(self::TEST_EMAIL, hash('sha256', self::TEST_PASSWORD . self::TEST_SALT), self::TEST_SALT);
+        $account->setActive(true);
+        $account->addRole(new Role('User', 'ROLE_USER'));
+
         $this->accountRepository->method('findOneBy')->willReturn($account);
-
         $this->authenticator->method('verifyPassword')->willReturn(true);
+        $this->roleService->method('hasRoles')->willReturn(true); // Přidejte toto pro kontrolu rolí
 
-        $result = $this->accountService->loginUser(self::TEST_EMAIL, self::TEST_PASSWORD);
+        $result = $this->accountService->loginUser(self::TEST_EMAIL, self::TEST_PASSWORD, ['ROLE_USER']);
 
         $this->assertInstanceOf(Account::class, $result);
         $this->assertEquals(self::TEST_EMAIL, $result->getEmail());
     }
+
 
     public function testChangePasswordSuccess()
     {
