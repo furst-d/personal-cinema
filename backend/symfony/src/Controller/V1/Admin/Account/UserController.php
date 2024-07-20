@@ -3,15 +3,10 @@
 namespace App\Controller\V1\Admin\Account;
 
 use App\Controller\V1\Personal\BasePersonalController;
-use App\DTO\AbstractQueryRequest;
 use App\DTO\PaginatorRequest;
-use App\DTO\Video\VideoRequest;
-use App\Exception\ApiException;
-use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\AccountService;
 use App\Service\Locator\BaseControllerLocator;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/admin/users')]
