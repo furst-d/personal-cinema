@@ -3,7 +3,7 @@ import {
     Avatar,
     Box,
     Button,
-    Container,
+    Container, Divider,
     IconButton,
     Menu,
     MenuItem,
@@ -15,9 +15,20 @@ import React from "react";
 import MenuIcon from '@mui/icons-material/Menu';
 import { useTheme } from 'styled-components';
 import Logo from '/public/images/logo.svg?react';
+import { NavLink } from 'react-router-dom';
 
-const pages = ['Vaše videa', 'Správa videí', 'Správa disku'];
-const settings = ['Profil', 'Nastavení', 'Odhlásit se'];
+const pages = [
+    { title: 'Vaše videa', path: '/' },
+    { title: 'Správa videí', path: '/videos' },
+    { title: 'Správa disku', path: '/disc' }
+];
+
+const settings = [
+    { title: 'Profil', path: '/profile' },
+    { title: 'Nastavení', path: '/settings' },
+    { isDivider: true },
+    { title: 'Odhlásit se', path: '/logout', color: '#b40000', weight: '700' }
+];
 
 const Navbar = () => {
     const theme = useTheme();
@@ -45,13 +56,15 @@ const Navbar = () => {
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     <Box sx={{ display: { xs: 'none', md: 'flex' }, marginRight: '1rem' }}>
-                        <Logo height="40px" />
+                        <NavLink to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+                            <Logo height="40px" />
+                        </NavLink>
                     </Box>
                     <Typography
                         variant="h6"
                         noWrap
-                        component="a"
-                        href="#app-bar-with-responsive-menu"
+                        component={NavLink}
+                        to="/"
                         sx={{
                             mr: 2,
                             display: { xs: 'none', md: 'flex' },
@@ -94,21 +107,39 @@ const Navbar = () => {
                                 display: { xs: 'block', md: 'none' }
                             }}
                         >
-                            {pages.map((page) => (
-                                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                                    <Typography textAlign="center">{page}</Typography>
-                                </MenuItem>
+                            {pages.map((page: any, index: number) => (
+                                page.isDivider
+                                    ? <Divider key={index} />
+                                    : <MenuItem
+                                        key={page.title}
+                                        component={NavLink}
+                                        to={page.path}
+                                        onClick={handleCloseNavMenu}
+                                        sx={{
+                                            color: page.color ? page.color : 'inherit',
+                                            fontWeight: page.weight ? page.weight : 'normal',
+                                        }}
+                                    >
+                                        <Typography
+                                            textAlign="center"
+                                            sx={{
+                                                fontWeight: page.weight ? page.weight : 'inherit',
+                                            }}
+                                        >{page.title}</Typography>
+                                    </MenuItem>
                             ))}
                         </Menu>
                     </Box>
                     <Box sx={{ display: { xs: 'flex', md: 'none' }, marginRight: '1rem' }}>
-                        <Logo height="40px" />
+                        <NavLink to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+                            <Logo height="40px" />
+                        </NavLink>
                     </Box>
                     <Typography
                         variant="h5"
                         noWrap
-                        component="a"
-                        href="#app-bar-with-responsive-menu"
+                        component={NavLink}
+                        to="/"
                         sx={{
                             mr: 2,
                             display: { xs: 'flex', md: 'none' },
@@ -125,7 +156,9 @@ const Navbar = () => {
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         {pages.map((page) => (
                             <Button
-                                key={page}
+                                key={page.title}
+                                component={NavLink}
+                                to={page.path}
                                 onClick={handleCloseNavMenu}
                                 sx={{
                                     my: 1,
@@ -133,12 +166,14 @@ const Navbar = () => {
                                     display: 'block',
                                     fontWeight: 'bold',
                                     '&:hover': {
-                                        backgroundColor: theme.primary_darker,
-                                        color: theme.text_light,
+                                        backgroundColor: theme.primary_darker
+                                    },
+                                    '&.active': {
+                                        backgroundColor: theme.primary_darker
                                     }
                                 }}
                             >
-                                {page}
+                                {page.title}
                             </Button>
                         ))}
                     </Box>
@@ -165,10 +200,25 @@ const Navbar = () => {
                             open={Boolean(anchorElUser)}
                             onClose={handleCloseUserMenu}
                         >
-                            {settings.map((setting) => (
-                                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                                    <Typography textAlign="center">{setting}</Typography>
-                                </MenuItem>
+                            {settings.map((setting: any, index: number) => (
+                                setting.isDivider
+                                    ? <Divider key={index} />
+                                    : <MenuItem
+                                        key={setting.title}
+                                        component={NavLink}
+                                        to={setting.path}
+                                        onClick={handleCloseUserMenu}
+                                        sx={{
+                                            color: setting.color ? setting.color : 'inherit',
+                                        }}
+                                    >
+                                        <Typography
+                                            textAlign="center"
+                                            sx={{
+                                                fontWeight: setting.weight ? setting.weight : 'inherit',
+                                            }}
+                                        >{setting.title}</Typography>
+                                    </MenuItem>
                             ))}
                         </Menu>
                     </Box>
