@@ -17,21 +17,21 @@ import { useTheme } from 'styled-components';
 import Logo from '/public/images/logo.svg?react';
 import { NavLink } from 'react-router-dom';
 
-const pages = [
-    { title: 'Vaše videa', path: '/' },
-    { title: 'Správa videí', path: '/videos' },
-    { title: 'Správa disku', path: '/disc' }
-];
-
-const settings = [
-    { title: 'Profil', path: '/profile' },
-    { title: 'Nastavení', path: '/settings' },
-    { isDivider: true },
-    { title: 'Odhlásit se', path: '/logout', color: '#b40000', weight: '700' }
-];
-
 const Navbar = () => {
     const theme = useTheme();
+
+    const pages = [
+        { title: 'Vaše videa', path: '/' },
+        { title: 'Správa videí', path: '/videos' },
+        { title: 'Správa disku', path: '/disc' }
+    ];
+
+    const settings = [
+        { title: 'Profil', path: '/profile' },
+        { title: 'Nastavení', path: '/settings' },
+        { isDivider: true },
+        { title: 'Odhlásit se', path: '/logout', color: theme.primary, weight: '700' }
+    ];
 
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
