@@ -7,6 +7,7 @@ export const ApplicationStyle = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
+  width: 100%;  
 `
 
 export const ContainerStyle = styled.div`
@@ -14,6 +15,7 @@ export const ContainerStyle = styled.div`
     display: flex;
     justify-content: center;
     flex: 1 1 auto;
+    width: 100%;
 `
 
 export const ContentWrapperStyle = styled.div`
@@ -31,4 +33,5 @@ export const ContentWrapperStyle = styled.div`
 
 export const ContentStyle = styled.div`
     margin-top: 2em;
+    width: 100%;
 `

@@ -4,6 +4,7 @@ import {
     Box,
     Button,
     Container,
+    Divider,
     IconButton,
     Menu,
     MenuItem,
@@ -15,12 +16,23 @@ import React from "react";
 import MenuIcon from '@mui/icons-material/Menu';
 import { useTheme } from 'styled-components';
 import Logo from '/public/images/logo.svg?react';
-
-const pages = ['Vaše videa', 'Správa videí', 'Správa disku'];
-const settings = ['Profil', 'Nastavení', 'Odhlásit se'];
+import { NavLink } from 'react-router-dom';
 
 const Navbar = () => {
     const theme = useTheme();
+
+    const pages = [
+        { title: 'Vaše videa', path: '/' },
+        { title: 'Správa videí', path: '/videos' },
+        { title: 'Správa disku', path: '/disc' }
+    ];
+
+    const settings = [
+        { title: 'Profil', path: '/profile' },
+        { title: 'Nastavení', path: '/settings' },
+        { isDivider: true },
+        { title: 'Odhlásit se', path: '/', color: theme.primary, weight: '700' }
+    ];
 
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
@@ -44,28 +56,27 @@ const Navbar = () => {
         <AppBar position="static" sx={{ color: theme.text_light }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                    <Box sx={{ display: { xs: 'none', md: 'flex' }, marginRight: '1rem' }}>
-                        <Logo height="40px" />
+                    <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', marginRight: '1rem' }}>
+                        <NavLink to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
+                            <Logo height="40px" />
+                            <Typography
+                                variant="h6"
+                                noWrap
+                                sx={{
+                                    ml: 1,
+                                    fontFamily: 'monospace',
+                                    fontWeight: 700,
+                                    letterSpacing: '.1rem',
+                                    color: 'inherit',
+                                    textDecoration: 'none',
+                                }}
+                            >
+                                SoukromeKino
+                            </Typography>
+                        </NavLink>
                     </Box>
-                    <Typography
-                        variant="h6"
-                        noWrap
-                        component="a"
-                        href="#app-bar-with-responsive-menu"
-                        sx={{
-                            mr: 2,
-                            display: { xs: 'none', md: 'flex' },
-                            fontFamily: 'monospace',
-                            fontWeight: 700,
-                            letterSpacing: '.1rem',
-                            color: 'inherit',
-                            textDecoration: 'none',
-                        }}
-                    >
-                        SoukromeKino
-                    </Typography>
 
-                    <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+                    <Box sx={{ display: { xs: 'flex', md: 'none' }, flexGrow: 1, justifyContent: 'space-between', alignItems: 'center' }}>
                         <IconButton
                             size="large"
                             aria-label="account of current user"
@@ -76,56 +87,75 @@ const Navbar = () => {
                         >
                             <MenuIcon />
                         </IconButton>
-                        <Menu
-                            id="menu-appbar"
-                            anchorEl={anchorElNav}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'left',
-                            }}
-                            keepMounted
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'left',
-                            }}
-                            open={Boolean(anchorElNav)}
-                            onClose={handleCloseNavMenu}
-                            sx={{
-                                display: { xs: 'block', md: 'none' }
-                            }}
-                        >
-                            {pages.map((page) => (
-                                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                                    <Typography textAlign="center">{page}</Typography>
-                                </MenuItem>
-                            ))}
-                        </Menu>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <NavLink to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
+                                <Logo height="40px" />
+                                <Typography
+                                    variant="h5"
+                                    noWrap
+                                    sx={{
+                                        ml: 1,
+                                        flexGrow: 1,
+                                        fontFamily: 'monospace',
+                                        fontWeight: 700,
+                                        letterSpacing: '.1rem',
+                                        color: 'inherit',
+                                        textDecoration: 'none',
+                                    }}
+                                >
+                                    SoukromeKino
+                                </Typography>
+                            </NavLink>
+                        </Box>
+                        <Box sx={{ width: '40px' }} /> {/* Empty box to balance the logo and menu icon */}
                     </Box>
-                    <Box sx={{ display: { xs: 'flex', md: 'none' }, marginRight: '1rem' }}>
-                        <Logo height="40px" />
-                    </Box>
-                    <Typography
-                        variant="h5"
-                        noWrap
-                        component="a"
-                        href="#app-bar-with-responsive-menu"
+
+                    <Menu
+                        id="menu-appbar"
+                        anchorEl={anchorElNav}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left',
+                        }}
+                        keepMounted
+                        transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'left',
+                        }}
+                        open={Boolean(anchorElNav)}
+                        onClose={handleCloseNavMenu}
                         sx={{
-                            mr: 2,
-                            display: { xs: 'flex', md: 'none' },
-                            flexGrow: 1,
-                            fontFamily: 'monospace',
-                            fontWeight: 700,
-                            letterSpacing: '.1rem',
-                            color: 'inherit',
-                            textDecoration: 'none',
+                            display: { xs: 'block', md: 'none' }
                         }}
                     >
-                        SoukromeKino
-                    </Typography>
+                        {pages.map((page: any, index: number) => (
+                            page.isDivider
+                                ? <Divider key={index} />
+                                : <MenuItem
+                                    key={page.title}
+                                    component={NavLink}
+                                    to={page.path}
+                                    onClick={handleCloseNavMenu}
+                                    sx={{
+                                        color: page.color ? page.color : 'inherit',
+                                    }}
+                                >
+                                    <Typography
+                                        textAlign="center"
+                                        sx={{
+                                            fontWeight: page.weight ? page.weight : 'inherit',
+                                        }}
+                                    >{page.title}</Typography>
+                                </MenuItem>
+                        ))}
+                    </Menu>
+
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         {pages.map((page) => (
                             <Button
-                                key={page}
+                                key={page.title}
+                                component={NavLink}
+                                to={page.path}
                                 onClick={handleCloseNavMenu}
                                 sx={{
                                     my: 1,
@@ -133,12 +163,14 @@ const Navbar = () => {
                                     display: 'block',
                                     fontWeight: 'bold',
                                     '&:hover': {
-                                        backgroundColor: theme.primary_darker,
-                                        color: theme.text_light,
+                                        backgroundColor: theme.primary_darker
+                                    },
+                                    '&.active': {
+                                        backgroundColor: theme.primary_darker
                                     }
                                 }}
                             >
-                                {page}
+                                {page.title}
                             </Button>
                         ))}
                     </Box>
@@ -165,10 +197,25 @@ const Navbar = () => {
                             open={Boolean(anchorElUser)}
                             onClose={handleCloseUserMenu}
                         >
-                            {settings.map((setting) => (
-                                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                                    <Typography textAlign="center">{setting}</Typography>
-                                </MenuItem>
+                            {settings.map((setting: any, index: number) => (
+                                setting.isDivider
+                                    ? <Divider key={index} />
+                                    : <MenuItem
+                                        key={setting.title}
+                                        component={NavLink}
+                                        to={setting.path}
+                                        onClick={handleCloseUserMenu}
+                                        sx={{
+                                            color: setting.color ? setting.color : 'inherit',
+                                        }}
+                                    >
+                                        <Typography
+                                            textAlign="center"
+                                            sx={{
+                                                fontWeight: setting.weight ? setting.weight : 'inherit',
+                                            }}
+                                        >{setting.title}</Typography>
+                                    </MenuItem>
                             ))}
                         </Menu>
                     </Box>
