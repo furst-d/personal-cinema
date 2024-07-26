@@ -29,6 +29,21 @@ export const login = async (email: string, password: string) => {
     }
 };
 
+export const register = async (email: string, password: string) => {
+    try {
+        const response = await axiosPublic.post('/v1/users/register', { email, password });
+        if (response.status === 201) {
+            return { success: true, message: "Registrace byla úspěšná. Zkontrolujte svůj email pro potvrzení účtu." };
+        }
+    } catch (error: any) {
+        if (error.response && error.response.status === 409) {
+            return { success: false, message: "Účet s tímto emailem již existuje" };
+        } else {
+            return { success: false, message: "Při zpracování došlo k chybě" };
+        }
+    }
+};
+
 export const resendActivationEmail = async (email: string) => {
     try {
         const response = await axiosPublic.post('/v1/users/activate/send', { email });
@@ -37,5 +52,20 @@ export const resendActivationEmail = async (email: string) => {
         }
     } catch (error) {
         toast.error("Při odesílání došlo k chybě");
+    }
+};
+
+export const resetPassword = async (email: string) => {
+    try {
+        const response = await axiosPublic.post('/v1/users/password-reset', { email });
+        if (response.status !== 500) {
+            toast.success("Žádost o obnovení hesla byla odeslána");
+        }
+    } catch (error) {
+        if (error.response && error.response.status === 500) {
+            toast.error("Při odesílání žádosti došlo k chybě");
+        } else {
+            toast.success("Žádost o obnovení hesla byla odeslána");
+        }
     }
 };
