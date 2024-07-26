@@ -5,6 +5,7 @@ namespace App\Service\Account;
 use App\Entity\Account\Account;
 use App\Exception\BadRequestException;
 use App\Exception\ConflictException;
+use App\Exception\ForbiddenException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
@@ -99,10 +100,6 @@ class AccountService
             throw new BadRequestException('Invalid email or password.');
         }
 
-        if (!$user->isActive()) {
-            throw new BadRequestException('Account is not activated.');
-        }
-
         if (!$this->roleService->hasRoles($user, $roles)) {
             throw new UnauthorizedException('User does not have sufficient permissions.');
         }
@@ -156,7 +153,7 @@ class AccountService
     public function getAccountByEmail(string $email): Account
     {
         /** @var Account $user */
-        $user = $this->accountRepository->findOneBy(['email' => $email]);
+        $user = $this->accountRepository->findOneBy(['email' => $email, 'isDeleted' => false]);
 
         if (!$user) {
             throw new NotFoundException(self::ACCOUNT_NOT_FOUND_MESSAGE);
@@ -173,7 +170,7 @@ class AccountService
     public function getAccountById(int $id): Account
     {
         /** @var Account $user */
-        $user = $this->accountRepository->find($id);
+        $user = $this->accountRepository->findby(['id' => $id, 'isDeleted' => false]);
 
         if (!$user) {
             throw new NotFoundException(self::ACCOUNT_NOT_FOUND_MESSAGE);

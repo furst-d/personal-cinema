@@ -3,6 +3,7 @@
 namespace App\Listener;
 
 use App\Entity\Account\Account;
+use App\Exception\ForbiddenException;
 use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
 use App\Helper\Api\ResponseEntity;
@@ -84,7 +85,7 @@ class TokenValidatorListener
                 }
 
                 if (!$user->isActive()) {
-                    $response = $this->re->withException(new UnauthorizedException('User is not active. Please check your email for activation.'));
+                    $response = $this->re->withException(new ForbiddenException('User is not active. Please check your email for activation.'));
                     $event->setResponse($response);
                     return;
                 }
