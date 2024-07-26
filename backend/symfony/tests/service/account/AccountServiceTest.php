@@ -156,7 +156,7 @@ class AccountServiceTest extends TestCase
     public function testGetAccountByIdSuccess()
     {
         $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT);
-        $this->accountRepository->method('find')->willReturn($account);
+        $this->accountRepository->method('findOneBy')->willReturn($account);
 
         $result = $this->accountService->getAccountById(self::TEST_ACCOUNT_ID);
 

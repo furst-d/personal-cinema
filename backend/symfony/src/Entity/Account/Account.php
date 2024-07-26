@@ -41,7 +41,6 @@ class Account implements UserInterface
     private bool $isActive = false;
 
     #[ORM\Column]
-    #[Groups(['account:read'])]
     private bool $isDeleted = false;
 
     /**

@@ -17,9 +17,11 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { useTheme } from 'styled-components';
 import Logo from '/public/images/logo.svg?react';
 import { NavLink } from 'react-router-dom';
+import { useAuth } from "../providers/AuthProvider";
 
 const Navbar = () => {
     const theme = useTheme();
+    const { logout } = useAuth();
 
     const pages = [
         { title: 'Vaše videa', path: '/' },
@@ -31,7 +33,7 @@ const Navbar = () => {
         { title: 'Profil', path: '/profile' },
         { title: 'Nastavení', path: '/settings' },
         { isDivider: true },
-        { title: 'Odhlásit se', path: '/', color: theme.primary, weight: '700' }
+        { title: 'Odhlásit se', path: '/login', color: theme.primary, weight: '700', onClick: logout }
     ];
 
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
@@ -176,7 +178,7 @@ const Navbar = () => {
                     </Box>
 
                     <Box sx={{ flexGrow: 0 }}>
-                        <Tooltip title="Nastavení">
+                        <Tooltip title="Profil">
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                                 <Avatar alt="Avatar" src="/static/images/avatar/2.jpg" />
                             </IconButton>
@@ -204,7 +206,10 @@ const Navbar = () => {
                                         key={setting.title}
                                         component={NavLink}
                                         to={setting.path}
-                                        onClick={handleCloseUserMenu}
+                                        onClick={() => {
+                                            handleCloseUserMenu();
+                                            if (setting.onClick) setting.onClick();
+                                        }}
                                         sx={{
                                             color: setting.color ? setting.color : 'inherit',
                                         }}
