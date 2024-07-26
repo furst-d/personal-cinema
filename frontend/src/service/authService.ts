@@ -69,3 +69,29 @@ export const resetPassword = async (email: string) => {
         }
     }
 };
+
+export const activateAccount = async (token: string) => {
+    try {
+        const response = await axiosPublic.post('/v1/users/activate', { token });
+        if (response.status === 200) {
+            return { success: true, message: "Účet byl úspěšně aktivován." };
+        } else {
+            return { success: false, message: "Při aktivaci účtu došlo k chybě." };
+        }
+    } catch (error: any) {
+        return { success: false, message: "Při aktivaci účtu došlo k chybě." };
+    }
+};
+
+export const resetPasswordWithToken = async (token: string, password: string) => {
+    try {
+        const response = await axiosPublic.post('/v1/users/password-reset', { token, password });
+        if (response.status === 200) {
+            return { success: true, message: "Heslo bylo úspěšně obnoveno." };
+        } else {
+            return { success: false, message: "Při obnovování hesla došlo k chybě." };
+        }
+    } catch (error: any) {
+        return { success: false, message: "Při obnovování hesla došlo k chybě." };
+    }
+};

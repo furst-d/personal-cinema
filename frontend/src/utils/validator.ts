@@ -48,3 +48,17 @@ export const validateRegisterForm = (email: string, password: string, confirmPas
 
     return errors;
 };
+
+export const validatePasswordResetForm = (password: string, confirmPassword: string) => {
+    const errors: { password?: string; confirmPassword?: string } = {};
+
+    if (password.length < 6) {
+        errors.password = "Heslo musí mít alespoň 6 znaků";
+    }
+
+    if (password !== confirmPassword) {
+        errors.confirmPassword = "Hesla se neshodují";
+    }
+
+    return errors;
+};

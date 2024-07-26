@@ -170,7 +170,7 @@ class AccountService
     public function getAccountById(int $id): Account
     {
         /** @var Account $user */
-        $user = $this->accountRepository->findby(['id' => $id, 'isDeleted' => false]);
+        $user = $this->accountRepository->findOneBy(['id' => $id, 'isDeleted' => false]);
 
         if (!$user) {
             throw new NotFoundException(self::ACCOUNT_NOT_FOUND_MESSAGE);
