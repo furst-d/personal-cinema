@@ -61,6 +61,7 @@ class Video
     private string $cdnId;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['video:read'])]
     private ?string $path = null;
 
     #[ORM\Column(nullable: true)]
