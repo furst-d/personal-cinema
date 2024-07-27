@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getVideos } from "../../service/videoService";
-import { Typography, CircularProgress, Container, List, ListItem, ListItemText, ListItemAvatar, Avatar, Box } from "@mui/material";
+import { Typography, Container, Grid } from "@mui/material";
 import Loading from "../loading/Loading";
+import VideoPreview from "./VideoPreview";
 
 const VideoList: React.FC = () => {
     const [videos, setVideos] = useState<any[]>([]);
@@ -29,19 +30,13 @@ const VideoList: React.FC = () => {
             <Typography variant="h4" gutterBottom>
                 Vaše videa
             </Typography>
-            <List>
+            <Grid container spacing={4}>
                 {videos.map((video) => (
-                    <ListItem key={video.id}>
-                        <ListItemAvatar>
-                            <Avatar variant="square" src={`data:image/jpeg;base64,${video.thumbnail}`} />
-                        </ListItemAvatar>
-                        <ListItemText
-                            primary={video.name}
-                            secondary={`Velikost: ${video.size} bajtů, Kodek: ${video.codec}, Rozlišení: ${video.originalWidth}x${video.originalHeight}`}
-                        />
-                    </ListItem>
+                    <Grid item xs={12} sm={6} md={4} lg={3} key={video.id}>
+                        <VideoPreview video={video} />
+                    </Grid>
                 ))}
-            </List>
+            </Grid>
         </Container>
     );
 };
