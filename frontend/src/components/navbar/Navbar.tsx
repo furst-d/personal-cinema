@@ -95,9 +95,9 @@ const Navbar = () => {
                         </IconButton>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <NavLink to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
-                                <Logo height="40px" />
+                                <Logo height="30px" />
                                 <Typography
-                                    variant="h5"
+                                    variant="h6"
                                     noWrap
                                     sx={{
                                         ml: 1,
