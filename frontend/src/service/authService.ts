@@ -29,6 +29,11 @@ export const login = async (email: string, password: string) => {
     }
 };
 
+export const logoutUser = () => {
+    localStorage.removeItem("user_data");
+    window.location.href = "/login";
+};
+
 export const register = async (email: string, password: string) => {
     try {
         const response = await axiosPublic.post('/v1/users/register', { email, password });
