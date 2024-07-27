@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContextType, User } from "../../types/auth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Loading from "../loading/Loading";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -48,7 +49,7 @@ export const AuthProvider: React.FC = ({ children }) => {
     };
 
     if (loading) {
-        return <div>Načítání...</div>;
+        return <Loading />;
     }
 
     return (

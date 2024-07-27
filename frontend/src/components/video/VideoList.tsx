@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { getVideos } from "../../service/videoService";
-import { Typography, CircularProgress, Container, List, ListItem, ListItemText, ListItemAvatar, Avatar } from "@mui/material";
+import { Typography, CircularProgress, Container, List, ListItem, ListItemText, ListItemAvatar, Avatar, Box } from "@mui/material";
+import Loading from "../loading/Loading";
 
 const VideoList: React.FC = () => {
     const [videos, setVideos] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         getVideos()
@@ -13,7 +13,6 @@ const VideoList: React.FC = () => {
                 setVideos(response.data.payload.data);
             })
             .catch(error => {
-                setError('Chyba při načítání videí');
                 console.error('Error loading videos:', error);
             })
             .finally(() => {
@@ -22,11 +21,7 @@ const VideoList: React.FC = () => {
     }, []);
 
     if (loading) {
-        return <CircularProgress />;
-    }
-
-    if (error) {
-        return <Typography color="error">{error}</Typography>;
+        return <Loading />;
     }
 
     return (

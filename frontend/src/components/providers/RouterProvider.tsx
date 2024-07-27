@@ -5,12 +5,13 @@ import PublicRouter from "../router/PublicRouter";
 import { Route, Routes } from "react-router-dom";
 import NotActivatedPage from "../pages/NotActivatedPage";
 import ActivateAccountPage from "../pages/ActivateAccountPage";
+import Loading from "../loading/Loading";
 
 const RouterProvider: React.FC = () => {
     const { isAuthenticated, user, loading } = useAuth();
 
     if (loading) {
-        return <div>Načítání...</div>;
+        return <Loading />;
     }
 
     return (
