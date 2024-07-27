@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { getToken, setToken, removeTokens } from '../service/tokenService';
-import { useAuth } from '../components/providers/AuthProvider';
+import { logoutUser } from '../service/authService';
 
 const axiosPrivate = axios.create({
     baseURL: import.meta.env.VITE_API_URL
@@ -27,11 +27,11 @@ axiosPrivate.interceptors.response.use(
             originalRequest._retry = true;
             const refreshToken = getToken('refresh_token');
             if (!refreshToken) {
-                useAuth().logout();
+                logoutUser();
                 return Promise.reject(error);
             }
             try {
-                const response = await axios.post(`${process.env.VITE_API_URL}/v1/users/refresh-token`, { token: refreshToken });
+                const response = await axios.post(`${import.meta.env.VITE_API_URL}/v1/users/refresh-token`, { token: refreshToken });
                 if (response.status === 200) {
                     const newToken = response.data.payload.data.tokens.access_token;
                     setToken('access_token', newToken);
@@ -40,7 +40,7 @@ axiosPrivate.interceptors.response.use(
                 }
             } catch (refreshError) {
                 removeTokens();
-                useAuth().logout();
+                logoutUser();
                 return Promise.reject(refreshError);
             }
         }

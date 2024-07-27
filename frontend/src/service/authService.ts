@@ -29,6 +29,11 @@ export const login = async (email: string, password: string) => {
     }
 };
 
+export const logoutUser = () => {
+    localStorage.removeItem("user_data");
+    window.location.href = "/login";
+};
+
 export const register = async (email: string, password: string) => {
     try {
         const response = await axiosPublic.post('/v1/users/register', { email, password });
@@ -55,9 +60,9 @@ export const resendActivationEmail = async (email: string) => {
     }
 };
 
-export const resetPassword = async (email: string) => {
+export const resendResetPasswordEmail = async (email: string) => {
     try {
-        const response = await axiosPublic.post('/v1/users/password-reset', { email });
+        const response = await axiosPublic.post('/v1/users/password-reset/send', { email });
         if (response.status !== 500) {
             toast.success("Žádost o obnovení hesla byla odeslána");
         }
@@ -79,7 +84,11 @@ export const activateAccount = async (token: string) => {
             return { success: false, message: "Při aktivaci účtu došlo k chybě." };
         }
     } catch (error: any) {
-        return { success: false, message: "Při aktivaci účtu došlo k chybě." };
+        if (error.response && error.response.status === 400) {
+            return { success: false, message: "Účet je již aktivovaný." };
+        } else {
+            return { success: false, message: "Při aktivaci účtu došlo k chybě." };
+        }
     }
 };
 

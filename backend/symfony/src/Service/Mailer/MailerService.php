@@ -3,17 +3,23 @@
 namespace App\Service\Mailer;
 
 use App\Exception\BadGatewayException;
+use Exception;
+use JsonException;
+use MailerSend\Exceptions\MailerSendAssertException;
+use MailerSend\Exceptions\MailerSendException;
+use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Log\LoggerInterface;
-use SendGrid;
-use SendGrid\Mail\Mail;
-use SendGrid\Mail\TypeException;
+use MailerSend\MailerSend;
+use MailerSend\Helpers\Builder\Variable;
+use MailerSend\Helpers\Builder\Recipient;
+use MailerSend\Helpers\Builder\EmailParams;
 
 class MailerService
 {
     /**
-     * @var SendGrid $sendGrid
+     * @var MailerSend $mailerSend
      */
-    private SendGrid $sendGrid;
+    private MailerSend $mailerSend;
 
     /**
      * @var LoggerInterface $logger
@@ -26,14 +32,15 @@ class MailerService
     private string $fromEmail;
 
     /**
-     * @param SendGrid $sendGrid
+     * @param string $apiKey
      * @param LoggerInterface $logger
+     * @throws MailerSendException
      */
-    public function __construct(SendGrid $sendGrid, LoggerInterface $logger)
+    public function __construct(string $apiKey, LoggerInterface $logger)
     {
-        $this->sendGrid = $sendGrid;
+        $this->mailerSend = new MailerSend(['api_key' => $apiKey]);
         $this->logger = $logger;
-        $this->fromEmail = 'info.soukromekino@gmail.com';
+        $this->fromEmail = 'info@soukromekino.cz';
     }
 
     /**
@@ -44,13 +51,13 @@ class MailerService
      */
     public function sendAccountActivation(string $to, string $token): void
     {
-        $templateId = 'd-c5d7091d86324686b4a5f228bac19e74';
+        $templateId = 'jpzkmgq66dm4059v';
         $dynamicTemplateData = [
             'name' => $to,
-            'link' => $_ENV['FRONTEND_URL'] . '/activate/' . $token
+            'link' => $_ENV['FRONTEND_URL'] . '/activate?token=' . $token
         ];
 
-        $this->sendEmail($to, $templateId, $dynamicTemplateData);
+        $this->sendEmail($to, $templateId, 'Vítejte na SoukromeKino.cz', $dynamicTemplateData);
     }
 
     /**
@@ -61,38 +68,47 @@ class MailerService
      */
     public function sendPasswordReset(string $to, string $token): void
     {
-        $templateId = 'd-828ba6419b7d41f2a02eb169635a113b';
+        $templateId = '3yxj6ljwwn5gdo2r';
         $dynamicTemplateData = [
             'name' => $to,
-            'link' => $_ENV['FRONTEND_URL'] . '/password-reset/' . $token
+            'link' => $_ENV['FRONTEND_URL'] . '/password-reset?token=' . $token
         ];
 
-        $this->sendEmail($to, $templateId, $dynamicTemplateData);
+        $this->sendEmail($to, $templateId, 'Obnovení hesla', $dynamicTemplateData);
     }
 
     /**
      * @param string $to
      * @param string $templateId
+     * @param string $subject
      * @param array $dynamicTemplateData
      * @return void
      * @throws BadGatewayException
      */
-    private function sendEmail(string $to, string $templateId, array $dynamicTemplateData): void
+    private function sendEmail(string $to, string $templateId, string $subject, array $dynamicTemplateData): void
     {
         try {
-            $email = new Mail();
-            $email->setFrom($this->fromEmail, "SoukromeKino");
-            $email->addTo($to);
-            $email->setTemplateId($templateId);
+            $variables = [new Variable($to, $dynamicTemplateData)];
+            $recipients = [new Recipient($to, $to)];
 
-            foreach ($dynamicTemplateData as $key => $value) {
-                $email->addDynamicTemplateData($key, $value);
+            $emailParams = (new EmailParams())
+                ->setFrom($this->fromEmail)
+                ->setFromName('SoukromeKino')
+                ->setRecipients($recipients)
+                ->setTemplateId($templateId)
+                ->setSubject($subject)
+                ->setVariables($variables);
+
+            try {
+                $response = $this->mailerSend->email->send($emailParams);
+            } catch (JsonException|ClientExceptionInterface|MailerSendAssertException $e) {
+                throw new BadGatewayException($e->getMessage());
             }
 
-            $response = $this->sendGrid->send($email);
+            $this->logger->debug('Response from MailerSend', ['response' => $response]);
 
-            if ($response->statusCode() >= 400) {
-                throw new BadGatewayException('Failed to send email: ' . $response->body());
+            if (!isset($response['status_code']) || $response['status_code'] >= 400) {
+                throw new BadGatewayException('Failed to send email: ' . json_encode($response));
             }
 
             $this->logger->info('Email was sent successfully.', [
@@ -100,7 +116,7 @@ class MailerService
                 'templateId' => $templateId,
             ]);
 
-        } catch (TypeException $e) {
+        } catch (Exception $e) {
             throw new BadGatewayException($e->getMessage());
         }
     }

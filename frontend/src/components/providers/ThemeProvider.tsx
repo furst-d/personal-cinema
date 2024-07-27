@@ -1,20 +1,18 @@
-// src/providers/ThemeProvider.tsx
-
 import React from 'react';
-import { createGlobalStyle, ThemeProvider as StyledThemeProvider } from "styled-components";
-import { createTheme } from "@mui/material/styles";
-import { ToastContainer } from "react-toastify";
+import { createGlobalStyle, ThemeProvider as StyledThemeProvider } from 'styled-components';
+import { createTheme } from '@mui/material/styles';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ThemeProvider as MuiThemeProvider } from "@mui/material";
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 
 export const theme = {
-    background: "#323232",
-    primary: "#b40000",
-    primary_darker: "#750000",
-    secondary: "#3f3f3f",
-    third: "#fff",
-    text_light: "#f3f3f3",
-    text_dark: "#111",
+    background: '#323232',
+    primary: '#b40000',
+    primary_darker: '#750000',
+    secondary: '#3f3f3f',
+    third: '#fff',
+    text_light: '#f3f3f3',
+    text_dark: '#111',
 };
 
 const muiTheme = createTheme({
@@ -30,7 +28,7 @@ const muiTheme = createTheme({
         },
         primary_darker: {
             main: theme.primary_darker,
-        }
+        },
     },
     components: {
         MuiButton: {
@@ -105,9 +103,11 @@ const GlobalStyle = createGlobalStyle`
     .Toastify__toast-theme--dark {
         background-color: ${theme.secondary};
     }
-`
+`;
 
-const ThemeProvider: ({ children }: { children: any }) => JSX.Element = ({ children }) => {
+export type Theme = typeof theme;
+
+const ThemeProvider: React.FC = ({ children }) => {
     return (
         <StyledThemeProvider theme={theme}>
             <MuiThemeProvider theme={muiTheme}>
@@ -116,7 +116,7 @@ const ThemeProvider: ({ children }: { children: any }) => JSX.Element = ({ child
                     position="bottom-right"
                     theme="dark"
                     autoClose={3000}
-                    hideProgressBar={true}
+                    hideProgressBar
                     pauseOnFocusLoss={false}
                     draggable={false}
                     pauseOnHover={false}

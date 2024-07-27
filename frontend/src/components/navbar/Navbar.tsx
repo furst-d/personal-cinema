@@ -21,7 +21,7 @@ import { useAuth } from "../providers/AuthProvider";
 
 const Navbar = () => {
     const theme = useTheme();
-    const { logout } = useAuth();
+    const { user, logout } = useAuth();
 
     const pages = [
         { title: 'Vaše videa', path: '/' },
@@ -52,6 +52,10 @@ const Navbar = () => {
 
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
+    };
+
+    const getInitial = (email: string) => {
+        return email.charAt(0).toUpperCase();
     };
 
     return (
@@ -180,7 +184,7 @@ const Navbar = () => {
                     <Box sx={{ flexGrow: 0 }}>
                         <Tooltip title="Profil">
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                <Avatar alt="Avatar" src="/static/images/avatar/2.jpg" />
+                                <Avatar>{getInitial(user?.email || "")}</Avatar>
                             </IconButton>
                         </Tooltip>
                         <Menu

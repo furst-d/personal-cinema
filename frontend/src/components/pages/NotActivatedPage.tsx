@@ -19,7 +19,7 @@ const NotActivatedPage: React.FC = () => {
 
     const handleLogoutAndNavigate = () => {
         logout();
-        navigate("/login");
+        navigate("/");
     };
 
     return (

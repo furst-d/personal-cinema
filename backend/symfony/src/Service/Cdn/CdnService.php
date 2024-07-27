@@ -149,16 +149,15 @@ class CdnService
 
     /**
      * @param CdnVideoRequest $videoData
-     * @param array $thumbs
      * @return void
      * @throws BadRequestException
-     * @throws NotFoundException
      * @throws InternalException
+     * @throws NotFoundException
      */
-    public function synchronizeThumbnail(CdnVideoRequest $videoData, array $thumbs): void
+    public function synchronizeThumbnail(CdnVideoRequest $videoData): void
     {
         try {
-            $this->cdnSynchronizer->synchronizeThumbnail($videoData, $thumbs);
+            $this->cdnSynchronizer->synchronizeThumbnail($videoData);
             $this->logger->info("Synchronized thumbnail.", [
                 "cdnId" => $videoData->id
             ]);

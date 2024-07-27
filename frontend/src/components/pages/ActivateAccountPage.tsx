@@ -4,13 +4,20 @@ import { CenteredContainerStyle } from "../../styles/layout/Application";
 import { CenterFormWrapperStyle } from "../../styles/form/Form";
 import { activateAccount } from "../../service/authService";
 import { Typography, Button } from "@mui/material";
+import {useAuth} from "../providers/AuthProvider";
 
 const ActivateAccountPage: React.FC = () => {
     const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const [searchParams] = useSearchParams();
     const token = searchParams.get("token");
     const [message, setMessage] = useState("");
+
+    const handleLogoutAndNavigate = () => {
+        logout();
+        navigate("/");
+    };
 
     useEffect(() => {
         const activate = async () => {
@@ -20,11 +27,7 @@ const ActivateAccountPage: React.FC = () => {
             }
 
             const response = await activateAccount(token);
-            if (response.success) {
-                setMessage(response.message);
-            } else {
-                setMessage(response.message);
-            }
+            setMessage(response.message);
         };
         activate();
     }, [token]);
@@ -40,7 +43,7 @@ const ActivateAccountPage: React.FC = () => {
                 </Typography>
                 <Button
                     variant="contained"
-                    onClick={() => navigate("/login")}
+                    onClick={handleLogoutAndNavigate}
                     fullWidth
                     style={{ marginTop: '20px' }}
                 >
