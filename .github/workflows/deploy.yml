@@ -25,7 +25,7 @@ jobs:
           sed -i 's|db_password|${{ secrets.POSTGRES_PASSWORD }}|' backend/.env
           sed -i 's|app_secret|${{ secrets.APP_SECRET }}|' backend/symfony/.env
           sed -i 's|jwt_passphrase|${{ secrets.JWT_PASSPHRASE }}|' backend/symfony/.env
-          sed -i 's|sendgrid_api_key|${{ secrets.SENDGRID_API_KEY }}|' backend/symfony/.env
+          sed -i 's|mailersend_api_key|${{ secrets.MAILERSEND_API_KEY }}|' backend/symfony/.env
           sed -i 's|cdn_project_id|${{ secrets.CDN_PROJECT_ID }}|' backend/symfony/.env
           sed -i 's|cdn_api_key|${{ secrets.CDN_API_KEY }}|' backend/symfony/.env
           sed -i 's|cdn_callback_key|${{ secrets.CDN_CALLBACK_KEY }}|' backend/symfony/.env

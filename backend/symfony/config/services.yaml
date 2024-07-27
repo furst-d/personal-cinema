@@ -40,7 +40,7 @@ services:
 
     App\Service\Mailer\MailerService:
         arguments:
-            $sendGrid: '@sendgrid'
+            $apiKey: '%env(MAILERSEND_API_KEY)%'
             $logger: '@monolog.logger.mailer'
 
     App\Service\Cdn\CdnService:
@@ -54,11 +54,6 @@ services:
         arguments:
             $cdnSecretKey: '%env(CDN_API_KEY)%'
             $cdnUrl: '%env(CDN_URL)%'
-
-    sendgrid:
-        class: SendGrid
-        arguments:
-            $apiKey: '%env(SENDGRID_API_KEY)%'
 
     App\Listener\TokenValidatorListener:
         tags:

@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CenteredContainerStyle } from "../../styles/layout/Application";
 import { CenterFormWrapperStyle, StyledLink } from "../../styles/form/Form";
-import { resetPassword } from "../../service/authService";
 import {validateForgottenPasswordForm} from "../../utils/validator";
+import {resendResetPasswordEmail} from "../../service/authService";
 
 const ForgottenPasswordForm = () => {
     const [email, setEmail] = useState("");
@@ -24,7 +24,7 @@ const ForgottenPasswordForm = () => {
             setErrors(formErrors);
             return;
         }
-        await resetPassword(email);
+        await resendResetPasswordEmail(email);
     };
 
     return (

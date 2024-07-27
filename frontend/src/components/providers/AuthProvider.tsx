@@ -12,12 +12,13 @@ export const AuthProvider: React.FC = ({ children }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        setIsAuthenticated(false);
         const userData = localStorage.getItem("user_data");
         if (userData) {
             const parsedUserData = JSON.parse(userData);
             setIsAuthenticated(true);
             setUser(parsedUserData.user);
-            if (!parsedUserData.user.isActive) {
+            if (!parsedUserData.user.isActive && window.location.pathname !== "/activate") {
                 navigate("/account-not-activated");
             }
         }
@@ -25,12 +26,15 @@ export const AuthProvider: React.FC = ({ children }) => {
     }, [navigate]);
 
     const login = (userData: any) => {
+        setIsAuthenticated(false);
+        setLoading(true);
         localStorage.setItem("user_data", JSON.stringify(userData));
         setIsAuthenticated(true);
         setUser(userData.user);
         if (!userData.user.isActive) {
             navigate("/account-not-activated");
         } else {
+            navigate("/");
             toast.success("Úspěšně přihlášen");
         }
     };
@@ -43,9 +47,13 @@ export const AuthProvider: React.FC = ({ children }) => {
         toast.info("Úspěšně odhlášen");
     };
 
+    if (loading) {
+        return <div>Načítání...</div>;
+    }
+
     return (
         <AuthContext.Provider value={{ isAuthenticated, user, loading, login, logout }}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 };

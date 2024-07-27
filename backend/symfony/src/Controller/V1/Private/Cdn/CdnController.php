@@ -53,7 +53,7 @@ class CdnController extends BasePrivateController
     {
         try {
             $this->authService->authCdn($request);
-            $this->cdnService->synchronizeThumbnail($thumbnailRequest->video, $thumbnailRequest->thumbs);
+            $this->cdnService->synchronizeThumbnail($thumbnailRequest->video);
             return $this->re->withMessage('Thumb processed.');
         } catch (ApiException $e) {
             return $this->re->withException($e);

@@ -1,5 +1,6 @@
 import React from "react";
-import {Helmet, HelmetProvider} from "react-helmet-async";
+import { Helmet, HelmetProvider } from "react-helmet-async";
+import VideoList from "../video/VideoList";
 
 const HomePage: React.FC = () => {
     return (
@@ -7,7 +8,7 @@ const HomePage: React.FC = () => {
             <Helmet>
                 <title>Vaše videa</title>
             </Helmet>
-            <h1>Vaše videa</h1>
+            <VideoList />
         </HelmetProvider>
     );
 }
