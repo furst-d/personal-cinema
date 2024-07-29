@@ -13,7 +13,7 @@ const PasswordResetForm: React.FC = () => {
     const token = searchParams.get("token");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [errors, setErrors] = useState<{ password?: string; confirmPassword?: string }>({});
+    const [errors, setErrors] = useState<{ missing?: boolean; password?: string; confirmPassword?: string }>({});
     const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
@@ -72,7 +72,7 @@ const PasswordResetForm: React.FC = () => {
                                 variant="outlined"
                                 margin="normal"
                                 fullWidth
-                                value={password}
+                                value={password || null}
                                 onChange={(e) => setPassword(e.target.value)}
                                 error={Boolean(errors.password)}
                                 helperText={errors.password}
@@ -83,7 +83,7 @@ const PasswordResetForm: React.FC = () => {
                                 variant="outlined"
                                 margin="normal"
                                 fullWidth
-                                value={confirmPassword}
+                                value={confirmPassword || null}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 error={Boolean(errors.confirmPassword)}
                                 helperText={errors.confirmPassword}
@@ -93,7 +93,7 @@ const PasswordResetForm: React.FC = () => {
                                 variant="contained"
                                 fullWidth
                                 style={{ margin: '20px 0' }}
-                                disabled={Boolean(errors.password) || Boolean(errors.confirmPassword)}
+                                disabled={errors.missing || Boolean(errors.password) || Boolean(errors.confirmPassword)}
                             >
                                 Obnovit heslo
                             </Button>

@@ -1,5 +1,3 @@
-// src/form/RegisterForm.tsx
-
 import { Button, TextField, Typography } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -7,13 +5,13 @@ import { CenteredContainerStyle } from "../../styles/layout/Application";
 import { CenterFormWrapperStyle, StyledLink } from "../../styles/form/Form";
 import { register } from "../../service/authService";
 import { toast } from "react-toastify";
-import {validateRegisterForm} from "../../utils/validator";
+import { validateRegisterForm } from "../../utils/validator";
 
 const RegisterForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
+    const [errors, setErrors] = useState<{ missing?: boolean; email?: string; password?: string; confirmPassword?: string }>({});
     const [errorMessage, setErrorMessage] = useState("");
     const navigate = useNavigate();
 
@@ -45,16 +43,17 @@ const RegisterForm = () => {
                 <Typography variant="h5" gutterBottom>
                     Registrace
                 </Typography>
-                <form onSubmit={handleRegister}>
+                <form onSubmit={handleRegister} autoComplete="off">
                     <TextField
                         label="Email"
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        value={email}
+                        value={email || null}
                         onChange={(e) => setEmail(e.target.value)}
                         error={Boolean(errors.email)}
                         helperText={errors.email}
+                        autoComplete="new-email"
                     />
                     <TextField
                         label="Heslo"
@@ -62,10 +61,11 @@ const RegisterForm = () => {
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        value={password}
+                        value={password || null}
                         onChange={(e) => setPassword(e.target.value)}
                         error={Boolean(errors.password)}
                         helperText={errors.password}
+                        autoComplete="new-password"
                     />
                     <TextField
                         label="Kontrola hesla"
@@ -73,17 +73,18 @@ const RegisterForm = () => {
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        value={confirmPassword}
+                        value={confirmPassword || null}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         error={Boolean(errors.confirmPassword)}
                         helperText={errors.confirmPassword}
+                        autoComplete="new-password"
                     />
                     <Button
                         type="submit"
                         variant="contained"
                         fullWidth
                         style={{ margin: '20px 0' }}
-                        disabled={Boolean(errors.email) || Boolean(errors.password) || Boolean(errors.confirmPassword)}
+                        disabled={errors.missing || Boolean(errors.email) || Boolean(errors.password) || Boolean(errors.confirmPassword)}
                     >
                         Registrovat se
                     </Button>

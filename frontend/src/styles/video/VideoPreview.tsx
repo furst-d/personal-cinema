@@ -50,7 +50,7 @@ export const DefaultThumbnail = styled(Box)({
     left: 0,
     width: '100%',
     height: '100%',
-    backgroundColor: '#555', // Default background color
+    backgroundColor: '#555',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
