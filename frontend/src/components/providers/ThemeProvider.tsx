@@ -81,6 +81,16 @@ const muiTheme = createTheme({
                 },
             },
         },
+        MuiInputBase: {
+            styleOverrides: {
+                input: {
+                    '&:-webkit-autofill': {
+                        '-webkitBackgroundClip': 'text',
+                        '-webkitTextFillColor': theme.text_light,
+                    },
+                },
+            },
+        },
     },
 });
 

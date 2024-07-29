@@ -1,5 +1,3 @@
-// src/form/RegisterForm.tsx
-
 import { Button, TextField, Typography } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +11,7 @@ const RegisterForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
+    const [errors, setErrors] = useState<{ missing?: boolean; email?: string; password?: string; confirmPassword?: string }>({});
     const [errorMessage, setErrorMessage] = useState("");
     const navigate = useNavigate();
 
@@ -51,7 +49,7 @@ const RegisterForm = () => {
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        value={email}
+                        value={email || null}
                         onChange={(e) => setEmail(e.target.value)}
                         error={Boolean(errors.email)}
                         helperText={errors.email}
@@ -62,7 +60,7 @@ const RegisterForm = () => {
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        value={password}
+                        value={password || null}
                         onChange={(e) => setPassword(e.target.value)}
                         error={Boolean(errors.password)}
                         helperText={errors.password}
@@ -73,7 +71,7 @@ const RegisterForm = () => {
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        value={confirmPassword}
+                        value={confirmPassword || null}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         error={Boolean(errors.confirmPassword)}
                         helperText={errors.confirmPassword}
@@ -83,7 +81,7 @@ const RegisterForm = () => {
                         variant="contained"
                         fullWidth
                         style={{ margin: '20px 0' }}
-                        disabled={Boolean(errors.email) || Boolean(errors.password) || Boolean(errors.confirmPassword)}
+                        disabled={errors.missing || Boolean(errors.email) || Boolean(errors.password) || Boolean(errors.confirmPassword)}
                     >
                         Registrovat se
                     </Button>

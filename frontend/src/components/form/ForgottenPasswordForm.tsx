@@ -8,7 +8,7 @@ import {resendResetPasswordEmail} from "../../service/authService";
 
 const ForgottenPasswordForm = () => {
     const [email, setEmail] = useState("");
-    const [errors, setErrors] = useState<{ email?: string }>({});
+    const [errors, setErrors] = useState<{ missing?: boolean; email?: string }>({});
     const [errorMessage, setErrorMessage] = useState("");
     const navigate = useNavigate();
 
@@ -39,7 +39,7 @@ const ForgottenPasswordForm = () => {
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        value={email}
+                        value={email || null}
                         onChange={(e) => setEmail(e.target.value)}
                         error={Boolean(errors.email)}
                         helperText={errors.email}
@@ -49,7 +49,7 @@ const ForgottenPasswordForm = () => {
                         variant="contained"
                         fullWidth
                         style={{ margin: '20px 0' }}
-                        disabled={Boolean(errors.email)}
+                        disabled={errors.missing || Boolean(errors.email)}
                     >
                         Odeslat žádost
                     </Button>

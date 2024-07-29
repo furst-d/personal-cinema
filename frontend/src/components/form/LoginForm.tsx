@@ -1,5 +1,3 @@
-// src/form/LoginForm.tsx
-
 import { Button, TextField, Typography } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +10,7 @@ import {validateLoginForm} from "../../utils/validator";
 const LoginForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+    const [errors, setErrors] = useState<{ missing?: boolean; email?: string; password?: string }>({});
     const [errorMessage, setErrorMessage] = useState("");
     const navigate = useNavigate();
     const { login: authLogin } = useAuth();
@@ -50,7 +48,7 @@ const LoginForm = () => {
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        value={email}
+                        value={email || null}
                         onChange={(e) => setEmail(e.target.value)}
                         error={Boolean(errors.email)}
                         helperText={errors.email}
@@ -61,7 +59,7 @@ const LoginForm = () => {
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        value={password}
+                        value={password || null}
                         onChange={(e) => setPassword(e.target.value)}
                         error={Boolean(errors.password)}
                         helperText={errors.password}
@@ -71,7 +69,7 @@ const LoginForm = () => {
                         variant="contained"
                         fullWidth
                         style={{ margin: '20px 0' }}
-                        disabled={Boolean(errors.email) || Boolean(errors.password)}
+                        disabled={errors.missing || Boolean(errors.email) || Boolean(errors.password)}
                     >
                         Přihlásit se
                     </Button>
