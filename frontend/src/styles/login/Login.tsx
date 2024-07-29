@@ -63,13 +63,12 @@ export const InfoBoxStyle = styled(LoginBoxStyle)`
     justify-content: flex-start;
     align-items: flex-start;
     height: auto;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
 
     @media (min-width: 769px) {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
         border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
         min-width: 250px;
         max-width: 250px;
     }
