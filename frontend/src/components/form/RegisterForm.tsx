@@ -5,7 +5,7 @@ import { CenteredContainerStyle } from "../../styles/layout/Application";
 import { CenterFormWrapperStyle, StyledLink } from "../../styles/form/Form";
 import { register } from "../../service/authService";
 import { toast } from "react-toastify";
-import {validateRegisterForm} from "../../utils/validator";
+import { validateRegisterForm } from "../../utils/validator";
 
 const RegisterForm = () => {
     const [email, setEmail] = useState("");
@@ -43,7 +43,7 @@ const RegisterForm = () => {
                 <Typography variant="h5" gutterBottom>
                     Registrace
                 </Typography>
-                <form onSubmit={handleRegister}>
+                <form onSubmit={handleRegister} autoComplete="off">
                     <TextField
                         label="Email"
                         variant="outlined"
@@ -53,6 +53,7 @@ const RegisterForm = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         error={Boolean(errors.email)}
                         helperText={errors.email}
+                        autoComplete="new-email"
                     />
                     <TextField
                         label="Heslo"
@@ -64,6 +65,7 @@ const RegisterForm = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         error={Boolean(errors.password)}
                         helperText={errors.password}
+                        autoComplete="new-password"
                     />
                     <TextField
                         label="Kontrola hesla"
@@ -75,6 +77,7 @@ const RegisterForm = () => {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         error={Boolean(errors.confirmPassword)}
                         helperText={errors.confirmPassword}
+                        autoComplete="new-password"
                     />
                     <Button
                         type="submit"
