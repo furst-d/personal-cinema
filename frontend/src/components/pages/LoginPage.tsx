@@ -1,6 +1,6 @@
 import React from "react";
 import { Helmet, HelmetProvider } from "react-helmet-async";
-import LoginForm from "../form/LoginForm";
+import Login from "../login/Login";
 
 const LoginPage: React.FC = () => {
     return (
@@ -8,7 +8,7 @@ const LoginPage: React.FC = () => {
             <Helmet>
                 <title>Přihlásit se</title>
             </Helmet>
-            <LoginForm />
+            <Login />
         </HelmetProvider>
     );
 }

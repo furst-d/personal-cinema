@@ -1,7 +1,6 @@
 import { Button, TextField, Typography } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CenteredContainerStyle } from "../../styles/layout/Application";
 import { CenterFormWrapperStyle, StyledLink } from "../../styles/form/Form";
 import { login } from "../../service/authService";
 import { useAuth } from "../providers/AuthProvider";
@@ -37,52 +36,50 @@ const LoginForm = () => {
     };
 
     return (
-        <CenteredContainerStyle>
-            <CenterFormWrapperStyle>
-                <Typography variant="h5" gutterBottom>
+        <CenterFormWrapperStyle>
+            <Typography variant="h5" gutterBottom sx={{marginBottom: '1em'}}>
+                Přihlásit se
+            </Typography>
+            <form onSubmit={handleSubmit}>
+                <TextField
+                    label="Email"
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    value={email || null}
+                    onChange={(e) => setEmail(e.target.value)}
+                    error={Boolean(errors.email)}
+                    helperText={errors.email}
+                />
+                <TextField
+                    label="Heslo"
+                    type="password"
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    value={password || null}
+                    onChange={(e) => setPassword(e.target.value)}
+                    error={Boolean(errors.password)}
+                    helperText={errors.password}
+                />
+                <Button
+                    type="submit"
+                    variant="contained"
+                    fullWidth
+                    style={{ margin: '20px 0' }}
+                    disabled={errors.missing || Boolean(errors.email) || Boolean(errors.password)}
+                >
                     Přihlásit se
-                </Typography>
-                <form onSubmit={handleSubmit}>
-                    <TextField
-                        label="Email"
-                        variant="outlined"
-                        margin="normal"
-                        fullWidth
-                        value={email || null}
-                        onChange={(e) => setEmail(e.target.value)}
-                        error={Boolean(errors.email)}
-                        helperText={errors.email}
-                    />
-                    <TextField
-                        label="Heslo"
-                        type="password"
-                        variant="outlined"
-                        margin="normal"
-                        fullWidth
-                        value={password || null}
-                        onChange={(e) => setPassword(e.target.value)}
-                        error={Boolean(errors.password)}
-                        helperText={errors.password}
-                    />
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        fullWidth
-                        style={{ margin: '20px 0' }}
-                        disabled={errors.missing || Boolean(errors.email) || Boolean(errors.password)}
-                    >
-                        Přihlásit se
-                    </Button>
-                </form>
-                {errorMessage && <Typography color="error" sx={{marginBottom: '15px'}}>{errorMessage}</Typography>}
-                <StyledLink variant="body2" onClick={() => navigate("/register")}>
-                    Nemáte účet? Registrujte se zde
-                </StyledLink>
-                <StyledLink variant="body2" style={{ marginTop: '10px' }} onClick={() => navigate("/forgotten-password")}>
-                    Zapomněli jste heslo?
-                </StyledLink>
-            </CenterFormWrapperStyle>
-        </CenteredContainerStyle>
+                </Button>
+            </form>
+            {errorMessage && <Typography color="error" sx={{marginBottom: '15px'}}>{errorMessage}</Typography>}
+            <StyledLink variant="body2" onClick={() => navigate("/register")}>
+                Nemáte účet? Registrujte se zde
+            </StyledLink>
+            <StyledLink variant="body2" style={{ marginTop: '10px' }} onClick={() => navigate("/forgotten-password")}>
+                Zapomněli jste heslo?
+            </StyledLink>
+        </CenterFormWrapperStyle>
     );
 }
 
