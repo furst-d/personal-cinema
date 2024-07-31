@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-frontend
+  namespace: personal-cinema
+spec:
+  selector:
+    app: admin-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 4174

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cdn-backend
+  namespace: personal-cinema
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cdn-backend
+  template:
+    metadata:
+      labels:
+        app: cdn-backend
+    spec:
+      containers:
+        - name: cdn-backend
+          image: furstd/personal-cinema_backend_cdn:latest
+          ports:
+            - containerPort: 4000
