@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-cdn-backend
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.cdnBackend.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-cdn-backend
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-cdn-backend
+    spec:
+      containers:
+        - name: cdn-backend
+          image: "{{ .Values.cdnBackend.image.repository }}:{{ .Values.cdnBackend.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.cdnBackend.containerPort }}

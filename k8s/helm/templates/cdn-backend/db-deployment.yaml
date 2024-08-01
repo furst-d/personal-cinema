@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-postgres-cdn
+  namespace: {{ .Release.Namespace }}
+spec:
+  serviceName: "{{ .Release.Name }}-postgres-cdn"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-postgres-cdn
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-postgres-cdn
+    spec:
+      containers:
+        - name: postgres-cdn
+          image: "{{ .Values.cdnBackend.db.image.repository }}:{{ .Values.cdnBackend.db.image.tag }}"
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-cdn-secret
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-cdn-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-cdn-secret
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: {{ .Values.cdnBackend.db.storage }}

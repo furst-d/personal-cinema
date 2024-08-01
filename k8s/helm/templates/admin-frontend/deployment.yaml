@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-admin-frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}-admin-frontend
+spec:
+  replicas: {{ .Values.adminFrontend.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-admin-frontend
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-admin-frontend
+    spec:
+      containers:
+        - name: admin-frontend
+          image: "{{ .Values.adminFrontend.image.repository }}:{{ .Values.adminFrontend.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.adminFrontend.containerPort }}

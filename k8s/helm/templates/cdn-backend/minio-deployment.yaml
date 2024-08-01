@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-minio
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-minio
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-minio
+    spec:
+      containers:
+        - name: minio
+          image: "{{ .Values.cdnBackend.minio.image }}"
+          args:
+            - server
+            - /data
+          env:
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-cdn-secret
+                  key: MINIO_ROOT_USER
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-cdn-secret
+                  key: MINIO_ROOT_PASSWORD
+          ports:
+            - containerPort: {{ index .Values.cdnBackend.minio.ports 0 }}
+              name: api
+            - containerPort: {{ index .Values.cdnBackend.minio.ports 1 }}
+              name: console
+          volumeMounts:
+            - name: minio-storage
+              mountPath: /data
+      volumes:
+        - name: minio-storage
+          persistentVolumeClaim:
+            claimName: minio-pvc
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-pvc
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.cdnBackend.minio.storage }}
