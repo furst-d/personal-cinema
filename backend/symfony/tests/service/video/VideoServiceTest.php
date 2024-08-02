@@ -7,6 +7,7 @@ use App\Entity\Video\Folder;
 use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
 use App\Exception\NotFoundException;
+use App\Helper\Generator\UrlGenerator;
 use App\Helper\Paginator\PaginatorResult;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
@@ -18,15 +19,18 @@ class VideoServiceTest extends TestCase
     private $videoService;
     private $mockVideoRepository;
     private $mockMd5Repository;
+    private $mockUrlGenerator;
 
     protected function setUp(): void
     {
         $this->mockVideoRepository = $this->createMock(VideoRepository::class);
         $this->mockMd5Repository = $this->createMock(MD5Repository::class);
+        $this->mockUrlGenerator = $this->createMock(UrlGenerator::class);
 
         $this->videoService = new VideoService(
             $this->mockVideoRepository,
-            $this->mockMd5Repository
+            $this->mockMd5Repository,
+            $this->mockUrlGenerator
         );
     }
 

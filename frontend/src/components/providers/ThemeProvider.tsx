@@ -4,6 +4,7 @@ import { createTheme } from '@mui/material/styles';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import {ProviderProps} from "../../types/Layout";
 
 export const theme = {
     background: '#323232',
@@ -23,11 +24,12 @@ const muiTheme = createTheme({
         secondary: {
             main: theme.secondary,
         },
-        bg: {
-            main: theme.background,
+        background: {
+            default: theme.background,
         },
-        primary_darker: {
-            main: theme.primary_darker,
+        text: {
+            primary: theme.text_light,
+            secondary: theme.text_dark,
         },
     },
     components: {
@@ -91,6 +93,16 @@ const muiTheme = createTheme({
                 },
             },
         },
+        MuiListItemText: {
+            styleOverrides: {
+                primary: {
+                    color: theme.text_light,
+                },
+                secondary: {
+                    color: theme.text_light,
+                },
+            },
+        },
     },
 });
 
@@ -102,6 +114,8 @@ const GlobalStyle = createGlobalStyle`
 
     html, body {
         height: 100%;
+        background-color: ${theme.background};
+        color: ${theme.text_light};
     }
 
     #root {
@@ -117,7 +131,7 @@ const GlobalStyle = createGlobalStyle`
 
 export type Theme = typeof theme;
 
-const ThemeProvider: React.FC = ({ children }) => {
+const ThemeProvider: React.FC<ProviderProps> = ({ children }) => {
     return (
         <StyledThemeProvider theme={theme}>
             <MuiThemeProvider theme={muiTheme}>

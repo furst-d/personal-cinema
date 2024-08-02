@@ -3,10 +3,11 @@ import { AuthContextType, User } from "../../types/auth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Loading from "../loading/Loading";
+import {ProviderProps} from "../../types/Layout";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC = ({ children }) => {
+export const AuthProvider: React.FC<ProviderProps> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);

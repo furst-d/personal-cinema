@@ -70,6 +70,8 @@ class VideoRepository extends ServiceEntityRepository
             ->where('v.isDeleted = false')
             ->andWhere('v.id != :id')->setParameter('id', $video->getId())
             ->andWhere('v.account = :account')->setParameter('account', $video->getAccount())
+            ->andWhere('v.path IS NOT NULL')
+            ->andWhere('v.thumbnail IS NOT NULL')
             ->orderBy('RAND()');
 
         if ($folder = $video->getFolder()) {

@@ -43,25 +43,18 @@ class VideoController extends BasePersonalController
     private FolderService $folderService;
 
     /**
-     * @var UrlGenerator $urlGenerator
-     */
-    private UrlGenerator $urlGenerator;
-
-    /**
      * @param BaseControllerLocator $locator
      * @param JwtService $jwtService
      * @param CdnService $cdnService
      * @param VideoService $videoService
      * @param FolderService $folderService
-     * @param UrlGenerator $urlGenerator
      */
     public function __construct(
         BaseControllerLocator $locator,
         JwtService $jwtService,
         CdnService $cdnService,
         VideoService $videoService,
-        FolderService $folderService,
-        UrlGenerator $urlGenerator
+        FolderService $folderService
     )
     {
         parent::__construct($locator);
@@ -69,7 +62,6 @@ class VideoController extends BasePersonalController
         $this->cdnService = $cdnService;
         $this->videoService = $videoService;
         $this->folderService = $folderService;
-        $this->urlGenerator = $urlGenerator;
     }
 
 
@@ -115,12 +107,7 @@ class VideoController extends BasePersonalController
                 $videoQueryRequest->getOffset()
             );
 
-            /** @var Video $video */
-            foreach ($videos->getData() as $video) {
-                if ($video->getThumbnail()) {
-                    $video->setThumbnailUrl($this->urlGenerator->generateThumbnail($account, $video));
-                }
-            }
+            $this->videoService->addThumbnailToVideos($videos->getData(), $account);
 
             return $this->re->withData($videos, ['videos:read']);
         } catch (ApiException $e) {
@@ -128,16 +115,14 @@ class VideoController extends BasePersonalController
         }
     }
 
-    #[Route('/{videoId<\d+>}', name: 'user_video_detail', methods: ['GET'])]
-    public function getVideoDetail(Request $request, int $videoId): JsonResponse
+    #[Route('/{hash}', name: 'user_video_detail', methods: ['GET'])]
+    public function getVideoDetail(Request $request, string $hash): JsonResponse
     {
         try {
             $account = $this->getAccount($request);
-            $video = $this->videoService->getAccountVideoById($account, $videoId);
+            $video = $this->videoService->getAccountVideoByHash($account, $hash);
 
-            if ($video->getPath()) {
-                $video->setVideoUrl($this->urlGenerator->generateVideo($account, $video));
-            }
+            $this->videoService->addVideoUrlToVideo($video, $account);
 
             return $this->re->withData($video, ['video:read']);
         } catch (ApiException $e) {
@@ -157,6 +142,8 @@ class VideoController extends BasePersonalController
                 $videoQueryRequest->getLimit(),
                 $videoQueryRequest->getOffset()
             );
+
+            $this->videoService->addThumbnailToVideos($videos->getData(), $account);
 
             return $this->re->withData($videos, ['videos:read']);
         } catch (ApiException $e) {

@@ -3,10 +3,10 @@ import videojs from "video.js";
 import "video.js/dist/video-js.css";
 
 interface IVideoPlayerProps {
-    options: videojs.PlayerOptions;
+    src: string;
 }
 
-const initialOptions: videojs.PlayerOptions = {
+const initialOptions = {
     controls: true,
     fluid: true,
     controlBar: {
@@ -16,30 +16,33 @@ const initialOptions: videojs.PlayerOptions = {
     }
 };
 
-const VideoPlayer: React.FC<IVideoPlayerProps> = ({ options }) => {
+const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
     const videoNode = React.useRef<HTMLVideoElement | null>(null);
-    const player = React.useRef<videojs.Player | null>(null);
+    const player = React.useRef<any | null>(null);
 
     React.useEffect(() => {
         if (videoNode.current) {
-            player.current = videojs(videoNode.current!, {
+            player.current = videojs(videoNode.current, {
                 ...initialOptions,
-                ...options
-            }).ready(function () {
-                console.log("Ready");
+                sources: [{ src, type: "application/vnd.apple.mpegurl" }]
+            }).ready(function (this) {
+                return this;
             });
         }
 
         return () => {
             if (player.current) {
-                if ("dispose" in player.current) {
-                    player.current.dispose();
-                }
+                player.current.dispose();
+                player.current = null;
             }
         };
-    }, [options]);
+    }, [src]);
 
-    return <video ref={videoNode} className="video-js" style={{ width: "600px" }} />;
+    return (
+        <div data-vjs-player={true}>
+            <video key={src} ref={videoNode} className="video-js" style={{ width: "100%" }} />
+        </div>
+    );
 };
 
 export default VideoPlayer;

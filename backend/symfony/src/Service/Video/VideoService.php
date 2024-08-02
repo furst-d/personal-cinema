@@ -6,7 +6,9 @@ use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
 use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
+use App\Exception\InternalException;
 use App\Exception\NotFoundException;
+use App\Helper\Generator\UrlGenerator;
 use App\Helper\Paginator\PaginatorResult;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
@@ -24,16 +26,26 @@ class VideoService
     private MD5Repository $md5Repository;
 
     /**
+     * @var UrlGenerator $urlGenerator
+     */
+    private UrlGenerator $urlGenerator;
+
+    private const NOT_FOUND_MESSAGE = 'Video not found';
+
+    /**
      * @param VideoRepository $videoRepository
      * @param MD5Repository $md5Repository
+     * @param UrlGenerator $urlGenerator
      */
     public function __construct(
         VideoRepository $videoRepository,
-        MD5Repository $md5Repository
+        MD5Repository $md5Repository,
+        UrlGenerator $urlGenerator
     )
     {
         $this->videoRepository = $videoRepository;
         $this->md5Repository = $md5Repository;
+        $this->urlGenerator = $urlGenerator;
     }
 
     /**
@@ -56,7 +68,24 @@ class VideoService
         $video = $this->videoRepository->findOneBy(['account' => $account, 'id' => $id]);
 
         if (!$video) {
-            throw new NotFoundException('Video not found');
+            throw new NotFoundException(self::NOT_FOUND_MESSAGE);
+        }
+
+        return $video;
+    }
+
+    /**
+     * @param Account $account
+     * @param string $hash
+     * @return Video
+     * @throws NotFoundException
+     */
+    public function getAccountVideoByHash(Account $account, string $hash): Video
+    {
+        $video = $this->videoRepository->findOneBy(['account' => $account, 'hash' => $hash]);
+
+        if (!$video) {
+            throw new NotFoundException(self::NOT_FOUND_MESSAGE);
         }
 
         return $video;
@@ -72,7 +101,7 @@ class VideoService
         $video = $this->videoRepository->find($videoId);
 
         if (!$video) {
-            throw new NotFoundException('Video not found');
+            throw new NotFoundException(self::NOT_FOUND_MESSAGE);
         }
 
         return $video;
@@ -130,5 +159,44 @@ class VideoService
     public function deleteVideo(Video $video): void
     {
         $this->videoRepository->delete($video);
+    }
+
+    /**
+     * @param Video[] $videos
+     * @param Account $account
+     * @return void
+     * @throws InternalException
+     */
+    public function addThumbnailToVideos(array $videos, Account $account): void
+    {
+        foreach ($videos as $video) {
+            $this->addThumbnailToVideo($video, $account);
+        }
+    }
+
+    /**
+     * @param Video $video
+     * @param Account $account
+     * @return void
+     * @throws InternalException
+     */
+    public function addThumbnailToVideo(Video $video, Account $account): void
+    {
+        if ($video->getThumbnail()) {
+            $video->setThumbnailUrl($this->urlGenerator->generateThumbnail($account, $video));
+        }
+    }
+
+    /**
+     * @param Video $video
+     * @param Account $account
+     * @return void
+     * @throws InternalException
+     */
+    public function addVideoUrlToVideo(Video $video, Account $account): void
+    {
+        if ($video->getPath()) {
+            $video->setVideoUrl($this->urlGenerator->generateVideo($account, $video));
+        }
     }
 }
