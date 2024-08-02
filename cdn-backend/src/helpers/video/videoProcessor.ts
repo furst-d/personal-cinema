@@ -188,9 +188,6 @@ const processVideoThumbnail = async (job: Job) => {
     try {
         await new Promise((resolve, reject) => {
             ffmpeg(videoUrl)
-                .on('filenames', function (filenames: any) {
-                    console.log('Will generate ' + filenames.join(', '));
-                })
                 .on('end', function () {
                     console.log('Screenshots taken');
                     resolve(true);
