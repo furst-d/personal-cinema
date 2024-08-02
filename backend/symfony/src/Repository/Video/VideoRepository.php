@@ -2,6 +2,7 @@
 
 namespace App\Repository\Video;
 
+use App\DQL\RandomFunction;
 use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
 use App\Entity\Video\Video;
@@ -52,6 +53,29 @@ class VideoRepository extends ServiceEntityRepository
 
         if ($folder) {
             $qb->andWhere('v.folder = :folder')->setParameter('folder', $folder);
+        }
+
+        return $this->getPaginatorResult($qb, $limit, $offset);
+    }
+
+    /**
+     * @param Video $video
+     * @param int|null $limit
+     * @param int|null $offset
+     * @return PaginatorResult<Video>
+     */
+    public function findRecommendations(Video $video, ?int $limit, ?int $offset): PaginatorResult
+    {
+        $qb = $this->createQueryBuilder('v')
+            ->where('v.isDeleted = false')
+            ->andWhere('v.id != :id')->setParameter('id', $video->getId())
+            ->andWhere('v.account = :account')->setParameter('account', $video->getAccount())
+            ->orderBy('RAND()');
+
+        if ($folder = $video->getFolder()) {
+            $qb->andWhere('v.folder = :folder')->setParameter('folder', $folder);
+        } else {
+            $qb->andWhere('v.folder IS NULL');
         }
 
         return $this->getPaginatorResult($qb, $limit, $offset);

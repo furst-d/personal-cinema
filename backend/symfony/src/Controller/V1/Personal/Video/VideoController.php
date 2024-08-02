@@ -108,7 +108,12 @@ class VideoController extends BasePersonalController
                 $folder = $this->folderService->getAccountFolderById($account, $folderId);
             }
 
-            $videos = $this->videoService->getVideos($account, $folder, $videoQueryRequest->getLimit(), $videoQueryRequest->getOffset());
+            $videos = $this->videoService->getVideos(
+                $account,
+                $folder,
+                $videoQueryRequest->getLimit(),
+                $videoQueryRequest->getOffset()
+            );
 
             /** @var Video $video */
             foreach ($videos->getData() as $video) {
@@ -135,6 +140,25 @@ class VideoController extends BasePersonalController
             }
 
             return $this->re->withData($video, ['video:read']);
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('/{videoId<\d+>}/recommend', name: 'user_video_recommendation', methods: ['GET'])]
+    public function getVideoRecommendation(Request $request, int $videoId, VideoQueryRequest $videoQueryRequest): JsonResponse
+    {
+        try {
+            $account = $this->getAccount($request);
+            $video = $this->videoService->getAccountVideoById($account, $videoId);
+
+            $videos = $this->videoService->getVideoRecommendations(
+                $video,
+                $videoQueryRequest->getLimit(),
+                $videoQueryRequest->getOffset()
+            );
+
+            return $this->re->withData($videos, ['videos:read']);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }

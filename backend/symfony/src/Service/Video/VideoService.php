@@ -101,6 +101,17 @@ class VideoService
 
     /**
      * @param Video $video
+     * @param int|null $limit
+     * @param int|null $offset
+     * @return PaginatorResult
+     */
+    public function getVideoRecommendations(Video $video, ?int $limit, ?int $offset): PaginatorResult
+    {
+        return $this->videoRepository->findRecommendations($video, $limit, $offset);
+    }
+
+    /**
+     * @param Video $video
      * @param string $name
      * @param Folder|null $folder
      * @return void
