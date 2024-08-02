@@ -1,48 +1,62 @@
-import * as React from "react";
+import React from 'react';
+import 'video.js/dist/video-js.css';
 import videojs from "video.js";
-import "video.js/dist/video-js.css";
 
 interface IVideoPlayerProps {
     src: string;
 }
 
-const initialOptions = {
-    controls: true,
-    fluid: true,
-    controlBar: {
-        volumePanel: {
-            inline: false
-        }
-    }
-};
-
 const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
-    const videoNode = React.useRef<HTMLVideoElement | null>(null);
-    const player = React.useRef<any | null>(null);
+    const videoRef = React.useRef<HTMLDivElement | null>(null);
+    const playerRef = React.useRef<any | null>(null);
+    const options = {
+        controls: true,
+        fluid: true,
+        sources: [{ src, type: "application/vnd.apple.mpegurl" }],
+        controlBar: {
+            volumePanel: {
+                inline: false
+            }
+        }
+    };
 
     React.useEffect(() => {
-        if (videoNode.current) {
-            player.current = videojs(videoNode.current, {
-                ...initialOptions,
-                sources: [{ src, type: "application/vnd.apple.mpegurl" }]
-            }).ready(function (this) {
-                return this;
+        if (!playerRef.current) {
+            const videoElement = document.createElement("video-js");
+
+            videoElement.classList.add('vjs-big-play-centered');
+            if (videoRef.current) {
+                videoRef.current.appendChild(videoElement);
+            }
+
+            playerRef.current = videojs(videoElement, options, () => {
+                videojs.log('player is ready');
             });
+
+        } else {
+            const player = playerRef.current;
+
+            player.src(options.sources);
         }
+    }, [options, src]);
+
+
+    React.useEffect(() => {
+        const player = playerRef.current;
 
         return () => {
-            if (player.current) {
-                player.current.dispose();
-                player.current = null;
+            if (player && !player.isDisposed()) {
+                player.dispose();
+                playerRef.current = null;
             }
         };
-    }, [src]);
+    }, []);
 
     return (
         <div data-vjs-player={true}>
-            <video key={src} ref={videoNode} className="video-js" style={{ width: "100%" }} />
+            <div ref={videoRef} />
         </div>
     );
-};
+}
 
 export default VideoPlayer;
