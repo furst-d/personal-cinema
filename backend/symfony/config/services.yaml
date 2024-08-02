@@ -55,6 +55,10 @@ services:
             $cdnSecretKey: '%env(CDN_API_KEY)%'
             $cdnUrl: '%env(CDN_URL)%'
 
+    App\Helper\Generator\UrlGenerator:
+        arguments:
+            $backendUrl: '%env(BACKEND_URL)%'
+
     App\Listener\TokenValidatorListener:
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }

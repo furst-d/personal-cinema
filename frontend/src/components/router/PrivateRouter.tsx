@@ -8,6 +8,7 @@ import SettingsPage from "../pages/SettingsPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import Navbar from "../navbar/Navbar";
 import {ContainerStyle, ContentStyle, ContentWrapperStyle} from "../../styles/layout/Application";
+import VideoDetailPage from "../pages/VideoDetailPage";
 
 const PrivateRouter: React.FC = () => (
     <>
@@ -17,7 +18,8 @@ const PrivateRouter: React.FC = () => (
                 <ContentStyle>
                     <Routes>
                         <Route path="/" element={<HomePage />} />
-                        <Route path="/videos" element={<VideoPage />} />
+                        <Route path="/videos-management" element={<VideoPage />} />
+                        <Route path="/videos/:hash" element={<VideoDetailPage />} />
                         <Route path="/disc" element={<DiscPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
                         <Route path="/settings" element={<SettingsPage />} />

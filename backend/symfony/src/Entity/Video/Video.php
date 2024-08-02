@@ -12,79 +12,87 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: VideoRepository::class)]
 class Video
 {
+    private const VIDEO_READ = 'video:read';
+    private const VIDEOS_READ = 'videos:read';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private string $name;
 
     #[ORM\ManyToOne(inversedBy: 'videos')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private Account $account;
 
     #[ORM\ManyToOne(inversedBy: 'videos')]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private ?MD5 $md5;
 
     #[ORM\ManyToOne(inversedBy: 'videos')]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private ?Folder $folder = null;
 
     #[ORM\Column(length: 255, unique: true)]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private string $hash;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private string $extension;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private ?string $codec = null;
 
     #[ORM\Column(type: Types::BIGINT)]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private string $size;
 
     #[ORM\Column(type: Types::BIGINT, nullable: true)]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private ?string $length = null;
 
     #[ORM\Column(unique: true)]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private string $cdnId;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private ?string $path = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private ?int $originalWidth = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private ?int $originalHeight = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['video:read'])]
     private ?string $thumbnail = null;
 
     #[ORM\Column]
     private bool $isDeleted;
 
     #[ORM\Column]
-    #[Groups(['video:read'])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private DateTimeImmutable $createdAt;
 
     #[ORM\Column(nullable: true)]
     private ?DateTimeImmutable $deletedAt = null;
+
+    #[Groups([self::VIDEO_READ])]
+    private ?string $videoUrl = null;
+
+    #[Groups([self::VIDEOS_READ])]
+    private ?string $thumbnailUrl = null;
 
     /**
      * @param string $name
@@ -367,5 +375,39 @@ class Video
     {
         $this->isDeleted = true;
         $this->deletedAt = new DateTimeImmutable();
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getVideoUrl(): ?string
+    {
+        return $this->videoUrl;
+    }
+
+    /**
+     * @param string|null $videoUrl
+     * @return void
+     */
+    public function setVideoUrl(?string $videoUrl): void
+    {
+        $this->videoUrl = $videoUrl;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getThumbnailUrl(): ?string
+    {
+        return $this->thumbnailUrl;
+    }
+
+    /**
+     * @param string|null $thumbnailUrl
+     * @return void
+     */
+    public function setThumbnailUrl(?string $thumbnailUrl): void
+    {
+        $this->thumbnailUrl = $thumbnailUrl;
     }
 }

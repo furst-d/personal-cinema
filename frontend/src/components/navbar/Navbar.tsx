@@ -15,9 +15,10 @@ import {
 import React from "react";
 import MenuIcon from '@mui/icons-material/Menu';
 import { useTheme } from 'styled-components';
-import Logo from '/public/images/logo.svg?react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from "../providers/AuthProvider";
+// @ts-ignore
+import Logo from '/public/images/logo.svg?react';
 
 const Navbar = () => {
     const theme = useTheme();
@@ -25,7 +26,7 @@ const Navbar = () => {
 
     const pages = [
         { title: 'Vaše videa', path: '/' },
-        { title: 'Správa videí', path: '/videos' },
+        { title: 'Správa videí', path: '/videos-management' },
         { title: 'Správa disku', path: '/disc' }
     ];
 

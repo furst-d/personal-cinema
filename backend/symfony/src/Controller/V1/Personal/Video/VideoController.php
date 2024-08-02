@@ -6,7 +6,9 @@ use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Video\UploadRequest;
 use App\DTO\Video\VideoQueryRequest;
 use App\DTO\Video\VideoRequest;
+use App\Entity\Video\Video;
 use App\Exception\ApiException;
+use App\Helper\Generator\UrlGenerator;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Cdn\CdnService;
 use App\Service\Jwt\JwtService;
@@ -98,30 +100,52 @@ class VideoController extends BasePersonalController
                 $folder = $this->folderService->getAccountFolderById($account, $folderId);
             }
 
-            $videos = $this->videoService->getVideos($account, $folder, $videoQueryRequest->getLimit(), $videoQueryRequest->getOffset());
+            $videos = $this->videoService->getVideos(
+                $account,
+                $folder,
+                $videoQueryRequest->getLimit(),
+                $videoQueryRequest->getOffset()
+            );
 
-            return $this->re->withData($videos, ['video:read']);
+            $this->videoService->addThumbnailToVideos($videos->getData(), $account);
+
+            return $this->re->withData($videos, ['videos:read']);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
     }
 
-    #[Route('/{videoId<\d+>}', name: 'user_video_detail', methods: ['GET'])]
-    public function getVideoDetail(Request $request, int $videoId): JsonResponse
+    #[Route('/{hash}', name: 'user_video_detail', methods: ['GET'])]
+    public function getVideoDetail(Request $request, string $hash): JsonResponse
+    {
+        try {
+            $account = $this->getAccount($request);
+            $video = $this->videoService->getAccountVideoByHash($account, $hash);
+
+            $this->videoService->addVideoUrlToVideo($video, $account);
+
+            return $this->re->withData($video, ['video:read']);
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('/{videoId<\d+>}/recommend', name: 'user_video_recommendation', methods: ['GET'])]
+    public function getVideoRecommendation(Request $request, int $videoId, VideoQueryRequest $videoQueryRequest): JsonResponse
     {
         try {
             $account = $this->getAccount($request);
             $video = $this->videoService->getAccountVideoById($account, $videoId);
 
-            $token = $this->jwtService->generateToken($account, JwtUsage::USAGE_VIDEO_ACCESS, [
-                'video_id' => $video->getId(),
-            ]);
+            $videos = $this->videoService->getVideoRecommendations(
+                $video,
+                $videoQueryRequest->getLimit(),
+                $videoQueryRequest->getOffset()
+            );
 
-            $backendUrl = $_ENV['BACKEND_URL'];
-            return $this->re->withData([
-                'video' => $this->serialize($video, ['video:read']),
-                'url' => "$backendUrl/v1/private/videos/url?token=$token"
-            ]);
+            $this->videoService->addThumbnailToVideos($videos->getData(), $account);
+
+            return $this->re->withData($videos, ['videos:read']);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
