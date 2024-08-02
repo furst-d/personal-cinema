@@ -1,5 +1,3 @@
-// src/processors/videoProcessors.ts
-
 import { videoConversionQueue, videoProcessQueue, videoThumbnailQueue, videoUploadQueue } from '../../config/bull';
 import minioClient, { bucketName } from '../../config/minio';
 import Video from '../../entities/video';
@@ -190,7 +188,7 @@ const processVideoThumbnail = async (job: Job) => {
     try {
         await new Promise((resolve, reject) => {
             ffmpeg(videoUrl)
-                .on('filenames', function (filenames) {
+                .on('filenames', function (filenames: any) {
                     console.log('Will generate ' + filenames.join(', '));
                 })
                 .on('end', function () {
