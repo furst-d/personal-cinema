@@ -37,13 +37,13 @@ const VideoPreview = ({ video }: { video: any }) => {
     const duration = video.length !== null ? formatDuration(video.length) : null;
     const size = video.size !== null ? formatSize(video.size) : null;
 
-    const isProcessing = !video.thumbnail || !video.path;
+    const isProcessing = !video.thumbnailUrl || !video.path;
 
     return (
         <VideoLink to="/" theme={theme} disabled={isProcessing}>
             <PreviewContainer>
-                {video.thumbnail ? (
-                    <Thumbnail src={`data:image/jpeg;base64,${video.thumbnail}`} />
+                {video.thumbnailUrl ? (
+                    <Thumbnail src={video.thumbnailUrl} />
                 ) : (
                     <DefaultThumbnail>
                         <NotAvailableIconStyled />

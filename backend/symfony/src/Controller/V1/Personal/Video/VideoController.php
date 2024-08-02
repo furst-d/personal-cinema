@@ -6,7 +6,9 @@ use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Video\UploadRequest;
 use App\DTO\Video\VideoQueryRequest;
 use App\DTO\Video\VideoRequest;
+use App\Entity\Video\Video;
 use App\Exception\ApiException;
+use App\Helper\Generator\UrlGenerator;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Cdn\CdnService;
 use App\Service\Jwt\JwtService;
@@ -41,18 +43,25 @@ class VideoController extends BasePersonalController
     private FolderService $folderService;
 
     /**
+     * @var UrlGenerator $urlGenerator
+     */
+    private UrlGenerator $urlGenerator;
+
+    /**
      * @param BaseControllerLocator $locator
      * @param JwtService $jwtService
      * @param CdnService $cdnService
      * @param VideoService $videoService
      * @param FolderService $folderService
+     * @param UrlGenerator $urlGenerator
      */
     public function __construct(
         BaseControllerLocator $locator,
         JwtService $jwtService,
         CdnService $cdnService,
         VideoService $videoService,
-        FolderService $folderService
+        FolderService $folderService,
+        UrlGenerator $urlGenerator
     )
     {
         parent::__construct($locator);
@@ -60,6 +69,7 @@ class VideoController extends BasePersonalController
         $this->cdnService = $cdnService;
         $this->videoService = $videoService;
         $this->folderService = $folderService;
+        $this->urlGenerator = $urlGenerator;
     }
 
 
@@ -100,7 +110,14 @@ class VideoController extends BasePersonalController
 
             $videos = $this->videoService->getVideos($account, $folder, $videoQueryRequest->getLimit(), $videoQueryRequest->getOffset());
 
-            return $this->re->withData($videos, ['video:read']);
+            /** @var Video $video */
+            foreach ($videos->getData() as $video) {
+                if ($video->getThumbnail()) {
+                    $video->setThumbnailUrl($this->urlGenerator->generateThumbnail($account, $video));
+                }
+            }
+
+            return $this->re->withData($videos, ['videos:read']);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
@@ -113,15 +130,11 @@ class VideoController extends BasePersonalController
             $account = $this->getAccount($request);
             $video = $this->videoService->getAccountVideoById($account, $videoId);
 
-            $token = $this->jwtService->generateToken($account, JwtUsage::USAGE_VIDEO_ACCESS, [
-                'video_id' => $video->getId(),
-            ]);
+            if ($video->getPath()) {
+                $video->setVideoUrl($this->urlGenerator->generateVideo($account, $video));
+            }
 
-            $backendUrl = $_ENV['BACKEND_URL'];
-            return $this->re->withData([
-                'video' => $this->serialize($video, ['video:read']),
-                'url' => "$backendUrl/v1/private/videos/url?token=$token"
-            ]);
+            return $this->re->withData($video, ['video:read']);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
