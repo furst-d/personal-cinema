@@ -1,5 +1,7 @@
 import React from "react";
 import {Helmet, HelmetProvider} from "react-helmet-async";
+import ChangePasswordForm from "../form/ChangePasswordForm";
+import Setting from "../setting/Setting";
 
 const SettingsPage: React.FC = () => {
     return (
@@ -7,7 +9,7 @@ const SettingsPage: React.FC = () => {
             <Helmet>
                 <title>Nastavení</title>
             </Helmet>
-            <h1>Nastavení</h1>
+            <Setting />
         </HelmetProvider>
     );
 }

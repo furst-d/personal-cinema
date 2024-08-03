@@ -72,7 +72,7 @@ const PasswordResetForm: React.FC = () => {
                                 variant="outlined"
                                 margin="normal"
                                 fullWidth
-                                value={password || null}
+                                value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 error={Boolean(errors.password)}
                                 helperText={errors.password}
@@ -83,7 +83,7 @@ const PasswordResetForm: React.FC = () => {
                                 variant="outlined"
                                 margin="normal"
                                 fullWidth
-                                value={confirmPassword || null}
+                                value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 error={Boolean(errors.confirmPassword)}
                                 helperText={errors.confirmPassword}

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import {Link} from "@mui/material";
+import {Box, Link} from "@mui/material";
 
 export const CenterFormWrapperStyle = styled.div`
     display: flex;
@@ -19,6 +19,17 @@ export const CenterFormWrapperStyle = styled.div`
         border-radius: 10px;
         height: auto;
         padding: 20px;
+    }
+`;
+
+export const FormWrapperStyle = styled(Box)`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    color: ${(props) => props.theme.text_light};
+
+    @media (min-width: 769px) {
+        max-width: 400px;
     }
 `;
 

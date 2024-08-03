@@ -27,7 +27,7 @@ const RegisterForm = () => {
             setErrors(formErrors);
             return;
         }
-        const result = await register(email, password);
+        const result: any = await register(email, password);
         if (result.success) {
             toast.success(result.message);
             navigate("/login");
@@ -49,7 +49,7 @@ const RegisterForm = () => {
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        value={email || null}
+                        value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         error={Boolean(errors.email)}
                         helperText={errors.email}
@@ -61,7 +61,7 @@ const RegisterForm = () => {
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        value={password || null}
+                        value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         error={Boolean(errors.password)}
                         helperText={errors.password}
@@ -73,7 +73,7 @@ const RegisterForm = () => {
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        value={confirmPassword || null}
+                        value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         error={Boolean(errors.confirmPassword)}
                         helperText={errors.confirmPassword}

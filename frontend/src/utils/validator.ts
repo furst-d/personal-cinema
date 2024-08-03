@@ -16,7 +16,7 @@ export const validatePassword = (password: string) => {
 };
 
 export const validateLoginForm = (email: string, password: string) => {
-    const errors: { missing: boolean, email?: string; password?: string } = {};
+    const errors: { missing?: boolean, email?: string; password?: string } = {};
 
     if (!email || !password) {
         errors.missing = true;
@@ -34,7 +34,7 @@ export const validateLoginForm = (email: string, password: string) => {
 };
 
 export const validateForgottenPasswordForm = (email: string) => {
-    const errors: { missing: boolean, email?: string } = {};
+    const errors: { missing?: boolean, email?: string } = {};
 
     if (!email) {
         errors.missing = true;
@@ -48,7 +48,7 @@ export const validateForgottenPasswordForm = (email: string) => {
 };
 
 export const validateRegisterForm = (email: string, password: string, confirmPassword: string) => {
-    const errors: { missing: boolean, email?: string; password?: string; confirmPassword?: string } = {};
+    const errors: { missing?: boolean, email?: string; password?: string; confirmPassword?: string } = {};
 
     if (!email || !password || !confirmPassword) {
         errors.missing = true;
@@ -70,17 +70,39 @@ export const validateRegisterForm = (email: string, password: string, confirmPas
 };
 
 export const validatePasswordResetForm = (password: string, confirmPassword: string) => {
-    const errors: { missing: boolean, password?: string; confirmPassword?: string } = {};
+    const errors: { missing?: boolean, password?: string; confirmPassword?: string } = {};
 
     if (!password || !confirmPassword) {
         errors.missing = true;
     }
 
-    if (password.length < 6) {
+    if (!validatePassword(password)) {
         errors.password = "Heslo musí mít alespoň 6 znaků";
     }
 
     if (password !== confirmPassword) {
+        errors.confirmPassword = "Hesla se neshodují";
+    }
+
+    return errors;
+};
+
+export const validatePasswordChangeForm = (oldPassword: string, newPassword: string, confirmPassword: string) => {
+    const errors: { missing?: boolean, oldPassword?: string; newPassword?: string; confirmPassword?: string } = {};
+
+    if (!oldPassword || !newPassword || !confirmPassword) {
+        errors.missing = true;
+    }
+
+    if (!validatePassword(oldPassword)) {
+        errors.oldPassword = "Současné heslo musí mít alespoň 6 znaků";
+    }
+
+    if (!validatePassword(newPassword)) {
+        errors.newPassword = "Nové heslo musí mít alespoň 6 znaků";
+    }
+
+    if (newPassword !== confirmPassword) {
         errors.confirmPassword = "Hesla se neshodují";
     }
 

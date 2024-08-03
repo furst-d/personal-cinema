@@ -39,7 +39,7 @@ const ForgottenPasswordForm = () => {
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        value={email || null}
+                        value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         error={Boolean(errors.email)}
                         helperText={errors.email}

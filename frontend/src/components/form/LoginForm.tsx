@@ -46,7 +46,7 @@ const LoginForm = () => {
                     variant="outlined"
                     margin="normal"
                     fullWidth
-                    value={email || null}
+                    value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     error={Boolean(errors.email)}
                     helperText={errors.email}
@@ -57,7 +57,7 @@ const LoginForm = () => {
                     variant="outlined"
                     margin="normal"
                     fullWidth
-                    value={password || null}
+                    value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     error={Boolean(errors.password)}
                     helperText={errors.password}
