@@ -1,6 +1,7 @@
 import React from "react";
 import LoginForm from "../form/LoginForm";
 import ProjectInfo from "./ProjectInfo";
+// @ts-ignore
 import Logo from '/public/images/logo.svg?react';
 import {
     InfoBoxStyle,

@@ -1,6 +1,7 @@
 import axiosPublic from '../api/axiosPublic';
 import { setToken } from './tokenService';
 import {toast} from "react-toastify";
+import axiosPrivate from "../api/axiosPrivate";
 
 export const login = async (email: string, password: string) => {
     try {
@@ -16,7 +17,7 @@ export const login = async (email: string, password: string) => {
             setToken('refresh_token', userData.tokens.refresh_token);
             return { success: true, data: userData };
         }
-    } catch (error) {
+    } catch (error: any) {
         if (error.response) {
             const status = error.response.status;
             if (status === 400) {
@@ -66,7 +67,7 @@ export const resendResetPasswordEmail = async (email: string) => {
         if (response.status !== 500) {
             toast.success("Žádost o obnovení hesla byla odeslána");
         }
-    } catch (error) {
+    } catch (error: any) {
         if (error.response && error.response.status === 500) {
             toast.error("Při odesílání žádosti došlo k chybě");
         } else {
@@ -102,5 +103,22 @@ export const resetPasswordWithToken = async (token: string, password: string) =>
         }
     } catch (error: any) {
         return { success: false, message: "Při obnovování hesla došlo k chybě." };
+    }
+};
+
+export const changePassword = async (oldPassword: string, newPassword: string) => {
+    try {
+        const response = await axiosPrivate.post('/v1/personal/account/change-password', { oldPassword, newPassword });
+        if (response.status === 200) {
+            toast.success("Heslo bylo úspěšně změněno");
+            return { success: true };
+        }
+    } catch (error: any) {
+        if (error.response && error.response.status === 400) {
+            toast.error("Původní heslo je nesprávné");
+        } else {
+            toast.error("Při změně hesla došlo k chybě");
+        }
+        return { success: false };
     }
 };

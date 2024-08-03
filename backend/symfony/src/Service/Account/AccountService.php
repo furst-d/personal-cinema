@@ -109,6 +109,24 @@ class AccountService
 
     /**
      * @param Account $account
+     * @param string $oldPassword
+     * @param string $newPassword
+     * @return Account
+     * @throws BadRequestException
+     */
+    public function checkAndChangePassword(Account $account, string $oldPassword, string $newPassword): Account
+    {
+        if (!$this->authenticator->verifyPassword($oldPassword, $account->getPassword(), $account->getSalt())) {
+            throw new BadRequestException('Current password does not match.');
+        }
+
+        $this->changePassword($account, $newPassword);
+
+        return $account;
+    }
+
+    /**
+     * @param Account $account
      * @param string $password
      * @return Account
      */
