@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helper\Paginator;
+namespace App\Helper\DTO;
 
 /**
  * @template T

@@ -2,6 +2,7 @@
 
 namespace App\Service\Video;
 
+use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
 use App\Entity\Video\MD5;
@@ -9,7 +10,7 @@ use App\Entity\Video\Video;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Helper\Generator\UrlGenerator;
-use App\Helper\Paginator\PaginatorResult;
+use App\Helper\DTO\PaginatorResult;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 
@@ -119,24 +120,22 @@ class VideoService
     /**
      * @param Account|null $account
      * @param Folder|null $folder
-     * @param int|null $limit
-     * @param int|null $offset
+     * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult<Video>
      */
-    public function getVideos(?Account $account, ?Folder $folder, ?int $limit, ?int $offset): PaginatorResult
+    public function getVideos(?Account $account, ?Folder $folder, PaginatorRequest $paginatorRequest): PaginatorResult
     {
-        return $this->videoRepository->findVideos($account, $folder, $limit, $offset);
+        return $this->videoRepository->findVideos($account, $folder, $paginatorRequest);
     }
 
     /**
      * @param Video $video
-     * @param int|null $limit
-     * @param int|null $offset
+     * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult
      */
-    public function getVideoRecommendations(Video $video, ?int $limit, ?int $offset): PaginatorResult
+    public function getVideoRecommendations(Video $video, PaginatorRequest $paginatorRequest): PaginatorResult
     {
-        return $this->videoRepository->findRecommendations($video, $limit, $offset);
+        return $this->videoRepository->findRecommendations($video, $paginatorRequest);
     }
 
     /**

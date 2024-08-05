@@ -33,7 +33,7 @@ class VideoController extends BasePersonalController
     #[Route('', name: 'admin_videos', methods: ['GET'])]
     public function getVideos(PaginatorRequest $paginatorRequest): JsonResponse
     {
-        $accounts = $this->videoService->getVideos(null, null, $paginatorRequest->getLimit(), $paginatorRequest->getOffset());
+        $accounts = $this->videoService->getVideos(null, null, $paginatorRequest);
         return $this->re->withData($accounts, ['video:read']);
     }
 }

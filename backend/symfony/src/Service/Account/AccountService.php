@@ -10,7 +10,7 @@ use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
 use App\Helper\Authenticator\Authenticator;
-use App\Helper\Paginator\PaginatorResult;
+use App\Helper\DTO\PaginatorResult;
 use App\Repository\Account\AccountRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;

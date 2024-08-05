@@ -103,8 +103,7 @@ class VideoController extends BasePersonalController
             $videos = $this->videoService->getVideos(
                 $account,
                 $folder,
-                $videoQueryRequest->getLimit(),
-                $videoQueryRequest->getOffset()
+                $videoQueryRequest
             );
 
             $this->videoService->addThumbnailToVideos($videos->getData(), $account);
@@ -139,8 +138,7 @@ class VideoController extends BasePersonalController
 
             $videos = $this->videoService->getVideoRecommendations(
                 $video,
-                $videoQueryRequest->getLimit(),
-                $videoQueryRequest->getOffset()
+                $videoQueryRequest
             );
 
             $this->videoService->addThumbnailToVideos($videos->getData(), $account);

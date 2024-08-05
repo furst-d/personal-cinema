@@ -5,6 +5,8 @@ namespace App\Resolver;
 use App\Exception\ApiException;
 use App\Exception\BadRequestException;
 use App\Helper\Api\ResponseEntity;
+use Exception;
+use InvalidArgumentException;
 use JetBrains\PhpStorm\NoReturn;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
@@ -71,21 +73,11 @@ class ValidationResolver implements ValueResolverInterface
             $this->sendErrorResponse(new BadRequestException('Invalid data format'));
         } catch (NotNormalizableValueException $e) {
             $this->sendErrorResponse(new BadRequestException($e->getMessage()));
+        } catch (Exception) {
+            $this->sendErrorResponse(new BadRequestException('Invalid data parameters'));
         }
 
-        $errors = $this->validator->validate($object);
-
-        if (count($errors) > 0) {
-            $errorDetails = [];
-            foreach ($errors as $error) {
-                $errorDetails[] = [
-                    'property' => $error->getPropertyPath(),
-                    'value' => $error->getInvalidValue(),
-                    'message' => $error->getMessage(),
-                ];
-            }
-            $this->sendErrorResponse(new BadRequestException('Validation failed', $errorDetails));
-        }
+        $this->resolveValidation($object);
 
         yield $object;
     }
@@ -102,23 +94,13 @@ class ValidationResolver implements ValueResolverInterface
 
         try {
             $object = $this->denormalizer->denormalize($data, $argument->getType());
-        } catch (NotNormalizableValueException $e) {
+        } catch (NotNormalizableValueException|InvalidArgumentException $e) {
             $this->sendErrorResponse(new BadRequestException($e->getMessage()));
+        } catch (Exception) {
+            $this->sendErrorResponse(new BadRequestException('Invalid query parameters'));
         }
 
-        $errors = $this->validator->validate($object);
-
-        if (count($errors) > 0) {
-            $errorDetails = [];
-            foreach ($errors as $error) {
-                $errorDetails[] = [
-                    'property' => $error->getPropertyPath(),
-                    'value' => $error->getInvalidValue(),
-                    'message' => $error->getMessage(),
-                ];
-            }
-            $this->sendErrorResponse(new BadRequestException('Validation failed', $errorDetails));
-        }
+        $this->resolveValidation($object);
 
         yield $object;
     }
@@ -147,5 +129,25 @@ class ValidationResolver implements ValueResolverInterface
         $response = $this->re->withException($ex);
         $response->send();
         exit;
+    }
+
+    /**
+     * @param mixed $object
+     */
+    private function resolveValidation(mixed $object): void
+    {
+        $errors = $this->validator->validate($object);
+
+        if (count($errors) > 0) {
+            $errorDetails = [];
+            foreach ($errors as $error) {
+                $errorDetails[] = [
+                    'property' => $error->getPropertyPath(),
+                    'value' => $error->getInvalidValue(),
+                    'message' => $error->getMessage(),
+                ];
+            }
+            $this->sendErrorResponse(new BadRequestException('Validation failed', $errorDetails));
+        }
     }
 }
