@@ -10,6 +10,7 @@ use App\Entity\Video\Video;
 use App\Exception\NotFoundException;
 use App\Helper\Generator\UrlGenerator;
 use App\Helper\DTO\PaginatorResult;
+use App\Helper\Video\FolderData;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 use App\Service\Video\VideoService;
@@ -119,6 +120,7 @@ class VideoServiceTest extends TestCase
     {
         $account = new Account('email@example.com', 'password', 'salt');
         $folder = new Folder('Test Folder', $account);
+        $folderData = new FolderData($folder, false);
         $videos = [new Video('Video 1', $account), new Video('Video 2', $account)];
         $paginatorRequest =  new PaginatorRequest(10, 0);
         $paginatorResult = new PaginatorResult($videos, 2);
@@ -126,10 +128,10 @@ class VideoServiceTest extends TestCase
         $this->mockVideoRepository
             ->expects($this->once())
             ->method('findVideos')
-            ->with($account, $folder, $paginatorRequest)
+            ->with($account, $folderData, $paginatorRequest)
             ->willReturn($paginatorResult);
 
-        $result = $this->videoService->getVideos($account, $folder, $paginatorRequest);
+        $result = $this->videoService->getVideos($account, $folderData, $paginatorRequest);
 
         $this->assertSame($paginatorResult, $result);
     }

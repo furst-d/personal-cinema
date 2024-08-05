@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class FolderQueryRequest extends PaginatorRequest
 {
-    #[Assert\Positive]
+    #[Assert\PositiveOrZero]
     private ?int $parentId;
 
     #[Assert\Choice(choices: [SortBy::NAME, SortBy::UPDATE_DATE], message: "Choose a valid sort order.")]

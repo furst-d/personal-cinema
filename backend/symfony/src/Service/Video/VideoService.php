@@ -11,6 +11,7 @@ use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Helper\Generator\UrlGenerator;
 use App\Helper\DTO\PaginatorResult;
+use App\Helper\Video\FolderData;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 
@@ -119,13 +120,13 @@ class VideoService
 
     /**
      * @param Account|null $account
-     * @param Folder|null $folder
+     * @param FolderData $folderData
      * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult<Video>
      */
-    public function getVideos(?Account $account, ?Folder $folder, PaginatorRequest $paginatorRequest): PaginatorResult
+    public function getVideos(?Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
     {
-        return $this->videoRepository->findVideos($account, $folder, $paginatorRequest);
+        return $this->videoRepository->findVideos($account, $folderData, $paginatorRequest);
     }
 
     /**

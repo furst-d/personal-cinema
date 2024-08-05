@@ -41,14 +41,11 @@ class FolderController extends BasePersonalController
             $account = $this->getAccount($request);
             $parentFolderId = $folderQueryRequest->getParentId();
 
-            $parentFolder = null;
-            if ($parentFolderId) {
-                $parentFolder = $this->folderService->getAccountFolderById($account, $parentFolderId);
-            }
+            $folderData = $this->folderService->getAccountFolderDataById($account, $parentFolderId);
 
             $folders = $this->folderService->getFolders(
                 $account,
-                $parentFolder,
+                $folderData,
                 $folderQueryRequest
             );
 

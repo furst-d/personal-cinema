@@ -11,3 +11,14 @@ export const formatDuration = (duration: number) => {
     const hours = Math.floor(duration / 3600);
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
+
+export const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+};

@@ -95,14 +95,11 @@ class VideoController extends BasePersonalController
             $account = $this->getAccount($request);
             $folderId = $videoQueryRequest->getFolderId();
 
-            $folder = null;
-            if ($folderId) {
-                $folder = $this->folderService->getAccountFolderById($account, $folderId);
-            }
+            $folderData = $this->folderService->getAccountFolderDataById($account, $folderId);
 
             $videos = $this->videoService->getVideos(
                 $account,
-                $folder,
+                $folderData,
                 $videoQueryRequest
             );
 

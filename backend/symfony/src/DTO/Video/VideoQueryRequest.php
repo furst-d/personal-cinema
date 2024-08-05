@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class VideoQueryRequest extends PaginatorRequest
 {
-    #[Assert\Positive]
+    #[Assert\PositiveOrZero]
     private ?int $folderId;
 
     #[Assert\Choice(choices: [SortBy::NAME], message: "Choose a valid sort order.")]

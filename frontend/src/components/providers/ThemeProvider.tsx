@@ -1,10 +1,9 @@
 import React from 'react';
 import { createGlobalStyle, ThemeProvider as StyledThemeProvider } from 'styled-components';
-import { createTheme } from '@mui/material/styles';
+import { createTheme, ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material';
-import {ProviderProps} from "../../types/Layout";
+import { ProviderProps } from "../../types/layout";
 
 export const theme = {
     background: '#323232',
@@ -14,6 +13,13 @@ export const theme = {
     third: '#fff',
     text_light: '#f3f3f3',
     text_dark: '#111',
+    breakpoints: {
+        xs: 0,
+        sm: 600,
+        md: 900,
+        lg: 1200,
+        xl: 1536,
+    },
 };
 
 const muiTheme = createTheme({
@@ -31,6 +37,9 @@ const muiTheme = createTheme({
             primary: theme.text_light,
             secondary: theme.text_dark,
         },
+    },
+    breakpoints: {
+        values: theme.breakpoints,
     },
     components: {
         MuiButton: {

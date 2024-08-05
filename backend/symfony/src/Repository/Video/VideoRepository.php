@@ -9,6 +9,7 @@ use App\Entity\Video\Folder;
 use App\Entity\Video\Video;
 use App\Helper\DTO\PaginatorResult;
 use App\Helper\DTO\SortBy;
+use App\Helper\Video\FolderData;
 use App\Repository\PaginatorHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -39,11 +40,11 @@ class VideoRepository extends ServiceEntityRepository
 
     /**
      * @param Account|null $account
-     * @param Folder|null $folder
+     * @param FolderData $folderData
      * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult<Video>
      */
-    public function findVideos(?Account $account, ?Folder $folder, PaginatorRequest $paginatorRequest): PaginatorResult
+    public function findVideos(?Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
     {
         $qb = $this->createQueryBuilder('v')
             ->where('v.isDeleted = false');
@@ -52,8 +53,12 @@ class VideoRepository extends ServiceEntityRepository
             $qb->andWhere('v.account = :account')->setParameter('account', $account);
         }
 
-        if ($folder) {
-            $qb->andWhere('v.folder = :folder')->setParameter('folder', $folder);
+        if ($folderData->isDefaultFolder()) {
+            $qb->andWhere('v.folder IS NULL');
+        } else {
+            if ($folderData->getFolder()) {
+                $qb->andWhere('v.folder = :folder')->setParameter('folder', $folderData->getFolder());
+            }
         }
 
         if ($sortBy = $paginatorRequest->getOrderBy()) {
