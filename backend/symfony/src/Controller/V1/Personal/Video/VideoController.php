@@ -93,7 +93,7 @@ class VideoController extends BasePersonalController
     {
         try {
             $account = $this->getAccount($request);
-            $folderId = $videoQueryRequest->folderId;
+            $folderId = $videoQueryRequest->getFolderId();
 
             $folder = null;
             if ($folderId) {

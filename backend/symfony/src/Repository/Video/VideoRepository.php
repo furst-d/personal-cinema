@@ -8,6 +8,7 @@ use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
 use App\Entity\Video\Video;
 use App\Helper\DTO\PaginatorResult;
+use App\Helper\DTO\SortBy;
 use App\Repository\PaginatorHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -53,6 +54,12 @@ class VideoRepository extends ServiceEntityRepository
 
         if ($folder) {
             $qb->andWhere('v.folder = :folder')->setParameter('folder', $folder);
+        }
+
+        if ($sortBy = $paginatorRequest->getOrderBy()) {
+            if ($sortBy === SortBy::NAME) {
+                $qb->orderBy('v.name');
+            }
         }
 
         return $this->getPaginatorResult($qb, $paginatorRequest);
