@@ -3,10 +3,13 @@
 namespace App\Repository\Video;
 
 use App\DQL\RandomFunction;
+use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
 use App\Entity\Video\Video;
-use App\Helper\Paginator\PaginatorResult;
+use App\Helper\DTO\PaginatorResult;
+use App\Helper\DTO\SortBy;
+use App\Helper\Video\FolderData;
 use App\Repository\PaginatorHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -37,12 +40,11 @@ class VideoRepository extends ServiceEntityRepository
 
     /**
      * @param Account|null $account
-     * @param Folder|null $folder
-     * @param int|null $limit
-     * @param int|null $offset
+     * @param FolderData $folderData
+     * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult<Video>
      */
-    public function findVideos(?Account $account, ?Folder $folder, ?int $limit, ?int $offset): PaginatorResult
+    public function findVideos(?Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
     {
         $qb = $this->createQueryBuilder('v')
             ->where('v.isDeleted = false');
@@ -51,20 +53,29 @@ class VideoRepository extends ServiceEntityRepository
             $qb->andWhere('v.account = :account')->setParameter('account', $account);
         }
 
-        if ($folder) {
-            $qb->andWhere('v.folder = :folder')->setParameter('folder', $folder);
+        if ($folderData->isDefaultFolder()) {
+            $qb->andWhere('v.folder IS NULL');
+        } else {
+            if ($folderData->getFolder()) {
+                $qb->andWhere('v.folder = :folder')->setParameter('folder', $folderData->getFolder());
+            }
         }
 
-        return $this->getPaginatorResult($qb, $limit, $offset);
+        if ($sortBy = $paginatorRequest->getOrderBy()) {
+            if ($sortBy === SortBy::NAME) {
+                $qb->orderBy('v.name');
+            }
+        }
+
+        return $this->getPaginatorResult($qb, $paginatorRequest);
     }
 
     /**
      * @param Video $video
-     * @param int|null $limit
-     * @param int|null $offset
+     * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult<Video>
      */
-    public function findRecommendations(Video $video, ?int $limit, ?int $offset): PaginatorResult
+    public function findRecommendations(Video $video, PaginatorRequest $paginatorRequest): PaginatorResult
     {
         $qb = $this->createQueryBuilder('v')
             ->where('v.isDeleted = false')
@@ -80,7 +91,7 @@ class VideoRepository extends ServiceEntityRepository
             $qb->andWhere('v.folder IS NULL');
         }
 
-        return $this->getPaginatorResult($qb, $limit, $offset);
+        return $this->getPaginatorResult($qb, $paginatorRequest);
     }
 
     /**

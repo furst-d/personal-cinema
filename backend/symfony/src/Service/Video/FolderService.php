@@ -2,12 +2,15 @@
 
 namespace App\Service\Video;
 
+use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
 use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
+use App\Helper\DTO\SortBy;
 use App\Helper\Folder\FolderDeletionMode;
-use App\Helper\Paginator\PaginatorResult;
+use App\Helper\DTO\PaginatorResult;
+use App\Helper\Video\FolderData;
 use App\Repository\Video\FolderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -68,6 +71,25 @@ class FolderService
 
     /**
      * @param Account $account
+     * @param int|null $id
+     * @return FolderData
+     * @throws NotFoundException
+     */
+    public function getAccountFolderDataById(Account $account, ?int $id): FolderData
+    {
+        if (is_null($id)) {
+            return new FolderData(null, false);
+        }
+
+        if ($id === 0) {
+            return new FolderData(null, true);
+        }
+
+        return new FolderData($this->getAccountFolderById($account, $id), false);
+    }
+
+    /**
+     * @param Account $account
      * @param string $name
      * @param int|null $parentId
      * @return Folder
@@ -113,14 +135,13 @@ class FolderService
 
     /**
      * @param Account $account
-     * @param Folder|null $parentFolder
-     * @param int $limit
-     * @param int $offset
+     * @param FolderData $folderData
+     * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult
      */
-    public function getFolders(Account $account, ?Folder $parentFolder, int $limit, int $offset): PaginatorResult
+    public function getFolders(Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
     {
-        return $this->folderRepository->findAccountFolders($account, $parentFolder, $limit, $offset);
+        return $this->folderRepository->findAccountFolders($account, $folderData, $paginatorRequest);
     }
 
     /**

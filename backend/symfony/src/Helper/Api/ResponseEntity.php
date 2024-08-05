@@ -3,7 +3,7 @@
 namespace App\Helper\Api;
 
 use App\Exception\ApiException;
-use App\Helper\Paginator\PaginatorResult;
+use App\Helper\DTO\PaginatorResult;
 use Countable;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;

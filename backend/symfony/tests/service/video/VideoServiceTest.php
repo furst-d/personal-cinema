@@ -2,13 +2,15 @@
 
 namespace App\Tests\Service\Video;
 
+use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
 use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
 use App\Exception\NotFoundException;
 use App\Helper\Generator\UrlGenerator;
-use App\Helper\Paginator\PaginatorResult;
+use App\Helper\DTO\PaginatorResult;
+use App\Helper\Video\FolderData;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 use App\Service\Video\VideoService;
@@ -118,16 +120,18 @@ class VideoServiceTest extends TestCase
     {
         $account = new Account('email@example.com', 'password', 'salt');
         $folder = new Folder('Test Folder', $account);
+        $folderData = new FolderData($folder, false);
         $videos = [new Video('Video 1', $account), new Video('Video 2', $account)];
+        $paginatorRequest =  new PaginatorRequest(10, 0);
         $paginatorResult = new PaginatorResult($videos, 2);
 
         $this->mockVideoRepository
             ->expects($this->once())
             ->method('findVideos')
-            ->with($account, $folder, 10, 0)
+            ->with($account, $folderData, $paginatorRequest)
             ->willReturn($paginatorResult);
 
-        $result = $this->videoService->getVideos($account, $folder, 10, 0);
+        $result = $this->videoService->getVideos($account, $folderData, $paginatorRequest);
 
         $this->assertSame($paginatorResult, $result);
     }

@@ -93,18 +93,14 @@ class VideoController extends BasePersonalController
     {
         try {
             $account = $this->getAccount($request);
-            $folderId = $videoQueryRequest->folderId;
+            $folderId = $videoQueryRequest->getFolderId();
 
-            $folder = null;
-            if ($folderId) {
-                $folder = $this->folderService->getAccountFolderById($account, $folderId);
-            }
+            $folderData = $this->folderService->getAccountFolderDataById($account, $folderId);
 
             $videos = $this->videoService->getVideos(
                 $account,
-                $folder,
-                $videoQueryRequest->getLimit(),
-                $videoQueryRequest->getOffset()
+                $folderData,
+                $videoQueryRequest
             );
 
             $this->videoService->addThumbnailToVideos($videos->getData(), $account);
@@ -139,8 +135,7 @@ class VideoController extends BasePersonalController
 
             $videos = $this->videoService->getVideoRecommendations(
                 $video,
-                $videoQueryRequest->getLimit(),
-                $videoQueryRequest->getOffset()
+                $videoQueryRequest
             );
 
             $this->videoService->addThumbnailToVideos($videos->getData(), $account);

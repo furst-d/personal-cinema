@@ -2,13 +2,15 @@
 
 namespace App\Repository\Video;
 
+use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
-use App\Helper\Folder\FolderDeletionMode;
-use App\Helper\Paginator\PaginatorResult;
+use App\Helper\DTO\SortBy;
+use App\Helper\DTO\PaginatorResult;
+use App\Helper\Video\FolderData;
+use App\Repository\PaginatorHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -16,6 +18,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class FolderRepository extends ServiceEntityRepository
 {
+    use PaginatorHelper;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Folder::class);
@@ -34,29 +38,32 @@ class FolderRepository extends ServiceEntityRepository
 
     /**
      * @param Account $account
-     * @param Folder|null $parent
-     * @param int|null $limit
-     * @param int|null $offset
+     * @param FolderData $folderData
+     * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult<Folder>
      */
-    public function findAccountFolders(Account $account, ?Folder $parent, ?int $limit, ?int $offset): PaginatorResult
+    public function findAccountFolders(Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
     {
         $qb = $this->createQueryBuilder('f')
             ->where('f.owner = :account')->setParameter('account', $account);
 
-        if ($parent) {
-            $qb->andWhere('f.parent = :parent')->setParameter('parent', $parent);
+        if ($folderData->isDefaultFolder()) {
+            $qb->andWhere('f.parent IS NULL');
+        } else {
+            if ($folderData->getFolder()) {
+                $qb->andWhere('f.parent = :folder')->setParameter('folder', $folderData->getFolder());
+            }
         }
 
-        if (!is_null($limit) && !is_null($offset)) {
-            $qb->setMaxResults($limit)
-                ->setFirstResult($offset);
+        if ($sortBy = $paginatorRequest->getOrderBy()) {
+            if ($sortBy === SortBy::NAME) {
+                $qb->orderBy('f.name');
+            } elseif ($sortBy === SortBy::UPDATE_DATE) {
+                $qb->orderBy('f.updatedAt', 'DESC');
+            }
         }
 
-        $paginator = new Paginator($qb);
-        $totalItems = $paginator->count();
-
-        return new PaginatorResult(iterator_to_array($paginator), $totalItems);
+        return $this->getPaginatorResult($qb, $paginatorRequest);
     }
 
     /**

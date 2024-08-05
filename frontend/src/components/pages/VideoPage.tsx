@@ -1,5 +1,6 @@
 import React from "react";
 import {Helmet, HelmetProvider} from "react-helmet-async";
+import FileManager from "../file/FileManager";
 
 const VideoPage: React.FC = () => {
     return (
@@ -7,7 +8,7 @@ const VideoPage: React.FC = () => {
             <Helmet>
                 <title>Správa videí</title>
             </Helmet>
-            <h1>Správa videí</h1>
+            <FileManager />
         </HelmetProvider>
     );
 }

@@ -3,7 +3,6 @@
 namespace App\Controller\V1\Personal\Folder;
 
 use App\Controller\V1\Personal\BasePersonalController;
-use App\DTO\PaginatorRequest;
 use App\DTO\Video\FolderQueryRequest;
 use App\DTO\Video\FolderRequest;
 use App\Exception\ApiException;
@@ -12,7 +11,6 @@ use App\Service\Locator\BaseControllerLocator;
 use App\Service\Video\FolderService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/personal/folders')]
@@ -41,14 +39,16 @@ class FolderController extends BasePersonalController
     {
         try {
             $account = $this->getAccount($request);
-            $parentFolderId = $folderQueryRequest->parentId;
+            $parentFolderId = $folderQueryRequest->getParentId();
 
-            $parentFolder = null;
-            if ($parentFolderId) {
-                $parentFolder = $this->folderService->getAccountFolderById($account, $parentFolderId);
-            }
+            $folderData = $this->folderService->getAccountFolderDataById($account, $parentFolderId);
 
-            $folders = $this->folderService->getFolders($account, $parentFolder, $folderQueryRequest->getLimit(), $folderQueryRequest->getOffset());
+            $folders = $this->folderService->getFolders(
+                $account,
+                $folderData,
+                $folderQueryRequest
+            );
+
             return $this->re->withData($folders, ['folder:read']);
         } catch (ApiException $e) {
             return $this->re->withException($e);
