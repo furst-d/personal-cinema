@@ -19,7 +19,7 @@ export const FileManagerListItemStyle = styled(ListItem)`
     cursor: pointer;
 
     &:hover {
-        background-color: ${(props) => props.theme.background};
+        background-color: rgba(0, 0, 0, 0.1);
     }
 `;
 
