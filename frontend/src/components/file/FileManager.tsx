@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import { toast } from "react-toastify";
 import axiosPrivate from "../../api/axiosPrivate";
 import Loading from "../loading/Loading";
 import FileExplorer from "./FileExplorer";
@@ -25,7 +26,12 @@ const FileManager: React.FC = () => {
     const [contextMenuAnchor, setContextMenuAnchor] = useState<null | HTMLElement>(null);
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-    const [newFolderName, setNewFolderName] = useState<string>("");
+    const [newName, setNewName] = useState<string>("");
+    const [nameError, setNameError] = useState<string>("");
+    const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [editingType, setEditingType] = useState<"folder" | "video" | null>(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+    const [deletingType, setDeletingType] = useState<"folder" | "video" | null>(null);
 
     useEffect(() => {
         setLoading(true);
@@ -92,23 +98,139 @@ const FileManager: React.FC = () => {
     };
 
     const handleCreateFolderClick = () => {
+        setIsEditing(false);
+        setNewName("");
+        setEditingType("folder");
         setDialogOpen(true);
     };
 
     const handleDialogClose = () => {
         setDialogOpen(false);
+        setNewName("");
+        setNameError("");
     };
 
     const handleCreateFolder = async () => {
+        if (!newName.trim()) {
+            setNameError("Název složky musí být vyplněn");
+            return;
+        }
+
         try {
-            await axiosPrivate.post('/v1/personal/folders', {
-                name: newFolderName,
-                parentId: currentFolderId || 0
-            });
-            fetchFolders(); // Refresh the folder list
+            const requestData: any = { name: newName };
+            if (currentFolderId) {
+                requestData.parentId = currentFolderId;
+            }
+
+            const response = await axiosPrivate.post('/v1/personal/folders', requestData);
+            const newFolder = response.data.payload.data;
+            setFolders([...folders, newFolder]); // Přidejte novou složku do stavu
             handleDialogClose();
+            toast.success("Složka byla úspěšně vytvořena");
         } catch (error) {
             console.error("Error creating folder", error);
+        }
+    };
+
+    const handleEditFolder = async () => {
+        if (!newName.trim()) {
+            setNameError("Název složky musí být vyplněn");
+            return;
+        }
+
+        try {
+            const requestData = { name: newName };
+            await axiosPrivate.put(`/v1/personal/folders/${selectedItem.id}`, requestData);
+
+            const updatedFolders = folders.map(folder =>
+                folder.id === selectedItem.id ? { ...folder, name: newName } : folder
+            );
+
+            setFolders(updatedFolders);
+            handleDialogClose();
+            toast.success("Složka byla úspěšně upravena");
+        } catch (error) {
+            console.error("Error editing folder", error);
+        }
+    };
+
+    const handleEditVideo = async () => {
+        if (!newName.trim()) {
+            setNameError("Název videa musí být vyplněn");
+            return;
+        }
+
+        try {
+            const requestData = { name: newName, folderId: currentFolderId };
+            await axiosPrivate.put(`/v1/personal/videos/${selectedItem.id}`, requestData);
+
+            const updatedVideos = videos.map(video =>
+                video.id === selectedItem.id ? { ...video, name: newName } : video
+            );
+
+            setVideos(updatedVideos);
+            handleDialogClose();
+            toast.success("Video bylo úspěšně upraveno");
+        } catch (error) {
+            console.error("Error editing video", error);
+        }
+    };
+
+    const handleEditFolderClick = (item: any) => {
+        setIsEditing(true);
+        setNewName(item.name);
+        setSelectedItem(item);
+        setEditingType("folder");
+        setDialogOpen(true);
+    };
+
+    const handleEditVideoClick = (item: any) => {
+        setIsEditing(true);
+        setNewName(item.name);
+        setSelectedItem(item);
+        setEditingType("video");
+        setDialogOpen(true);
+    };
+
+    const handleDeleteFolderClick = (item: any) => {
+        setDeletingType("folder");
+        setSelectedItem(item);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteVideoClick = (item: any) => {
+        setDeletingType("video");
+        setSelectedItem(item);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteDialogClose = () => {
+        setDeleteDialogOpen(false);
+        setSelectedItem(null);
+        setDeletingType(null);
+    };
+
+    const handleDeleteFolder = async () => {
+        try {
+            await axiosPrivate.delete(`/v1/personal/folders/${selectedItem.id}`);
+            const updatedFolders = folders.filter(folder => folder.id !== selectedItem.id);
+            setFolders(updatedFolders);
+            handleDeleteDialogClose();
+            toast.success("Složka byla úspěšně smazána");
+        } catch (error) {
+            console.error("Error deleting folder", error);
+        }
+    };
+
+    const handleDeleteVideo = async () => {
+        try {
+            await axiosPrivate.delete(`/v1/personal/videos/${selectedItem.id}`);
+            const updatedVideos = videos.filter(video => video.id !== selectedItem.id);
+            setVideos(updatedVideos);
+            handleDeleteDialogClose();
+            toast.success("Video bylo úspěšně smazáno");
+        } catch (error) {
+            console.error("Error deleting video", error);
         }
     };
 
@@ -149,26 +271,55 @@ const FileManager: React.FC = () => {
                 onVideoDoubleClick={handleVideoDoubleClick}
                 onContextMenuOpen={handleContextMenuOpen}
                 onContextMenuClose={handleContextMenuClose}
+                onEditFolder={handleEditFolderClick}
+                onEditVideo={handleEditVideoClick}
+                onDeleteFolder={handleDeleteFolderClick}
+                onDeleteVideo={handleDeleteVideoClick}
+                onCreateFolder={handleCreateFolderClick}
                 contextMenuAnchor={contextMenuAnchor}
+                selectedItem={selectedItem}
             />
-            <Dialog open={dialogOpen} onClose={handleDialogClose}>
-                <DialogTitle>Vytvořit novou složku</DialogTitle>
+            <Dialog open={dialogOpen} onClose={handleDialogClose} fullWidth>
+                <DialogTitle>{isEditing ? (editingType === "folder" ? "Upravit složku" : "Upravit video") : "Vytvořit novou složku"}</DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus
                         margin="dense"
-                        label="Název složky"
+                        label={editingType === "folder" ? "Název složky" : "Název videa"}
                         fullWidth
-                        value={newFolderName}
-                        onChange={(e) => setNewFolderName(e.target.value)}
+                        value={newName}
+                        onChange={(e) => {
+                            setNewName(e.target.value);
+                            setNameError("");
+                        }}
+                        error={Boolean(nameError)}
+                        helperText={nameError}
                     />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogClose} color="primary">
                         Zrušit
                     </Button>
-                    <Button onClick={handleCreateFolder} color="primary">
-                        Vytvořit
+                    <Button onClick={isEditing ? (editingType === "folder" ? handleEditFolder : handleEditVideo) : handleCreateFolder} color="primary">
+                        {isEditing ? "Upravit" : "Vytvořit"}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog open={deleteDialogOpen} onClose={handleDeleteDialogClose}>
+                <DialogTitle>Potvrdit smazání</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        {deletingType === "folder"
+                            ? "Opravdu chcete smazat tuto složku a všechny její podřízené složky a videa?"
+                            : "Opravdu chcete smazat toto video? Tato akce je nevratná."}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteDialogClose} color="primary">
+                        Zrušit
+                    </Button>
+                    <Button onClick={deletingType === "folder" ? handleDeleteFolder : handleDeleteVideo} color="primary">
+                        Smazat
                     </Button>
                 </DialogActions>
             </Dialog>
