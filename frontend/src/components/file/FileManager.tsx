@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
     Container,
     Typography,
@@ -16,6 +16,8 @@ import { toast } from "react-toastify";
 import axiosPrivate from "../../api/axiosPrivate";
 import Loading from "../loading/Loading";
 import FileExplorer from "./FileExplorer";
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 const FileManager: React.FC = () => {
     const [folders, setFolders] = useState<any[]>([]);
@@ -124,7 +126,7 @@ const FileManager: React.FC = () => {
 
             const response = await axiosPrivate.post('/v1/personal/folders', requestData);
             const newFolder = response.data.payload.data;
-            setFolders([...folders, newFolder]); // Přidejte novou složku do stavu
+            setFolders([...folders, newFolder]);
             handleDialogClose();
             toast.success("Složka byla úspěšně vytvořena");
         } catch (error) {
@@ -234,96 +236,122 @@ const FileManager: React.FC = () => {
         }
     };
 
+    const moveItem = useCallback(async (item: any, targetFolderId: string | null) => {
+        if (item.type === 'folder') {
+            console.log(`Přesunout složku ${item.id} do složky ${targetFolderId}`);
+            await axiosPrivate.put(`/v1/personal/folders/${item.id}`, {
+                name: item.name,
+                parentId: targetFolderId
+            });
+            setFolders(prevFolders => {
+                return prevFolders.filter(folder => folder.id !== item.id);
+            });
+            toast.success("Složka byla úspěšně přesunuta");
+        } else {
+            await axiosPrivate.put(`/v1/personal/videos/${item.id}`, {
+                name: item.name,
+                folderId: targetFolderId
+            });
+            setVideos(prevVideos => {
+                return prevVideos.filter(video => video.id !== item.id);
+            });
+            toast.success("Soubor byl úspěšně přesunut");
+        }
+    }, [folders, videos, fetchFolders, fetchVideos]);
+
     if (loading) {
         return <Loading />;
     }
 
     return (
-        <Container>
-            <Typography variant="h4" gutterBottom>Správa videí</Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <Box sx={{ marginBottom: '10px' }}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<UploadFileIcon />}
-                        onClick={handleUploadClick}
-                        sx={{ marginRight: '10px' }}
-                    >
-                        Nahrát soubor
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="secondary"
-                        startIcon={<CreateNewFolderIcon />}
-                        onClick={handleCreateFolderClick}
-                    >
-                        Vytvořit složku
-                    </Button>
+        <DndProvider backend={HTML5Backend}>
+            <Container>
+                <Typography variant="h4" gutterBottom>Správa videí</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                    <Box sx={{ marginBottom: '10px' }}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<UploadFileIcon />}
+                            onClick={handleUploadClick}
+                            sx={{ marginRight: '10px' }}
+                        >
+                            Nahrát soubor
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="secondary"
+                            startIcon={<CreateNewFolderIcon />}
+                            onClick={handleCreateFolderClick}
+                        >
+                            Vytvořit složku
+                        </Button>
+                    </Box>
                 </Box>
-            </Box>
-            <FileExplorer
-                folders={folders}
-                videos={videos}
-                currentFolderId={currentFolderId}
-                onFolderClick={handleFolderClick}
-                onBackClick={handleBackClick}
-                onVideoDoubleClick={handleVideoDoubleClick}
-                onContextMenuOpen={handleContextMenuOpen}
-                onContextMenuClose={handleContextMenuClose}
-                onEditFolder={handleEditFolderClick}
-                onEditVideo={handleEditVideoClick}
-                onDeleteFolder={handleDeleteFolderClick}
-                onDeleteVideo={handleDeleteVideoClick}
-                onCreateFolder={handleCreateFolderClick}
-                contextMenuAnchor={contextMenuAnchor}
-                selectedItem={selectedItem}
-            />
-            <Dialog open={dialogOpen} onClose={handleDialogClose} fullWidth>
-                <DialogTitle>{isEditing ? (editingType === "folder" ? "Upravit složku" : "Upravit video") : "Vytvořit novou složku"}</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label={editingType === "folder" ? "Název složky" : "Název videa"}
-                        fullWidth
-                        value={newName}
-                        onChange={(e) => {
-                            setNewName(e.target.value);
-                            setNameError("");
-                        }}
-                        error={Boolean(nameError)}
-                        helperText={nameError}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleDialogClose} color="primary">
-                        Zrušit
-                    </Button>
-                    <Button onClick={isEditing ? (editingType === "folder" ? handleEditFolder : handleEditVideo) : handleCreateFolder} color="primary">
-                        {isEditing ? "Upravit" : "Vytvořit"}
-                    </Button>
-                </DialogActions>
-            </Dialog>
-            <Dialog open={deleteDialogOpen} onClose={handleDeleteDialogClose}>
-                <DialogTitle>Potvrdit smazání</DialogTitle>
-                <DialogContent>
-                    <Typography>
-                        {deletingType === "folder"
-                            ? "Opravdu chcete smazat tuto složku a všechny její podřízené složky a videa?"
-                            : "Opravdu chcete smazat toto video? Tato akce je nevratná."}
-                    </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleDeleteDialogClose} color="primary">
-                        Zrušit
-                    </Button>
-                    <Button onClick={deletingType === "folder" ? handleDeleteFolder : handleDeleteVideo} color="primary">
-                        Smazat
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </Container>
+                <FileExplorer
+                    folders={folders}
+                    videos={videos}
+                    currentFolderId={currentFolderId}
+                    onFolderClick={handleFolderClick}
+                    onBackClick={handleBackClick}
+                    onVideoDoubleClick={handleVideoDoubleClick}
+                    onContextMenuOpen={handleContextMenuOpen}
+                    onContextMenuClose={handleContextMenuClose}
+                    onEditFolder={handleEditFolderClick}
+                    onEditVideo={handleEditVideoClick}
+                    onDeleteFolder={handleDeleteFolderClick}
+                    onDeleteVideo={handleDeleteVideoClick}
+                    onCreateFolder={handleCreateFolderClick}
+                    contextMenuAnchor={contextMenuAnchor}
+                    selectedItem={selectedItem}
+                    moveItem={moveItem}
+                />
+                <Dialog open={dialogOpen} onClose={handleDialogClose} fullWidth>
+                    <DialogTitle>{isEditing ? (editingType === "folder" ? "Upravit složku" : "Upravit video") : "Vytvořit novou složku"}</DialogTitle>
+                    <DialogContent>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            label={editingType === "folder" ? "Název složky" : "Název videa"}
+                            fullWidth
+                            value={newName}
+                            onChange={(e) => {
+                                setNewName(e.target.value);
+                                setNameError("");
+                            }}
+                            error={Boolean(nameError)}
+                            helperText={nameError}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleDialogClose} color="primary">
+                            Zrušit
+                        </Button>
+                        <Button onClick={isEditing ? (editingType === "folder" ? handleEditFolder : handleEditVideo) : handleCreateFolder} color="primary">
+                            {isEditing ? "Upravit" : "Vytvořit"}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+                <Dialog open={deleteDialogOpen} onClose={handleDeleteDialogClose}>
+                    <DialogTitle>Potvrdit smazání</DialogTitle>
+                    <DialogContent>
+                        <Typography>
+                            {deletingType === "folder"
+                                ? "Opravdu chcete smazat tuto složku a všechny její podřízené složky a videa?"
+                                : "Opravdu chcete smazat toto video? Tato akce je nevratná."}
+                        </Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleDeleteDialogClose} color="primary">
+                            Zrušit
+                        </Button>
+                        <Button onClick={deletingType === "folder" ? handleDeleteFolder : handleDeleteVideo} color="primary">
+                            Smazat
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </Container>
+        </DndProvider>
     );
 };
 

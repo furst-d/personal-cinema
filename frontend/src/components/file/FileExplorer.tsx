@@ -1,4 +1,4 @@
-import React, { useState, MouseEvent } from "react";
+import React from "react";
 import {
     Grid,
     Typography,
@@ -15,8 +15,6 @@ import FolderIcon from '@mui/icons-material/Folder';
 import VideoFileIcon from '@mui/icons-material/VideoFile';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { useTheme } from "styled-components";
 import {
     FileManagerContainerStyle,
@@ -24,6 +22,7 @@ import {
     FileManagerListItemStyle, FileManagerSeparator
 } from "../../styles/file/FileManager";
 import { formatDate } from "../../utils/formatter";
+import { useDrag, useDrop } from 'react-dnd';
 
 interface FileExplorerProps {
     folders: any[];
@@ -41,42 +40,36 @@ interface FileExplorerProps {
     onCreateFolder: () => void;
     contextMenuAnchor: HTMLElement | null;
     selectedItem: any;
+    moveItem: (item: any, targetFolderId: string | null) => void;
 }
 
+const ItemTypes = {
+    FOLDER: 'folder',
+    VIDEO: 'video',
+};
+
 const FileExplorer: React.FC<FileExplorerProps> = ({
-   folders,
-   videos,
-   currentFolderId,
-   onFolderClick,
-   onBackClick,
-   onVideoDoubleClick,
-   onContextMenuOpen,
-   onContextMenuClose,
-   onCreateFolder,
-   onEditFolder,
-   onEditVideo,
-   onDeleteFolder,
-   onDeleteVideo,
-   contextMenuAnchor,
-   selectedItem
-}) => {
+                                                       folders,
+                                                       videos,
+                                                       currentFolderId,
+                                                       onFolderClick,
+                                                       onBackClick,
+                                                       onVideoDoubleClick,
+                                                       onContextMenuOpen,
+                                                       onContextMenuClose,
+                                                       onCreateFolder,
+                                                       onEditFolder,
+                                                       onEditVideo,
+                                                       onDeleteFolder,
+                                                       onDeleteVideo,
+                                                       contextMenuAnchor,
+                                                       selectedItem,
+                                                       moveItem
+                                                   }) => {
     const theme = useTheme();
-    const [contextMenuPosition, setContextMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
-
-    const handleContextMenu = (event: MouseEvent) => {
-        event.preventDefault();
-        setContextMenuPosition({
-            mouseX: event.clientX,
-            mouseY: event.clientY,
-        });
-    };
-
-    const handleCloseContextMenu = () => {
-        setContextMenuPosition(null);
-    };
 
     return (
-        <FileManagerContainerStyle theme={theme} onContextMenu={handleContextMenu}>
+        <FileManagerContainerStyle theme={theme}>
             {currentFolderId && (
                 <IconButton onClick={onBackClick} sx={{ marginBottom: '10px', color: theme.textLight }}>
                     <ArrowBackIcon />
@@ -94,22 +87,13 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
                     <>
                         {folders.map((folder, index) => (
                             <React.Fragment key={folder.id}>
-                                <Grid item xs={12} onDoubleClick={() => onFolderClick(folder.id)}>
-                                    <FileManagerListItemStyle theme={theme}>
-                                        <ListItemIcon>
-                                            <FolderIcon sx={{ color: theme.textLight }} />
-                                        </ListItemIcon>
-                                        <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, marginRight: '5px' }}>
-                                            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' } }}>
-                                                <ListItemText primary={folder.name} />
-                                                <Typography variant="body2" className="date">{formatDate(folder.updatedAt)}</Typography>
-                                            </Box>
-                                        </Box>
-                                        <IconButton onClick={(e) => onContextMenuOpen(e, folder)} sx={{ color: theme.textLight }}>
-                                            <MoreVertIcon />
-                                        </IconButton>
-                                    </FileManagerListItemStyle>
-                                </Grid>
+                                <Folder
+                                    folder={folder}
+                                    onFolderClick={onFolderClick}
+                                    onContextMenuOpen={onContextMenuOpen}
+                                    moveItem={moveItem}
+                                    theme={theme}
+                                />
                                 {index < folders.length - 1 && <FileManagerSeparator theme={theme} />}
                             </React.Fragment>
                         ))}
@@ -118,29 +102,13 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
                             const isProcessing = !video.thumbnailUrl || !video.path;
                             return (
                                 <React.Fragment key={video.id}>
-                                    <Grid item xs={12} onDoubleClick={() => !isProcessing && onVideoDoubleClick(video.hash)}>
-                                        <FileManagerListItemStyle theme={theme}>
-                                            <ListItemIcon>
-                                                <VideoFileIcon sx={{ color: theme.textLight }} />
-                                            </ListItemIcon>
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, marginRight: '5px' }}>
-                                                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' } }}>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <ListItemText primary={video.name} />
-                                                        {isProcessing && (
-                                                            <Typography variant="body2" sx={{ marginLeft: '10px', backgroundColor: theme.background, padding: '2px 6px', borderRadius: '4px', color: theme.textLight }}>
-                                                                Zpracovává se
-                                                            </Typography>
-                                                        )}
-                                                    </Box>
-                                                    <Typography variant="body2" className="date">{formatDate(video.createdAt)}</Typography>
-                                                </Box>
-                                            </Box>
-                                            <IconButton onClick={(e) => onContextMenuOpen(e, video)} sx={{ color: theme.textLight }}>
-                                                <MoreVertIcon />
-                                            </IconButton>
-                                        </FileManagerListItemStyle>
-                                    </Grid>
+                                    <Video
+                                        video={video}
+                                        onVideoDoubleClick={onVideoDoubleClick}
+                                        onContextMenuOpen={onContextMenuOpen}
+                                        isProcessing={isProcessing}
+                                        theme={theme}
+                                    />
                                     {index < videos.length - 1 && <FileManagerSeparator theme={theme} />}
                                 </React.Fragment>
                             );
@@ -149,50 +117,92 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
                 )}
             </Grid>
             <Menu
-                anchorReference="anchorPosition"
-                anchorPosition={
-                    contextMenuPosition !== null
-                        ? { top: contextMenuPosition.mouseY, left: contextMenuPosition.mouseX }
-                        : undefined
-                }
-                keepMounted
-                open={contextMenuPosition !== null}
-                onClose={handleCloseContextMenu}
-            >
-                <MenuItem onClick={onCreateFolder}>
-                    <ListItemIcon>
-                        <CreateNewFolderIcon sx={{ color: theme.textLight }} fontSize="small" />
-                    </ListItemIcon>
-                    <Typography variant="inherit">Vytvořit složku</Typography>
-                </MenuItem>
-                <MenuItem onClick={handleCloseContextMenu}>
-                    <ListItemIcon>
-                        <UploadFileIcon sx={{ color: theme.textLight }} fontSize="small" />
-                    </ListItemIcon>
-                    <Typography variant="inherit">Nahrát soubor</Typography>
-                </MenuItem>
-            </Menu>
-            <Menu
                 anchorEl={contextMenuAnchor}
                 keepMounted
                 open={Boolean(contextMenuAnchor)}
                 onClose={onContextMenuClose}
             >
                 {selectedItem && selectedItem.hash ? (
-                    <>
-                        <MenuItem onClick={() => onEditVideo(selectedItem)}>Upravit</MenuItem>
-                        <MenuItem onClick={onContextMenuClose}>Sdílet</MenuItem>
-                        <MenuItem onClick={() => onDeleteVideo(selectedItem)}>Smazat</MenuItem>
-                    </>
+                    [
+                        <MenuItem key="edit" onClick={() => onEditVideo(selectedItem)}>Upravit</MenuItem>,
+                        <MenuItem key="share" onClick={onContextMenuClose}>Sdílet</MenuItem>,
+                        <MenuItem key="delete" onClick={() => onDeleteVideo(selectedItem)}>Smazat</MenuItem>
+                    ]
                 ) : (
-                    <>
-                        <MenuItem onClick={() => onEditFolder(selectedItem)}>Upravit</MenuItem>
-                        <MenuItem onClick={onContextMenuClose}>Sdílet</MenuItem>
-                        <MenuItem onClick={() => onDeleteFolder(selectedItem)}>Smazat</MenuItem>
-                    </>
+                    [
+                        <MenuItem key="edit" onClick={() => onEditFolder(selectedItem)}>Upravit</MenuItem>,
+                        <MenuItem key="share" onClick={onContextMenuClose}>Sdílet</MenuItem>,
+                        <MenuItem key="delete" onClick={() => onDeleteFolder(selectedItem)}>Smazat</MenuItem>
+                    ]
                 )}
             </Menu>
         </FileManagerContainerStyle>
+    );
+};
+
+const Folder: React.FC<{ folder: any, onFolderClick: any, onContextMenuOpen: any, moveItem: any, theme: any }> = ({ folder, onFolderClick, onContextMenuOpen, moveItem, theme }) => {
+    const [, drag] = useDrag({
+        type: ItemTypes.FOLDER,
+        item: { ...folder, type: ItemTypes.FOLDER },
+    });
+
+    const [, drop] = useDrop({
+        accept: [ItemTypes.FOLDER, ItemTypes.VIDEO],
+        drop: (item: any) => {
+            moveItem(item, folder.id);
+        },
+    });
+
+    return (
+        <Grid item xs={12} ref={node => drag(drop(node))} onDoubleClick={() => onFolderClick(folder.id)}>
+            <FileManagerListItemStyle theme={theme}>
+                <ListItemIcon>
+                    <FolderIcon sx={{ color: theme.textLight }} />
+                </ListItemIcon>
+                <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, marginRight: '5px' }}>
+                    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' } }}>
+                        <ListItemText primary={folder.name} />
+                        <Typography variant="body2" className="date">{formatDate(folder.updatedAt)}</Typography>
+                    </Box>
+                </Box>
+                <IconButton onClick={(e) => onContextMenuOpen(e, folder)} sx={{ color: theme.textLight }}>
+                    <MoreVertIcon />
+                </IconButton>
+            </FileManagerListItemStyle>
+        </Grid>
+    );
+};
+
+const Video: React.FC<{ video: any, onVideoDoubleClick: any, onContextMenuOpen: any, isProcessing: boolean, theme: any }> = ({ video, onVideoDoubleClick, onContextMenuOpen, isProcessing, theme }) => {
+    const [, drag] = useDrag({
+        type: ItemTypes.VIDEO,
+        item: { ...video, type: ItemTypes.VIDEO },
+    });
+
+    return (
+        <Grid item xs={12} ref={drag} onDoubleClick={() => !isProcessing && onVideoDoubleClick(video.hash)}>
+            <FileManagerListItemStyle theme={theme}>
+                <ListItemIcon>
+                    <VideoFileIcon sx={{ color: theme.textLight }} />
+                </ListItemIcon>
+                <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, marginRight: '5px' }}>
+                    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' } }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <ListItemText primary={video.name} />
+                            {isProcessing && (
+                                <Typography variant="body2" sx={{ marginLeft: '10px', backgroundColor: theme.background, padding: '2px 6px', borderRadius: '4px', color: theme.textLight }}>
+                                    Zpracovává se
+                                </Typography>
+                            )}
+                        </Box>
+                        <Typography variant="body2" className="date">{formatDate(video.createdAt)}</Typography>
+                    </Box>
+                </Box>
+                <IconButton onClick={(e) => onContextMenuOpen(e, video)} sx={{ color: theme.textLight }}>
+                    <MoreVertIcon />
+                </IconButton>
+            </FileManagerListItemStyle>
+        </Grid>
     );
 };
 
