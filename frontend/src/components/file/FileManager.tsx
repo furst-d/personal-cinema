@@ -25,7 +25,6 @@ const FileManager: React.FC = () => {
         dialogOpen,
         newName,
         nameError,
-        isEditing,
         editingType,
         deleteDialogOpen,
         deletingType,
@@ -41,14 +40,16 @@ const FileManager: React.FC = () => {
         handleCreateFolderClick,
         handleDialogClose,
         handleCreateFolder,
+        handleEditFolderClick,
         handleEditFolder,
+        handleEditVideoClick,
         handleEditVideo,
         handleDeleteFolder,
         handleDeleteVideo,
         handleDeleteDialogClose,
         handleMoveItem,
         setNewName,
-        setNameError
+        setNameError,
     } = useFileManagerHandlers(null, setLoading);
 
     if (loading) {
@@ -72,8 +73,8 @@ const FileManager: React.FC = () => {
                     onVideoDoubleClick={handleVideoDoubleClick}
                     onContextMenuOpen={handleContextMenuOpen}
                     onContextMenuClose={handleContextMenuClose}
-                    onEditFolder={handleEditFolder}
-                    onEditVideo={handleEditVideo}
+                    onEditFolder={handleEditFolderClick}
+                    onEditVideo={handleEditVideoClick}
                     onDeleteFolder={handleDeleteFolder}
                     onDeleteVideo={handleDeleteVideo}
                     contextMenuAnchor={contextMenuAnchor}
@@ -109,7 +110,7 @@ const FileManager: React.FC = () => {
                     dialogOpen={dialogOpen}
                     handleDialogClose={handleDialogClose}
                     handleCreateFolder={handleCreateFolder}
-                    isEditing={isEditing}
+                    isEditing={!!selectedItem}
                     editingType={editingType}
                     newName={newName}
                     setNewName={setNewName}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import {
     fetchFolders,
@@ -21,7 +21,6 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [newName, setNewName] = useState<string>("");
     const [nameError, setNameError] = useState<string>("");
-    const [isEditing, setIsEditing] = useState<boolean>(false);
     const [editingType, setEditingType] = useState<"folder" | "video" | null>(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
     const [deletingType, setDeletingType] = useState<"folder" | "video" | null>(null);
@@ -65,7 +64,7 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
 
     const handleBackClick = () => {
         setCurrentFolderId(parentFolderId);
-        setParentFolderId(null); // This resets the parentFolderId. You might need to handle it differently if there's more levels of folders.
+        setParentFolderId(null);
     };
 
     const handleVideoDoubleClick = (hash: string) => {
@@ -77,7 +76,6 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
     };
 
     const handleCreateFolderClick = () => {
-        setIsEditing(false);
         setNewName("");
         setEditingType("folder");
         setDialogOpen(true);
@@ -110,16 +108,14 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
         }
     };
 
-    const handleEditFolder = async (item: any) => {
-        if (!isEditing) {
-            setIsEditing(true);
-            setNewName(item.name);
-            setSelectedItem(item);
-            setEditingType("folder");
-            setDialogOpen(true);
-            return;
-        }
+    const handleEditFolderClick = (item: any) => {
+        setNewName(item.name);
+        setSelectedItem(item);
+        setEditingType("folder");
+        setDialogOpen(true);
+    };
 
+    const handleEditFolder = async () => {
         if (!newName.trim()) {
             setNameError("Název složky musí být vyplněn");
             return;
@@ -143,16 +139,14 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
         setSelectedItem(null);
     };
 
-    const handleEditVideo = async (item: any) => {
-        if (!isEditing) {
-            setIsEditing(true);
-            setNewName(item.name);
-            setSelectedItem(item);
-            setEditingType("video");
-            setDialogOpen(true);
-            return;
-        }
+    const handleEditVideoClick = (item: any) => {
+        setNewName(item.name);
+        setSelectedItem(item);
+        setEditingType("video");
+        setDialogOpen(true);
+    };
 
+    const handleEditVideo = async () => {
         if (!newName.trim()) {
             setNameError("Název videa musí být vyplněn");
             return;
@@ -257,7 +251,6 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
         dialogOpen,
         newName,
         nameError,
-        isEditing,
         editingType,
         deleteDialogOpen,
         deletingType,
@@ -273,7 +266,9 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
         handleCreateFolderClick,
         handleDialogClose,
         handleCreateFolder,
+        handleEditFolderClick,
         handleEditFolder,
+        handleEditVideoClick,
         handleEditVideo,
         handleDeleteFolder,
         handleDeleteVideo,
@@ -282,7 +277,7 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
         setNewName,
         setNameError,
         setCurrentFolderId,
-        setParentFolderId
+        setParentFolderId,
     };
 };
 

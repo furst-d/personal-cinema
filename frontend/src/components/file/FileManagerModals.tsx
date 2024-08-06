@@ -12,8 +12,8 @@ interface FileManagerModalsProps {
     setNewName: (name: string) => void;
     nameError: string;
     setNameError: (error: string) => void;
-    handleEditFolder: (item: any) => void;
-    handleEditVideo: (item: any) => void;
+    handleEditFolder: () => void;
+    handleEditVideo: () => void;
     deleteDialogOpen: boolean;
     handleDeleteDialogClose: () => void;
     handleDeleteFolder: () => void;
@@ -22,23 +22,23 @@ interface FileManagerModalsProps {
 }
 
 const FileManagerModals: React.FC<FileManagerModalsProps> = ({
-     dialogOpen,
-     handleDialogClose,
-     handleCreateFolder,
-     isEditing,
-     editingType,
-     newName,
-     setNewName,
-     nameError,
-     setNameError,
-     handleEditFolder,
-     handleEditVideo,
-     deleteDialogOpen,
-     handleDeleteDialogClose,
-     handleDeleteFolder,
-     handleDeleteVideo,
-     deletingType
- }) => {
+                                                                 dialogOpen,
+                                                                 handleDialogClose,
+                                                                 handleCreateFolder,
+                                                                 isEditing,
+                                                                 editingType,
+                                                                 newName,
+                                                                 setNewName,
+                                                                 nameError,
+                                                                 setNameError,
+                                                                 handleEditFolder,
+                                                                 handleEditVideo,
+                                                                 deleteDialogOpen,
+                                                                 handleDeleteDialogClose,
+                                                                 handleDeleteFolder,
+                                                                 handleDeleteVideo,
+                                                                 deletingType
+                                                             }) => {
     return (
         <>
             <EditDialog
