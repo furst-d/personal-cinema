@@ -54,7 +54,6 @@ export const createFolder = async (requestData: CreateFolderRequest): Promise<Fo
 };
 
 export const updateFolder = async (folderId: string, requestData: UpdateRequest): Promise<void> => {
-    console.log('folderId', folderId);
     await axiosPrivate.put(`/v1/personal/folders/${folderId}`, requestData);
 };
 

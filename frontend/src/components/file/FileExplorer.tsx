@@ -22,30 +22,32 @@ interface FileExplorerProps {
     selectedItem: any;
     moveItem: (item: any, targetFolderId: string | null) => void;
     parentFolderId: string | null;
+    onFileExplorerContextMenu: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
 const FileExplorer: React.FC<FileExplorerProps> = ({
-                                                       folders,
-                                                       videos,
-                                                       currentFolderId,
-                                                       onFolderClick,
-                                                       onBackClick,
-                                                       onVideoDoubleClick,
-                                                       onContextMenuOpen,
-                                                       onContextMenuClose,
-                                                       onEditFolder,
-                                                       onEditVideo,
-                                                       onDeleteFolder,
-                                                       onDeleteVideo,
-                                                       contextMenuAnchor,
-                                                       selectedItem,
-                                                       moveItem,
-                                                       parentFolderId
-                                                   }) => {
+    folders,
+    videos,
+    currentFolderId,
+    onFolderClick,
+    onBackClick,
+    onVideoDoubleClick,
+    onContextMenuOpen,
+    onContextMenuClose,
+    onEditFolder,
+    onEditVideo,
+    onDeleteFolder,
+    onDeleteVideo,
+    contextMenuAnchor,
+    selectedItem,
+    moveItem,
+    parentFolderId,
+    onFileExplorerContextMenu
+}) => {
     const theme = useTheme();
 
     return (
-        <FileManagerContainerStyle theme={theme}>
+        <FileManagerContainerStyle theme={theme} onContextMenu={onFileExplorerContextMenu}>
             <BackButton
                 currentFolderId={currentFolderId}
                 onBackClick={onBackClick}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import {
     fetchFolders,
@@ -25,7 +25,7 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
     const [editingType, setEditingType] = useState<"folder" | "video" | null>(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
     const [deletingType, setDeletingType] = useState<"folder" | "video" | null>(null);
-    const [uploadMenuAnchor, setUploadMenuAnchor] = useState<null | HTMLElement>(null);
+    const [uploadMenuAnchor, setUploadMenuAnchor] = useState<null | { mouseX: number, mouseY: number }>(null);
 
     useEffect(() => {
         setLoading(true);
@@ -42,8 +42,20 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
         setSelectedItem(item);
     };
 
+    const handleUploadMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        setUploadMenuAnchor({
+            mouseX: event.clientX - 2,
+            mouseY: event.clientY - 4,
+        });
+    };
+
     const handleContextMenuClose = () => {
         setContextMenuAnchor(null);
+    };
+
+    const handleUploadMenuClose = () => {
+        setUploadMenuAnchor(null);
     };
 
     const handleFolderClick = (folderId: string) => {
@@ -53,7 +65,7 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
 
     const handleBackClick = () => {
         setCurrentFolderId(parentFolderId);
-        setParentFolderId(null);
+        setParentFolderId(null); // This resets the parentFolderId. You might need to handle it differently if there's more levels of folders.
     };
 
     const handleVideoDoubleClick = (hash: string) => {
@@ -251,7 +263,9 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
         deletingType,
         uploadMenuAnchor,
         handleContextMenuOpen,
+        handleUploadMenuOpen,
         handleContextMenuClose,
+        handleUploadMenuClose,
         handleFolderClick,
         handleBackClick,
         handleVideoDoubleClick,
