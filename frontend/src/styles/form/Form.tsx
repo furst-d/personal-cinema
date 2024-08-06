@@ -9,7 +9,7 @@ export const CenterFormWrapperStyle = styled.div`
     width: 100%;
     height: 100vh;
     background-color: ${(props) => props.theme.secondary};
-    color: ${(props) => props.theme.text_light};
+    color: ${(props) => props.theme.textLight};
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     padding-top: 25px;
 
@@ -26,7 +26,7 @@ export const FormWrapperStyle = styled(Box)`
     display: flex;
     flex-direction: column;
     width: 100%;
-    color: ${(props) => props.theme.text_light};
+    color: ${(props) => props.theme.textLight};
 
     @media (min-width: 769px) {
         max-width: 400px;

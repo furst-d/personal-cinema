@@ -17,7 +17,7 @@ const VideoDetail: React.FC<VideoDetailProps> = ({ video }) => {
             <Grid container spacing={4} sx={{ justifyContent: { lg: 'space-between' } }}>
                 <Grid item xs={12} md={8}>
                     <VideoPlayer src={video.videoUrl} />
-                    <Typography variant="h5" gutterBottom sx={{ marginTop: '16px', marginBottom: '32px', color: theme.text_light }}>
+                    <Typography variant="h5" gutterBottom sx={{ marginTop: '16px', marginBottom: '32px', color: theme.textLight }}>
                         {video.name}
                     </Typography>
                     <VideoDetailInfo video={video} />

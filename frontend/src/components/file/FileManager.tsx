@@ -1,133 +1,131 @@
-import React, { useState, useEffect } from "react";
-import {
-    Container,
-    Typography,
-    Box,
-    Button
-} from "@mui/material";
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
-import axiosPrivate from "../../api/axiosPrivate";
+import React, { useState } from "react";
+import { Container, Typography, Menu, MenuItem, ListItemIcon } from "@mui/material";
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import Loading from "../loading/Loading";
 import FileExplorer from "./FileExplorer";
+import FileManagerActions from "./FileManagerActions";
+import FileManagerModals from "./FileManagerModals";
+import useFileManagerHandlers from "../../hook/file/useFileManagerHandlers";
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import {useTheme} from "styled-components";
 
 const FileManager: React.FC = () => {
-    const [folders, setFolders] = useState<any[]>([]);
-    const [videos, setVideos] = useState<any[]>([]);
+    const theme = useTheme();
     const [loading, setLoading] = useState<boolean>(true);
-    const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
-    const [parentFolderId, setParentFolderId] = useState<string | null>(null);
-    const [contextMenuAnchor, setContextMenuAnchor] = useState<null | HTMLElement>(null);
-    const [selectedItem, setSelectedItem] = useState<any>(null);
 
-    useEffect(() => {
-        setLoading(true);
-        Promise.all([fetchFolders(), fetchVideos()])
-            .finally(() => setLoading(false));
-    }, [currentFolderId]);
-
-    const fetchFolders = async () => {
-        try {
-            const response = await axiosPrivate.get('/v1/personal/folders', {
-                params: {
-                    limit: 1000,
-                    sortBy: 'name',
-                    parentId: currentFolderId || 0
-                }
-            });
-            setFolders(response.data.payload.data);
-        } catch (error) {
-            console.error("Error fetching folders", error);
-        }
-    };
-
-    const fetchVideos = async () => {
-        try {
-            const response = await axiosPrivate.get('/v1/personal/videos', {
-                params: {
-                    limit: 1000,
-                    sortBy: 'name',
-                    folderId: currentFolderId || 0
-                }
-            });
-            setVideos(response.data.payload.data);
-        } catch (error) {
-            console.error("Error fetching videos", error);
-        }
-    };
-
-    const handleContextMenuOpen = (event: React.MouseEvent<HTMLElement>, item: any) => {
-        setContextMenuAnchor(event.currentTarget);
-        setSelectedItem(item);
-    };
-
-    const handleContextMenuClose = () => {
-        setContextMenuAnchor(null);
-        setSelectedItem(null);
-    };
-
-    const handleFolderClick = (folderId: string) => {
-        setParentFolderId(currentFolderId);
-        setCurrentFolderId(folderId);
-    };
-
-    const handleBackClick = () => {
-        setCurrentFolderId(parentFolderId);
-        setParentFolderId(null); // This resets the parentFolderId. You might need to handle it differently if there's more levels of folders.
-    };
-
-    const handleVideoDoubleClick = (hash: string) => {
-        window.open(`/videos/${hash}`, "_blank");
-    };
-
-    const handleUploadClick = () => {
-        console.log("Aktuální složka pro nahrání souboru:", currentFolderId);
-    };
-
-    const handleCreateFolderClick = () => {
-        console.log("Aktuální složka pro vytvoření nové složky:", currentFolderId);
-    };
+    const {
+        folders,
+        videos,
+        currentFolderId,
+        parentFolderId,
+        contextMenuAnchor,
+        selectedItem,
+        dialogOpen,
+        newName,
+        nameError,
+        editingType,
+        deleteDialogOpen,
+        deletingType,
+        uploadMenuAnchor,
+        handleContextMenuOpen,
+        handleContextMenuClose,
+        handleUploadMenuOpen,
+        handleUploadMenuClose,
+        handleFolderClick,
+        handleBackClick,
+        handleVideoDoubleClick,
+        handleUploadClick,
+        handleCreateFolderClick,
+        handleDialogClose,
+        handleCreateFolder,
+        handleEditFolderClick,
+        handleEditFolder,
+        handleEditVideoClick,
+        handleEditVideo,
+        handleDeleteFolder,
+        handleDeleteVideo,
+        handleDeleteDialogClose,
+        handleMoveItem,
+        setNewName,
+        setNameError,
+    } = useFileManagerHandlers(null, setLoading);
 
     if (loading) {
         return <Loading />;
     }
 
     return (
-        <Container>
-            <Typography variant="h4" gutterBottom>Správa videí</Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <Box sx={{ marginBottom: '10px' }}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<UploadFileIcon />}
-                        onClick={handleUploadClick}
-                        sx={{ marginRight: '10px' }}
-                    >
+        <DndProvider backend={HTML5Backend}>
+            <Container>
+                <Typography variant="h4" gutterBottom>Správa videí</Typography>
+                <FileManagerActions
+                    handleUploadClick={handleUploadClick}
+                    handleCreateFolderClick={handleCreateFolderClick}
+                />
+                <FileExplorer
+                    folders={folders}
+                    videos={videos}
+                    currentFolderId={currentFolderId}
+                    onFolderClick={handleFolderClick}
+                    onBackClick={handleBackClick}
+                    onVideoDoubleClick={handleVideoDoubleClick}
+                    onContextMenuOpen={handleContextMenuOpen}
+                    onContextMenuClose={handleContextMenuClose}
+                    onEditFolder={handleEditFolderClick}
+                    onEditVideo={handleEditVideoClick}
+                    onDeleteFolder={handleDeleteFolder}
+                    onDeleteVideo={handleDeleteVideo}
+                    contextMenuAnchor={contextMenuAnchor}
+                    selectedItem={selectedItem}
+                    moveItem={handleMoveItem}
+                    parentFolderId={parentFolderId}
+                    onFileExplorerContextMenu={handleUploadMenuOpen}
+                />
+                <Menu
+                    open={uploadMenuAnchor !== null}
+                    onClose={handleUploadMenuClose}
+                    anchorReference="anchorPosition"
+                    anchorPosition={
+                        uploadMenuAnchor !== null
+                            ? { top: uploadMenuAnchor.mouseY, left: uploadMenuAnchor.mouseX }
+                            : undefined
+                    }
+                >
+                    <MenuItem onClick={() => { handleUploadClick(); handleUploadMenuClose(); }}>
+                        <ListItemIcon>
+                            <UploadFileIcon sx={{ color: theme.textLight }} />
+                        </ListItemIcon>
                         Nahrát soubor
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="secondary"
-                        startIcon={<CreateNewFolderIcon />}
-                        onClick={handleCreateFolderClick}
-                    >
+                    </MenuItem>
+                    <MenuItem onClick={() => { handleCreateFolderClick(); handleUploadMenuClose(); }}>
+                        <ListItemIcon>
+                            <CreateNewFolderIcon sx={{ color: theme.textLight }} />
+                        </ListItemIcon>
                         Vytvořit složku
-                    </Button>
-                </Box>
-            </Box>
-            <FileExplorer
-                folders={folders}
-                videos={videos}
-                currentFolderId={currentFolderId}
-                onFolderClick={handleFolderClick}
-                onBackClick={handleBackClick}
-                onVideoDoubleClick={handleVideoDoubleClick}
-                onContextMenuOpen={handleContextMenuOpen}
-                onContextMenuClose={handleContextMenuClose}
-                contextMenuAnchor={contextMenuAnchor}
-            />
-        </Container>
+                    </MenuItem>
+                </Menu>
+                <FileManagerModals
+                    dialogOpen={dialogOpen}
+                    handleDialogClose={handleDialogClose}
+                    handleCreateFolder={handleCreateFolder}
+                    isEditing={!!selectedItem}
+                    editingType={editingType}
+                    newName={newName}
+                    setNewName={setNewName}
+                    nameError={nameError}
+                    setNameError={setNameError}
+                    handleEditFolder={handleEditFolder}
+                    handleEditVideo={handleEditVideo}
+                    deleteDialogOpen={deleteDialogOpen}
+                    handleDeleteDialogClose={handleDeleteDialogClose}
+                    handleDeleteFolder={handleDeleteFolder}
+                    handleDeleteVideo={handleDeleteVideo}
+                    deletingType={deletingType}
+                />
+            </Container>
+        </DndProvider>
     );
 };
 

@@ -7,7 +7,7 @@ export const VideoDetailsStyle = styled(Box)`
     padding: 16px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    color: ${(props) => props.theme.text_light};
+    color: ${(props) => props.theme.textLight};
 `;
 
 export const DetailsGridStyle = styled(Box)`
@@ -22,10 +22,10 @@ export const DetailsItemStyle = styled(Box)`
 
     .MuiTypography-subtitle1 {
         font-weight: bold;
-        color: ${(props) => props.theme.text_light};
+        color: ${(props) => props.theme.textLight};
     }
 
     .MuiTypography-body2 {
-        color: ${(props) => props.theme.text_light};
+        color: ${(props) => props.theme.textLight};
     }
 `;

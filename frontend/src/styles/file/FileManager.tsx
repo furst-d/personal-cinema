@@ -15,7 +15,7 @@ export const FileManagerListItemStyle = styled(ListItem)`
     border-radius: 4px;
     display: flex;
     justify-content: space-between;
-    color: ${(props) => props.theme.text_light};
+    color: ${(props) => props.theme.textLight};
     cursor: pointer;
 
     &:hover {
@@ -26,7 +26,7 @@ export const FileManagerListItemStyle = styled(ListItem)`
 export const FileManagerSeparator = styled(Box)`
     width: 100%;
     height: 1px;
-    background-color: ${(props) => props.theme.text_light};
+    background-color: ${(props) => props.theme.textLight};
     margin: 2px 0;
     opacity: 0.2;
 `;
@@ -37,7 +37,7 @@ export const FileManagerEmptyFolderStyle = styled(Box)`
     align-items: center;
     justify-content: center;
     min-height: 200px;
-    color: ${(props) => props.theme.text_light};
+    color: ${(props) => props.theme.textLight};
     opacity: 0.5;
     text-align: center;
     margin: auto;

@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export const ApplicationStyle = styled.div`
   background: ${p => p.theme.background};
-  color: ${p => p.theme.text_light};
+  color: ${p => p.theme.textLight};
   font-family: 'Open Sans', sans-serif;
   display: flex;
   flex-direction: column;
