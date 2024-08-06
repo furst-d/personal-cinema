@@ -8,11 +8,11 @@ import { ProviderProps } from "../../types/layout";
 export const theme = {
     background: '#323232',
     primary: '#b40000',
-    primary_darker: '#750000',
+    primaryDarker: '#750000',
     secondary: '#3f3f3f',
     third: '#fff',
-    text_light: '#f3f3f3',
-    text_dark: '#111',
+    textLight: '#f3f3f3',
+    textDark: '#111',
     breakpoints: {
         xs: 0,
         sm: 600,
@@ -34,8 +34,8 @@ const muiTheme = createTheme({
             default: theme.background,
         },
         text: {
-            primary: theme.text_light,
-            secondary: theme.text_dark,
+            primary: theme.textLight,
+            secondary: theme.textDark,
         },
     },
     breakpoints: {
@@ -46,9 +46,9 @@ const muiTheme = createTheme({
             styleOverrides: {
                 root: {
                     backgroundColor: theme.primary,
-                    color: theme.text_light,
+                    color: theme.textLight,
                     '&:hover': {
-                        backgroundColor: theme.primary_darker,
+                        backgroundColor: theme.primaryDarker,
                     },
                 },
             },
@@ -57,16 +57,16 @@ const muiTheme = createTheme({
             styleOverrides: {
                 root: {
                     '& label': {
-                        color: theme.text_light,
+                        color: theme.textLight,
                     },
                     '& .MuiInputBase-input': {
-                        color: theme.text_light,
+                        color: theme.textLight,
                     },
                     '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
-                        borderColor: theme.text_light,
+                        borderColor: theme.textLight,
                     },
                     '&:hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
-                        borderColor: theme.text_light,
+                        borderColor: theme.textLight,
                     },
                     '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
                         borderColor: theme.primary,
@@ -77,7 +77,7 @@ const muiTheme = createTheme({
         MuiLink: {
             styleOverrides: {
                 root: {
-                    color: theme.text_light,
+                    color: theme.textLight,
                     '&:hover': {
                         color: theme.primary,
                     },
@@ -87,7 +87,7 @@ const muiTheme = createTheme({
         MuiMenu: {
             styleOverrides: {
                 paper: {
-                    color: theme.text_light,
+                    color: theme.textLight,
                     backgroundColor: theme.secondary,
                 },
             },
@@ -96,8 +96,8 @@ const muiTheme = createTheme({
             styleOverrides: {
                 input: {
                     '&:-webkit-autofill': {
-                        '-webkitBackgroundClip': 'text',
-                        '-webkitTextFillColor': theme.text_light,
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: theme.textLight,
                     },
                 },
             },
@@ -105,10 +105,41 @@ const muiTheme = createTheme({
         MuiListItemText: {
             styleOverrides: {
                 primary: {
-                    color: theme.text_light,
+                    color: theme.textLight,
                 },
                 secondary: {
-                    color: theme.text_light,
+                    color: theme.textLight,
+                },
+            },
+        },
+        MuiDialog: {
+            styleOverrides: {
+                paper: {
+                    backgroundColor: theme.secondary,
+                    color: theme.textLight,
+                },
+            },
+        },
+        MuiDialogTitle: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: theme.secondary,
+                    color: theme.textLight,
+                },
+            },
+        },
+        MuiDialogContent: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: theme.secondary,
+                    color: theme.textLight,
+                },
+            },
+        },
+        MuiDialogActions: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: theme.secondary,
                 },
             },
         },
@@ -124,7 +155,7 @@ const GlobalStyle = createGlobalStyle`
     html, body {
         height: 100%;
         background-color: ${theme.background};
-        color: ${theme.text_light};
+        color: ${theme.textLight};
     }
 
     #root {

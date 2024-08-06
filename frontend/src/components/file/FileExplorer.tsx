@@ -37,16 +37,16 @@ interface FileExplorerProps {
 }
 
 const FileExplorer: React.FC<FileExplorerProps> = ({
-   folders,
-   videos,
-   currentFolderId,
-   onFolderClick,
-   onBackClick,
-   onVideoDoubleClick,
-   onContextMenuOpen,
-   onContextMenuClose,
-   contextMenuAnchor
-}) => {
+                                                       folders,
+                                                       videos,
+                                                       currentFolderId,
+                                                       onFolderClick,
+                                                       onBackClick,
+                                                       onVideoDoubleClick,
+                                                       onContextMenuOpen,
+                                                       onContextMenuClose,
+                                                       contextMenuAnchor
+                                                   }) => {
     const theme = useTheme();
     const [contextMenuPosition, setContextMenuPosition] = useState<{ mouseX: number; mouseY: number } | null>(null);
 
@@ -75,15 +75,15 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
     return (
         <FileManagerContainerStyle theme={theme} onContextMenu={handleContextMenu}>
             {currentFolderId && (
-                <IconButton onClick={onBackClick} sx={{ marginBottom: '10px', color: theme.text_light }}>
+                <IconButton onClick={onBackClick} sx={{ marginBottom: '10px', color: theme.textLight }}>
                     <ArrowBackIcon />
                 </IconButton>
             )}
             <Grid container>
                 {folders.length === 0 && videos.length === 0 ? (
                     <FileManagerEmptyFolderStyle>
-                        <FolderOpenIcon sx={{ fontSize: 60, color: theme.text_light }} />
-                        <Typography variant="body1" sx={{ color: theme.text_light }}>
+                        <FolderOpenIcon sx={{ fontSize: 60, color: theme.textLight }} />
+                        <Typography variant="body1" sx={{ color: theme.textLight }}>
                             Složka je prázdná.
                         </Typography>
                     </FileManagerEmptyFolderStyle>
@@ -94,7 +94,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
                                 <Grid item xs={12} onDoubleClick={() => onFolderClick(folder.id)}>
                                     <FileManagerListItemStyle theme={theme}>
                                         <ListItemIcon>
-                                            <FolderIcon sx={{ color: theme.text_light }} />
+                                            <FolderIcon sx={{ color: theme.textLight }} />
                                         </ListItemIcon>
                                         <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, marginRight: '5px' }}>
                                             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' } }}>
@@ -102,7 +102,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
                                                 <Typography variant="body2" className="date">{formatDate(folder.updatedAt)}</Typography>
                                             </Box>
                                         </Box>
-                                        <IconButton onClick={(e) => onContextMenuOpen(e, folder)} sx={{ color: theme.text_light }}>
+                                        <IconButton onClick={(e) => onContextMenuOpen(e, folder)} sx={{ color: theme.textLight }}>
                                             <MoreVertIcon />
                                         </IconButton>
                                     </FileManagerListItemStyle>
@@ -116,7 +116,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
                                 <Grid item xs={12} onDoubleClick={() => onVideoDoubleClick(video.hash)}>
                                     <FileManagerListItemStyle theme={theme}>
                                         <ListItemIcon>
-                                            <VideoFileIcon sx={{ color: theme.text_light }} />
+                                            <VideoFileIcon sx={{ color: theme.textLight }} />
                                         </ListItemIcon>
                                         <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, marginRight: '5px' }}>
                                             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' } }}>
@@ -124,7 +124,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
                                                 <Typography variant="body2" className="date">{formatDate(video.createdAt)}</Typography>
                                             </Box>
                                         </Box>
-                                        <IconButton onClick={(e) => onContextMenuOpen(e, video)} sx={{ color: theme.text_light }}>
+                                        <IconButton onClick={(e) => onContextMenuOpen(e, video)} sx={{ color: theme.textLight }}>
                                             <MoreVertIcon />
                                         </IconButton>
                                     </FileManagerListItemStyle>
@@ -148,13 +148,13 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
             >
                 <MenuItem onClick={handleUploadClick}>
                     <ListItemIcon>
-                        <UploadFileIcon sx={{ color: theme.text_light }} fontSize="small" />
+                        <UploadFileIcon sx={{ color: theme.textLight }} fontSize="small" />
                     </ListItemIcon>
                     <Typography variant="inherit">Nahrát video</Typography>
                 </MenuItem>
                 <MenuItem onClick={handleCreateFolderClick}>
                     <ListItemIcon>
-                        <CreateNewFolderIcon sx={{ color: theme.text_light }} fontSize="small" />
+                        <CreateNewFolderIcon sx={{ color: theme.textLight }} fontSize="small" />
                     </ListItemIcon>
                     <Typography variant="inherit">Vytvořit složku</Typography>
                 </MenuItem>

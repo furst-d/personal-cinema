@@ -56,7 +56,7 @@ export const LoginBoxStyle = styled.div`
 
 export const InfoBoxStyle = styled(LoginBoxStyle)`
     background-color: ${(props) => props.theme.primary};
-    color: ${(props) => props.theme.text_light};
+    color: ${(props) => props.theme.textLight};
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     padding: 20px;
     position: relative;

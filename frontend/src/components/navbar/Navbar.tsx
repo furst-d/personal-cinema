@@ -60,7 +60,7 @@ const Navbar = () => {
     };
 
     return (
-        <AppBar position="static" sx={{ color: theme.text_light }}>
+        <AppBar position="static" sx={{ color: theme.textLight }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', marginRight: '1rem' }}>

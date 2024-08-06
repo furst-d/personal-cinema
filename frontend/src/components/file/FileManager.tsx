@@ -3,7 +3,12 @@ import {
     Container,
     Typography,
     Box,
-    Button
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    TextField
 } from "@mui/material";
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
@@ -19,6 +24,8 @@ const FileManager: React.FC = () => {
     const [parentFolderId, setParentFolderId] = useState<string | null>(null);
     const [contextMenuAnchor, setContextMenuAnchor] = useState<null | HTMLElement>(null);
     const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+    const [newFolderName, setNewFolderName] = useState<string>("");
 
     useEffect(() => {
         setLoading(true);
@@ -85,7 +92,24 @@ const FileManager: React.FC = () => {
     };
 
     const handleCreateFolderClick = () => {
-        console.log("Aktuální složka pro vytvoření nové složky:", currentFolderId);
+        setDialogOpen(true);
+    };
+
+    const handleDialogClose = () => {
+        setDialogOpen(false);
+    };
+
+    const handleCreateFolder = async () => {
+        try {
+            await axiosPrivate.post('/v1/personal/folders', {
+                name: newFolderName,
+                parentId: currentFolderId || 0
+            });
+            fetchFolders(); // Refresh the folder list
+            handleDialogClose();
+        } catch (error) {
+            console.error("Error creating folder", error);
+        }
     };
 
     if (loading) {
@@ -127,6 +151,27 @@ const FileManager: React.FC = () => {
                 onContextMenuClose={handleContextMenuClose}
                 contextMenuAnchor={contextMenuAnchor}
             />
+            <Dialog open={dialogOpen} onClose={handleDialogClose}>
+                <DialogTitle>Vytvořit novou složku</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Název složky"
+                        fullWidth
+                        value={newFolderName}
+                        onChange={(e) => setNewFolderName(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose} color="primary">
+                        Zrušit
+                    </Button>
+                    <Button onClick={handleCreateFolder} color="primary">
+                        Vytvořit
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 };
