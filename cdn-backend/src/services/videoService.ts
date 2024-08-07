@@ -27,13 +27,19 @@ export const uploadVideo = async (file: Express.Multer.File, params: string, pro
     try {
         await fs.promises.writeFile(tempFilePath, buffer);
 
-        videoUploadQueue.add({
-            videoId,
-            tempFilePath,
-            urlPath,
-            mimetype,
-            size
-        }).then(() => {
+        await videoUploadQueue.add(
+            {
+                videoId,
+                tempFilePath,
+                urlPath,
+                mimetype,
+                size
+            },
+            {
+                removeOnComplete: true,
+                removeOnFail: true
+            }
+        ).then(() => {
             console.log("Successfully added to queue");
         }).catch((err) => {
             console.error("Failed to add to queue", err);

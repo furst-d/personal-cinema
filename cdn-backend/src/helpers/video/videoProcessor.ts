@@ -27,9 +27,9 @@ const processVideoUpload = async (job: Job) => {
             video.status = 'uploaded-original';
             await video.save();
 
-            await videoProcessQueue.add({ videoId });
-            await videoConversionQueue.add({ videoId });
-            await videoThumbnailQueue.add({ videoId });
+            await videoProcessQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
+            await videoConversionQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
+            await videoThumbnailQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
         }
     } catch (error) {
         console.error('Error uploading to Minio:', error);
