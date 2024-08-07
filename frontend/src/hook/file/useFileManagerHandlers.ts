@@ -10,6 +10,7 @@ import {
     deleteVideo,
     moveItem
 } from "../../service/fileManagerService";
+import { uploadVideoMetadata, uploadVideoToCdn } from "../../service/uploadService";
 import { removeFileExtension } from "../../utils/namer";
 
 const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loading: boolean) => void) => {
@@ -37,37 +38,6 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
             })
             .finally(() => setLoading(false));
     }, [currentFolderId]);
-
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-            const newVideos = Array.from(event.target.files).map(file => ({
-                name: removeFileExtension(file.name),
-                file
-            }));
-            setUploadingVideos(prevVideos => [...prevVideos, ...newVideos]);
-        }
-    };
-
-    const handleNameChange = (index: number, newName: string) => {
-        setUploadingVideos(prevVideos => {
-            const updatedVideos = [...prevVideos];
-            updatedVideos[index].name = removeFileExtension(newName);
-            return updatedVideos;
-        });
-    };
-
-    const handleSingleUploadCompleted = (uploadedVideo: { name: string; file: File }) => {
-        const videoWithDate = {
-            ...uploadedVideo,
-            createdAt: new Date().toISOString()
-        };
-        setVideos(prevVideos => [...prevVideos, videoWithDate]);
-    };
-
-    const handleAllUploadsCompleted = () => {
-        setUploadingVideos([]);
-        toast.success("Všechna videa byla úspěšně nahrána.");
-    };
 
     const handleContextMenuOpen = (event: React.MouseEvent<HTMLElement>, item: any) => {
         setContextMenuAnchor(event.currentTarget);
@@ -274,6 +244,39 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
         }
     }, [folders, videos]);
 
+    // Upload Handlers
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            const newVideos = Array.from(event.target.files).map(file => ({
+                name: removeFileExtension(file.name),
+                file
+            }));
+            setUploadingVideos(prevVideos => [...prevVideos, ...newVideos]);
+        }
+    };
+
+    const handleNameChange = (index: number, newName: string) => {
+        setUploadingVideos(prevVideos => {
+            const updatedVideos = [...prevVideos];
+            updatedVideos[index].name = removeFileExtension(newName);
+            return updatedVideos;
+        });
+    };
+
+    const handleSingleUploadCompleted = (uploadedVideo: { name: string; file: File }) => {
+        const videoWithDate = {
+            ...uploadedVideo,
+            createdAt: new Date().toISOString()
+        };
+        setVideos(prevVideos => [...prevVideos, videoWithDate]);
+        toast.success(`${uploadedVideo.name} byl úspěšně nahrán.`);
+    };
+
+    const handleAllUploadsComplete = () => {
+        setUploadingVideos([]);
+        toast.success("Všechna videa byla úspěšně nahrána.");
+    };
+
     return {
         folders,
         videos,
@@ -291,8 +294,6 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
         uploadingVideos,
         handleFileChange,
         handleNameChange,
-        handleSingleUploadCompleted,
-        handleAllUploadsCompleted,
         handleContextMenuOpen,
         handleUploadMenuOpen,
         handleContextMenuClose,
@@ -312,6 +313,8 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
         handleDeleteVideo,
         handleDeleteDialogClose,
         handleMoveItem,
+        handleSingleUploadCompleted,
+        handleAllUploadsComplete,
         setNewName,
         setNameError,
         setCurrentFolderId,

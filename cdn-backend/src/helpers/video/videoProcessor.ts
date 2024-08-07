@@ -6,17 +6,19 @@ import ffmpeg from 'fluent-ffmpeg';
 import { getOrCreateMd5, getVideoUrl } from '../../services/videoService';
 import {sendNotificationCallback, sendThumbnailCallback} from "../../services/callbackService";
 import path from "path";
-import * as fs from 'fs/promises';
+import { promises as fs } from 'fs';
 import crypto from 'crypto';
 import {mkdirSync} from "fs";
 import {VideoProcessingUtils} from "./VideoProcessingUtils";
 
 const processVideoUpload = async (job: Job) => {
-    const { videoId, buffer, urlPath, mimetype, size } = job.data;
+    const { videoId, tempFilePath, urlPath, mimetype, size } = job.data;
     VideoProcessingUtils.ensureTempDir(videoId);
 
     try {
-        await minioClient.putObject(bucketName, urlPath, Buffer.from(buffer, 'base64'), size, {
+        const fileBuffer = await fs.readFile(tempFilePath);
+
+        await minioClient.putObject(bucketName, urlPath, fileBuffer, size, {
             'Content-Type': mimetype,
         });
 

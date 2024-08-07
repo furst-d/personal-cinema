@@ -7,22 +7,21 @@ interface VideoUploadProcessProps {
     progress: number[];
     speed: number;
     totalRemainingTime: number;
-    completedUploads: Set<number>;
 }
 
-const VideoUploadProcess: React.FC<VideoUploadProcessProps> = ({ videos, progress, speed, totalRemainingTime, completedUploads }) => {
+const VideoUploadProcess: React.FC<VideoUploadProcessProps> = ({ videos, progress, speed, totalRemainingTime }) => {
     const theme = useTheme();
 
     return (
         <Box sx={{ marginTop: 2, marginBottom: 4 }}>
             {videos.map((video, index) => (
-                <Box key={index} sx={{ marginBottom: 2, position: 'relative' }}>
+                <Box key={video.name} sx={{ marginBottom: 2, position: 'relative' }}>
                     <Typography variant="body1" sx={{ position: 'absolute', left: 10, zIndex: 1, color: '#fff', display: 'flex', alignItems: 'center', height: '100%' }}>{video.name}</Typography>
-                    <Box sx={{ height: 40, borderRadius: 4, border: `2px solid ${completedUploads.has(index) ? 'green' : theme.primary}`, overflow: 'hidden' }}>
+                    <Box sx={{ height: 40, borderRadius: 4, border: `2px solid ${progress[index] === 100 ? 'green' : theme.primary}`, overflow: 'hidden' }}>
                         <Box sx={{
                             height: '100%',
                             width: `${progress[index] || 0}%`,
-                            backgroundColor: completedUploads.has(index) ? 'green' : theme.primary,
+                            backgroundColor: progress[index] === 100 ? 'green' : theme.primary,
                             transition: 'width 0.5s ease-in-out',
                             display: 'flex',
                             alignItems: 'center',

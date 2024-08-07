@@ -5,6 +5,7 @@ import Video from '../entities/video';
 import Md5 from '../entities/md5';
 import minioClient, {bucketName} from '../config/minio';
 import { videoUploadQueue } from "../config/bull";
+import fs from 'fs';
 
 /**
  * Upload a video
@@ -21,13 +22,27 @@ export const uploadVideo = async (file: Express.Multer.File, params: string, pro
     const videoId = uuidv4();
     const urlPath = `${videoId}/${hash}${extension}`;
 
-    await videoUploadQueue.add({
-        videoId,
-        buffer,
-        urlPath,
-        mimetype,
-        size
-    });
+    const tempFilePath = path.join('/tmp', `${videoId}${extension}`);
+
+    try {
+        await fs.promises.writeFile(tempFilePath, buffer);
+
+        videoUploadQueue.add({
+            videoId,
+            tempFilePath,
+            urlPath,
+            mimetype,
+            size
+        }).then(() => {
+            console.log("Successfully added to queue");
+        }).catch((err) => {
+            console.error("Failed to add to queue", err);
+        });
+
+    } catch (err) {
+        console.error("Failed to save file locally", err);
+        throw err;
+    }
 
     return await Video.create({
         id: videoId,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Container, Typography, Menu, MenuItem, ListItemIcon } from "@mui/material";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -33,9 +33,6 @@ const FileManager: React.FC = () => {
         uploadingVideos,
         handleFileChange,
         handleNameChange,
-        handleConfirmUpload,
-        handleSingleUploadCompleted,
-        handleAllUploadsCompleted,
         handleContextMenuOpen,
         handleUploadMenuOpen,
         handleContextMenuClose,
@@ -55,6 +52,8 @@ const FileManager: React.FC = () => {
         handleDeleteVideo,
         handleDeleteDialogClose,
         handleMoveItem,
+        handleSingleUploadCompleted,
+        handleAllUploadsComplete,
         setNewName,
         setNameError,
         setCurrentFolderId,
@@ -74,8 +73,9 @@ const FileManager: React.FC = () => {
                     handleCreateFolderClick={handleCreateFolderClick}
                 />
                 <VideoUpload
+                    currentFolderId={currentFolderId}
                     handleSingleUploadCompleted={handleSingleUploadCompleted}
-                    handleAllUploadsCompleted={handleAllUploadsCompleted}
+                    handleAllUploadsComplete={handleAllUploadsComplete}
                 />
                 <FileExplorer
                     folders={folders}
