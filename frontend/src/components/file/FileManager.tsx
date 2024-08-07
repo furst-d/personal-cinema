@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Typography, Menu, MenuItem, ListItemIcon } from "@mui/material";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -9,7 +9,8 @@ import FileManagerModals from "./FileManagerModals";
 import useFileManagerHandlers from "../../hook/file/useFileManagerHandlers";
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
-import {useTheme} from "styled-components";
+import { useTheme } from "styled-components";
+import VideoUpload from "./upload/VideoUpload";
 
 const FileManager: React.FC = () => {
     const theme = useTheme();
@@ -29,9 +30,15 @@ const FileManager: React.FC = () => {
         deleteDialogOpen,
         deletingType,
         uploadMenuAnchor,
+        uploadingVideos,
+        handleFileChange,
+        handleNameChange,
+        handleConfirmUpload,
+        handleSingleUploadCompleted,
+        handleAllUploadsCompleted,
         handleContextMenuOpen,
-        handleContextMenuClose,
         handleUploadMenuOpen,
+        handleContextMenuClose,
         handleUploadMenuClose,
         handleFolderClick,
         handleBackClick,
@@ -50,6 +57,8 @@ const FileManager: React.FC = () => {
         handleMoveItem,
         setNewName,
         setNameError,
+        setCurrentFolderId,
+        setParentFolderId,
     } = useFileManagerHandlers(null, setLoading);
 
     if (loading) {
@@ -61,8 +70,12 @@ const FileManager: React.FC = () => {
             <Container>
                 <Typography variant="h4" gutterBottom>Správa videí</Typography>
                 <FileManagerActions
-                    handleUploadClick={handleUploadClick}
+                    handleUploadClick={() => document.getElementById('upload-video-choice')?.click()}
                     handleCreateFolderClick={handleCreateFolderClick}
+                />
+                <VideoUpload
+                    handleSingleUploadCompleted={handleSingleUploadCompleted}
+                    handleAllUploadsCompleted={handleAllUploadsCompleted}
                 />
                 <FileExplorer
                     folders={folders}

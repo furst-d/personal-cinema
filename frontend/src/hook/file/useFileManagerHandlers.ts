@@ -10,6 +10,7 @@ import {
     deleteVideo,
     moveItem
 } from "../../service/fileManagerService";
+import { removeFileExtension } from "../../utils/namer";
 
 const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loading: boolean) => void) => {
     const [folders, setFolders] = useState<any[]>([]);
@@ -25,6 +26,7 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
     const [deletingType, setDeletingType] = useState<"folder" | "video" | null>(null);
     const [uploadMenuAnchor, setUploadMenuAnchor] = useState<null | { mouseX: number, mouseY: number }>(null);
+    const [uploadingVideos, setUploadingVideos] = useState<{ name: string; file: File }[]>([]);
 
     useEffect(() => {
         setLoading(true);
@@ -35,6 +37,37 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
             })
             .finally(() => setLoading(false));
     }, [currentFolderId]);
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            const newVideos = Array.from(event.target.files).map(file => ({
+                name: removeFileExtension(file.name),
+                file
+            }));
+            setUploadingVideos(prevVideos => [...prevVideos, ...newVideos]);
+        }
+    };
+
+    const handleNameChange = (index: number, newName: string) => {
+        setUploadingVideos(prevVideos => {
+            const updatedVideos = [...prevVideos];
+            updatedVideos[index].name = removeFileExtension(newName);
+            return updatedVideos;
+        });
+    };
+
+    const handleSingleUploadCompleted = (uploadedVideo: { name: string; file: File }) => {
+        const videoWithDate = {
+            ...uploadedVideo,
+            createdAt: new Date().toISOString()
+        };
+        setVideos(prevVideos => [...prevVideos, videoWithDate]);
+    };
+
+    const handleAllUploadsCompleted = () => {
+        setUploadingVideos([]);
+        toast.success("Všechna videa byla úspěšně nahrána.");
+    };
 
     const handleContextMenuOpen = (event: React.MouseEvent<HTMLElement>, item: any) => {
         setContextMenuAnchor(event.currentTarget);
@@ -255,6 +288,11 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
         deleteDialogOpen,
         deletingType,
         uploadMenuAnchor,
+        uploadingVideos,
+        handleFileChange,
+        handleNameChange,
+        handleSingleUploadCompleted,
+        handleAllUploadsCompleted,
         handleContextMenuOpen,
         handleUploadMenuOpen,
         handleContextMenuClose,
