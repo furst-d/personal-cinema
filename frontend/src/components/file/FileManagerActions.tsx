@@ -18,7 +18,7 @@ const FileManagerActions: React.FC<FileManagerActionsProps> = ({ handleUploadCli
                 onClick={handleUploadClick}
                 sx={{ marginRight: '10px' }}
             >
-                Nahrát soubor
+                Nahrát soubory
             </Button>
             <Button
                 variant="contained"

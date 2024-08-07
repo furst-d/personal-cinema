@@ -32,6 +32,7 @@ jobs:
           sed -i 's|cdn_url|${{ secrets.CDN_URL }}|' backend/symfony/.env
           sed -i 's|backend_url|${{ secrets.BACKEND_URL }}|' backend/symfony/.env
           sed -i 's|api_url|${{ secrets.API_URL }}|' frontend/.env
+          sed -i 's|cdn_url|${{ secrets.CDN_URL }}|' frontend/.env
           sed -i 's|api_url|${{ secrets.API_URL }}|' admin-frontend/.env
           sed -i 's|db_name|${{ secrets.POSTGRES_CDN_DB }}|' cdn-backend/.env
           sed -i 's|db_user|${{ secrets.POSTGRES_CDN_USER }}|' cdn-backend/.env

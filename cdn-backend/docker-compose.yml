@@ -6,8 +6,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - minio
       - redis
+      - minio
       - postgres-cdn
     volumes:
       - .:/var/www
@@ -40,6 +40,10 @@ services:
     command: [ "sh", "/usr/local/bin/init-redis.sh" ]
     networks:
       - cdn-backend
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
   postgres-cdn:
     image: postgres:13
