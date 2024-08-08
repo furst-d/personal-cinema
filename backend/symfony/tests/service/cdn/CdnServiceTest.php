@@ -56,7 +56,7 @@ class CdnServiceTest extends TestCase
 
     public function testCreateUploadDataSuccess()
     {
-        $data = ['param1' => 'value1'];
+        $data = ['param1' => 'value1', 'size' => '123'];
         $this->mockCdnHasher->expects($this->once())
             ->method('addSignature')
             ->willReturnCallback(function(&$data, $secretKey) {

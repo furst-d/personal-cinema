@@ -13,6 +13,7 @@ use App\Helper\Jwt\JwtUsage;
 use App\Service\Cdn\CdnService;
 use App\Service\Jwt\JwtService;
 use App\Service\Locator\BaseControllerLocator;
+use App\Service\Storage\StorageService;
 use App\Service\Video\FolderService;
 use App\Service\Video\VideoService;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -43,18 +44,25 @@ class VideoController extends BasePersonalController
     private FolderService $folderService;
 
     /**
+     * @var StorageService $storageService
+     */
+    private StorageService $storageService;
+
+    /**
      * @param BaseControllerLocator $locator
      * @param JwtService $jwtService
      * @param CdnService $cdnService
      * @param VideoService $videoService
      * @param FolderService $folderService
+     * @param StorageService $storageService
      */
     public function __construct(
         BaseControllerLocator $locator,
         JwtService $jwtService,
         CdnService $cdnService,
         VideoService $videoService,
-        FolderService $folderService
+        FolderService $folderService,
+        StorageService $storageService
     )
     {
         parent::__construct($locator);
@@ -62,6 +70,7 @@ class VideoController extends BasePersonalController
         $this->cdnService = $cdnService;
         $this->videoService = $videoService;
         $this->folderService = $folderService;
+        $this->storageService = $storageService;
     }
 
 
@@ -71,12 +80,15 @@ class VideoController extends BasePersonalController
         try {
             $account = $this->getAccount($request);
 
+            $this->storageService->checkStorageBeforeUpload($account->getStorage(), $uploadRequest->size);
+
             $videoToken = $this->jwtService->generateToken($account, JwtUsage::USAGE_UPLOAD, [
                 'name' => $uploadRequest->name,
                 'folder' => $uploadRequest->folderId,
             ]);
 
             $data = $this->cdnService->createUploadData([
+                'size' => $uploadRequest->size,
                 'params' => json_encode([
                     'video_token' => $videoToken,
                 ])

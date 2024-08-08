@@ -10,8 +10,6 @@ import {
     deleteVideo,
     moveItem
 } from "../../service/fileManagerService";
-import { uploadVideoMetadata, uploadVideoToCdn } from "../../service/uploadService";
-import { removeFileExtension } from "../../utils/namer";
 
 const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loading: boolean) => void) => {
     const [folders, setFolders] = useState<any[]>([]);
@@ -27,7 +25,6 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
     const [deletingType, setDeletingType] = useState<"folder" | "video" | null>(null);
     const [uploadMenuAnchor, setUploadMenuAnchor] = useState<null | { mouseX: number, mouseY: number }>(null);
-    const [uploadingVideos, setUploadingVideos] = useState<{ name: string; file: File }[]>([]);
 
     useEffect(() => {
         setLoading(true);
@@ -75,7 +72,7 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
     };
 
     const handleUploadClick = () => {
-        console.log("Aktuální složka pro nahrání souboru:", currentFolderId);
+        document.getElementById('upload-video-choice')?.click();
     };
 
     const handleCreateFolderClick = () => {
@@ -244,37 +241,9 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
         }
     }, [folders, videos]);
 
-    // Upload Handlers
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-            const newVideos = Array.from(event.target.files).map(file => ({
-                name: removeFileExtension(file.name),
-                file
-            }));
-            setUploadingVideos(prevVideos => [...prevVideos, ...newVideos]);
-        }
-    };
-
-    const handleNameChange = (index: number, newName: string) => {
-        setUploadingVideos(prevVideos => {
-            const updatedVideos = [...prevVideos];
-            updatedVideos[index].name = removeFileExtension(newName);
-            return updatedVideos;
-        });
-    };
-
-    const handleSingleUploadCompleted = (uploadedVideo: { name: string; file: File }) => {
-        const videoWithDate = {
-            ...uploadedVideo,
-            createdAt: new Date().toISOString()
-        };
-        setVideos(prevVideos => [...prevVideos, videoWithDate]);
-        toast.success(`${uploadedVideo.name} byl úspěšně nahrán.`);
-    };
-
-    const handleAllUploadsComplete = () => {
-        setUploadingVideos([]);
-        toast.success("Všechna videa byla úspěšně nahrána.");
+    const handleSingleUploadCompleted = async () => {
+        const videosData = await fetchVideos(currentFolderId);
+        setVideos(videosData);
     };
 
     return {
@@ -291,9 +260,6 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
         deleteDialogOpen,
         deletingType,
         uploadMenuAnchor,
-        uploadingVideos,
-        handleFileChange,
-        handleNameChange,
         handleContextMenuOpen,
         handleUploadMenuOpen,
         handleContextMenuClose,
@@ -314,7 +280,6 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
         handleDeleteDialogClose,
         handleMoveItem,
         handleSingleUploadCompleted,
-        handleAllUploadsComplete,
         setNewName,
         setNameError,
         setCurrentFolderId,

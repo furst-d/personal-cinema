@@ -15,4 +15,20 @@ class SettingsRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Settings::class);
     }
+
+    /**
+     * @return string
+     */
+    public function getMaxFileSize(): string
+    {
+        return $this->findOneBy(['key' => 'video_size_limit'])->getValue();
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultUserStorageLimit(): string
+    {
+        return $this->findOneBy(['key' => 'default_user_storage_limit'])->getValue();
+    }
 }

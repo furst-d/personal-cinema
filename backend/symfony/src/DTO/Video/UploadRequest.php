@@ -10,6 +10,9 @@ class UploadRequest extends AbstractRequest
     #[Assert\NotBlank]
     public string $name;
 
+    #[Assert\NotBlank]
+    public int $size;
+
     #[Assert\Positive]
     public ?int $folderId = null;
 }

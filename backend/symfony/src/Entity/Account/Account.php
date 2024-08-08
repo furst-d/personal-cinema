@@ -2,6 +2,7 @@
 
 namespace App\Entity\Account;
 
+use App\Entity\Storage\Storage;
 use App\Entity\Video\Folder;
 use App\Entity\Video\Video;
 use App\Repository\Account\AccountRepository;
@@ -68,12 +69,16 @@ class Account implements UserInterface
     #[ORM\OneToMany(targetEntity: Video::class, mappedBy: 'account', orphanRemoval: true)]
     private Collection $videos;
 
+    #[ORM\OneToOne(mappedBy: 'account', cascade: ['persist', 'remove'])]
+    private Storage $storage;
+
     /**
      * @param string $email
      * @param string $password
      * @param string $salt
+     * @param int $maxStorage
      */
-    public function __construct(string $email, string $password, string $salt)
+    public function __construct(string $email, string $password, string $salt, int $maxStorage)
     {
         $this->email = $email;
         $this->password = $password;
@@ -83,6 +88,7 @@ class Account implements UserInterface
         $this->apiTokens = new ArrayCollection();
         $this->folders = new ArrayCollection();
         $this->videos = new ArrayCollection();
+        $this->storage = new Storage($this, $maxStorage);
     }
 
     /**
@@ -255,5 +261,22 @@ class Account implements UserInterface
     public function getVideos(): Collection
     {
         return $this->videos;
+    }
+
+    public function getStorage(): ?Storage
+    {
+        return $this->storage;
+    }
+
+    public function setStorage(Storage $storage): static
+    {
+        // set the owning side of the relation if necessary
+        if ($storage->getAccount() !== $this) {
+            $storage->setAccount($this);
+        }
+
+        $this->storage = $storage;
+
+        return $this;
     }
 }

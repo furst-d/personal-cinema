@@ -38,7 +38,7 @@ class PasswordResetControllerTest extends WebTestCase
         $this->client->getContainer()->set(JwtService::class, $this->mockJwtService);
         $this->client->getContainer()->set(MailerService::class, $this->mockMailerService);
 
-        $this->account = new Account(self::TEST_EMAIL, 'password', 'salt');
+        $this->account = new Account(self::TEST_EMAIL, 'password', 'salt', 10);
     }
 
     public function testResetPasswordSuccess()

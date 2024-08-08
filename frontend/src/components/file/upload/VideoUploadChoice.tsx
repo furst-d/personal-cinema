@@ -5,19 +5,10 @@ interface VideoUploadChoiceProps {
     videos: { name: string; file: File }[];
     onNameChange: (index: number, newName: string) => void;
     onConfirmUpload: () => void;
-    handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const VideoUploadChoice: React.FC<VideoUploadChoiceProps> = ({ videos, onNameChange, onConfirmUpload, handleFileChange }) => (
+const VideoUploadChoice: React.FC<VideoUploadChoiceProps> = ({ videos, onNameChange, onConfirmUpload }) => (
     <Box sx={{ marginTop: 2, marginBottom: 4 }}>
-        <input
-            accept="video/*"
-            style={{ display: 'none' }}
-            id="upload-video-choice"
-            type="file"
-            multiple
-            onChange={handleFileChange}
-        />
         <Typography variant="h6" sx={{ marginTop: 2 }}>Nahraná videa:</Typography>
         {videos.map((video, index) => (
             <Grid container spacing={2} alignItems="center" key={index} sx={{ marginTop: 1 }}>

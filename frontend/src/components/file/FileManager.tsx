@@ -30,9 +30,6 @@ const FileManager: React.FC = () => {
         deleteDialogOpen,
         deletingType,
         uploadMenuAnchor,
-        uploadingVideos,
-        handleFileChange,
-        handleNameChange,
         handleContextMenuOpen,
         handleUploadMenuOpen,
         handleContextMenuClose,
@@ -53,11 +50,8 @@ const FileManager: React.FC = () => {
         handleDeleteDialogClose,
         handleMoveItem,
         handleSingleUploadCompleted,
-        handleAllUploadsComplete,
         setNewName,
         setNameError,
-        setCurrentFolderId,
-        setParentFolderId,
     } = useFileManagerHandlers(null, setLoading);
 
     if (loading) {
@@ -69,13 +63,12 @@ const FileManager: React.FC = () => {
             <Container>
                 <Typography variant="h4" gutterBottom>Správa videí</Typography>
                 <FileManagerActions
-                    handleUploadClick={() => document.getElementById('upload-video-choice')?.click()}
+                    handleUploadClick={handleUploadClick}
                     handleCreateFolderClick={handleCreateFolderClick}
                 />
                 <VideoUpload
                     currentFolderId={currentFolderId}
                     handleSingleUploadCompleted={handleSingleUploadCompleted}
-                    handleAllUploadsComplete={handleAllUploadsComplete}
                 />
                 <FileExplorer
                     folders={folders}

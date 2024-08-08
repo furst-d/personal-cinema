@@ -33,6 +33,9 @@ export const uploadVideoMiddleware = async (req: Request, res: Response, next: N
             } else if (err) {
                 res.status(400).json({ error: err.message, tag: err.tag || 'UNKNOWN_ERROR' });
             } else {
+                if (req.file) {
+                    req.body.fileSize = req.file.size;
+                }
                 next();
             }
         });

@@ -1,24 +1,23 @@
-import React, { useState } from 'react';
+import React, {useRef, useState} from 'react';
 import VideoUploadChoice from './VideoUploadChoice';
 import VideoUploadProcess from './VideoUploadProcess';
 import { removeFileExtension } from "../../../utils/namer";
 import { uploadVideoMetadata, uploadVideoToCdn } from "../../../service/uploadService";
-import { fetchVideos } from "../../../service/fileManagerService"; // Ensure this is imported
 import { toast } from 'react-toastify';
 
 interface VideoUploadProps {
     currentFolderId: string | null;
-    handleAllUploadsComplete: () => void;
-    setVideos: (videos: any[]) => void; // Added prop for setting videos
+    handleSingleUploadCompleted: () => void;
 }
 
-const VideoUpload: React.FC<VideoUploadProps> = ({ currentFolderId, handleAllUploadsComplete, setVideos }) => {
+const VideoUpload: React.FC<VideoUploadProps> = ({ currentFolderId, handleSingleUploadCompleted }) => {
     const [videos, setUploadVideos] = useState<{ name: string; file: File }[]>([]);
     const [isUploading, setIsUploading] = useState<boolean>(false);
     const [showUploadChoice, setShowUploadChoice] = useState<boolean>(false);
     const [progress, setProgress] = useState<number[]>([]);
     const [speed, setSpeed] = useState<number>(0);
     const [totalRemainingTime, setTotalRemainingTime] = useState<number>(0);
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
@@ -42,85 +41,103 @@ const VideoUpload: React.FC<VideoUploadProps> = ({ currentFolderId, handleAllUpl
 
     const handleConfirmUpload = () => {
         setIsUploading(true);
-        uploadFiles(videos);
+        uploadFiles(videos).then(() => {
+            handleUploadAllComplete();
+        });
     };
-
-    const handleSingleUploadComplete = () => {
-        console.log('Single upload complete');
-    }
 
     const handleUploadAllComplete = () => {
         setIsUploading(false);
         setShowUploadChoice(false);
         setUploadVideos([]);
-        handleAllUploadsComplete();
+        if (inputRef.current) {
+            inputRef.current.value = '';
+        }
+        toast.success('Upload videí byl dokončen');
     };
 
     const uploadFiles = async (videos: { name: string; file: File }[]) => {
         const totalSize = videos.reduce((acc, video) => acc + video.file.size, 0);
-        let startTime = Date.now();
         let uploadedSize = 0;
 
         for (let i = 0; i < videos.length; i++) {
-            await uploadCurrentFile(videos[i].file, i, totalSize, startTime, uploadedSize, videos[i].name);
+            await uploadCurrentFile(videos[i].file, i, totalSize, uploadedSize, videos[i].name);
             uploadedSize += videos[i].file.size;
         }
-        handleUploadAllComplete();
     };
 
-    const uploadCurrentFile = async (file: File, fileIndex: number, totalSize: number, startTime: number, uploadedSize: number, name: string) => {
-        const fileSize = file.size;
+    const updateProgress = (fileIndex: number, progress: number) => {
+        return new Promise<void>((resolve) => {
+            setProgress(prevProgress => {
+                const newProgress = [...prevProgress];
+                newProgress[fileIndex] = progress;
+                resolve();
+                return newProgress;
+            });
+        });
+    };
 
-        const metadataResponse = await uploadVideoMetadata(name, currentFolderId);
+    const uploadCurrentFile = async (file: File, fileIndex: number, totalSize: number, uploadedSize: number, name: string) => {
+        let hasError = false;
+        let currentProgress = 0;
 
-        const formData = new FormData();
-        formData.append('video', file);
-        formData.append('params', metadataResponse.params);
-        formData.append('signature', metadataResponse.signature);
-        formData.append('nonce', metadataResponse.nonce);
-        formData.append('project_id', metadataResponse.project_id);
+        try {
+            const startTime = Date.now();
+            const fileSize = file.size;
+            const metadataResponse = await uploadVideoMetadata(name, currentFolderId, fileSize);
 
-        await uploadVideoToCdn(formData, (progressEvent) => {
-            console.log("Progress event: ", progressEvent);
-            if (progressEvent.lengthComputable) {
-                const elapsedTime = (Date.now() - startTime) / 1000; // in seconds
-                const currentSpeed = uploadedSize / elapsedTime; // bytes per second
-                setSpeed(currentSpeed);
+            const formData = new FormData();
+            formData.append('video', file);
+            formData.append('params', metadataResponse.params);
+            formData.append('signature', metadataResponse.signature);
+            formData.append('nonce', metadataResponse.nonce);
+            formData.append('project_id', metadataResponse.project_id);
 
-                const remainingBytes = totalSize - uploadedSize;
-                setTotalRemainingTime(remainingBytes / currentSpeed); // in seconds
+            await uploadVideoToCdn(formData, async (progressEvent) => {
+                if (progressEvent.lengthComputable && progressEvent.total && !hasError) {
+                    const currentSpeed = progressEvent.loaded / ((Date.now() - startTime) / 1000);
+                    setSpeed(currentSpeed);
 
-                const fileUploadedSize = progressEvent.loaded;
-                const currentProgress = (fileUploadedSize / fileSize) * 100;
-                setProgress(prevProgress => {
-                    const newProgress = [...prevProgress];
-                    newProgress[fileIndex] = currentProgress;
-                    return newProgress;
-                });
+                    const remainingBytes = totalSize - (uploadedSize + progressEvent.loaded);
+                    setTotalRemainingTime(remainingBytes / currentSpeed);
 
-                console.log(`File index: ${fileIndex}, progress: ${currentProgress}%`);
+                    currentProgress = (progressEvent.loaded / progressEvent.total) * 100;
+                    await updateProgress(fileIndex, currentProgress);
+                }
+            });
+            setSpeed(0);
+            currentProgress = 100;
+
+            handleSingleUploadCompleted();
+        } catch (error: any) {
+            hasError = true;
+            setSpeed(0);
+            currentProgress = 0;
+
+            if (error.response && error.response.status === 413) {
+                const maxSize = error.response.data.payload.details.maxFileSize;
+                toast.error(`Video ${name} je příliš velké, maximální velikost souboru je ${maxSize}`);
+            } else {
+                toast.error(`Při nahrávání videa ${name} došlo k chybě`);
             }
-        });
-
-        // Ensure the progress is set to 100% when the upload completes
-        setProgress(prevProgress => {
-            const newProgress = [...prevProgress];
-            newProgress[fileIndex] = 100;
-            return newProgress;
-        });
+        } finally {
+            await updateProgress(fileIndex, currentProgress);
+        }
     };
 
     return (
         <>
             <input
-                accept="video/*"
+                accept=".mp4, .mov, .avi, .mkv, .flv, .wmv, .webm, .mpeg"
                 style={{ display: 'none' }}
                 id="upload-video-choice"
                 type="file"
                 multiple
                 onChange={handleFileChange}
                 disabled={isUploading}
+                ref={inputRef}
             />
+
             {showUploadChoice && (
                 <div>
                     {isUploading ? (
@@ -135,7 +152,6 @@ const VideoUpload: React.FC<VideoUploadProps> = ({ currentFolderId, handleAllUpl
                             videos={videos}
                             onNameChange={handleNameChange}
                             onConfirmUpload={handleConfirmUpload}
-                            handleFileChange={handleFileChange}
                         />
                     )}
                 </div>

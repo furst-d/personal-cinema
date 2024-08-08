@@ -40,7 +40,7 @@ class UserControllerTest extends WebTestCase
 
     public function testRegisterSuccess()
     {
-        $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, 'salt');
+        $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, 'salt', 10);
         $this->mockAccountService->method('registerUser')->willReturn($account);
 
         $this->mockJwtService->method('generateToken')->willReturn('activationToken');
@@ -69,7 +69,7 @@ class UserControllerTest extends WebTestCase
 
     public function testLoginSuccess()
     {
-        $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, 'salt');
+        $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, 'salt', 10);
         $this->mockAccountService->method('loginUser')->willReturn($account);
 
         $apiToken = new ApiToken('refreshToken', 'sessionId', $account);

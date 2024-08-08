@@ -159,11 +159,16 @@ class CdnSynchronizer
     {
         $video->setCodec($videoData->codec);
         $video->setExtension($videoData->extension);
-        $video->setSize($videoData->size);
         $video->setLength($videoData->length);
         $video->setPath($videoData->path);
         $this->updateVideoResolution($video, $videoData);
         $this->updateVideoMd5($video, $videoData);
+
+        if (!$video->getSize()) {
+            $video->setSize($videoData->size);
+            $storage = $video->getAccount()->getStorage();
+            $storage->setUsedStorage($storage->getUsedStorage() + $videoData->size);
+        }
     }
 
     /**

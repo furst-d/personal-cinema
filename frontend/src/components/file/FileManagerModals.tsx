@@ -22,23 +22,23 @@ interface FileManagerModalsProps {
 }
 
 const FileManagerModals: React.FC<FileManagerModalsProps> = ({
-                                                                 dialogOpen,
-                                                                 handleDialogClose,
-                                                                 handleCreateFolder,
-                                                                 isEditing,
-                                                                 editingType,
-                                                                 newName,
-                                                                 setNewName,
-                                                                 nameError,
-                                                                 setNameError,
-                                                                 handleEditFolder,
-                                                                 handleEditVideo,
-                                                                 deleteDialogOpen,
-                                                                 handleDeleteDialogClose,
-                                                                 handleDeleteFolder,
-                                                                 handleDeleteVideo,
-                                                                 deletingType
-                                                             }) => {
+     dialogOpen,
+     handleDialogClose,
+     handleCreateFolder,
+     isEditing,
+     editingType,
+     newName,
+     setNewName,
+     nameError,
+     setNameError,
+     handleEditFolder,
+     handleEditVideo,
+     deleteDialogOpen,
+     handleDeleteDialogClose,
+     handleDeleteFolder,
+     handleDeleteVideo,
+     deletingType
+}) => {
     return (
         <>
             <EditDialog

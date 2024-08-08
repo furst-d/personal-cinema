@@ -46,7 +46,7 @@ class TokenValidatorListenerTest extends TestCase
         $event = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
 
         $decodedToken = ['user_id' => 1];
-        $user = new Account('test@example.com', 'password', 'salt');
+        $user = new Account('test@example.com', 'password', 'salt', 10);
         $user->setActive(true);
         $user->addRole(new Role('User', 'ROLE_USER'));
 
@@ -60,7 +60,7 @@ class TokenValidatorListenerTest extends TestCase
             ->with(1)
             ->willReturn($user);
 
-        $this->roleService->method('isAdmin')->with($user)->willReturn(true); // Mock kontrolu admin role
+        $this->roleService->method('isAdmin')->with($user)->willReturn(true);
 
         $this->listener->onKernelRequest($event);
 

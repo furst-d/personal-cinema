@@ -12,6 +12,7 @@ use App\Exception\UnauthorizedException;
 use App\Helper\Authenticator\Authenticator;
 use App\Helper\DTO\PaginatorResult;
 use App\Repository\Account\AccountRepository;
+use App\Service\Storage\StorageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
@@ -28,6 +29,11 @@ class AccountService
     private RoleService $roleService;
 
     /**
+     * @var StorageService $storageService
+     */
+    private StorageService $storageService;
+
+    /**
      * @var AccountRepository $accountRepository
      */
     private AccountRepository $accountRepository;
@@ -42,18 +48,21 @@ class AccountService
     /**
      * @param EntityManagerInterface $em
      * @param RoleService $roleService
+     * @param StorageService $storageService
      * @param AccountRepository $accountRepository
      * @param Authenticator $authenticator
      */
     public function __construct(
         EntityManagerInterface $em,
         RoleService            $roleService,
+        StorageService         $storageService,
         AccountRepository      $accountRepository,
-        Authenticator          $authenticator
+        Authenticator          $authenticator,
     )
     {
         $this->em = $em;
         $this->roleService = $roleService;
+        $this->storageService = $storageService;
         $this->accountRepository = $accountRepository;
         $this->authenticator = $authenticator;
     }
@@ -73,8 +82,9 @@ class AccountService
         try {
             $salt = $this->authenticator->generateSalt();
             $password = $this->authenticator->combinePassword($password, $salt);
+            $storageSize = $this->storageService->getDefaultUserStorageLimit();
 
-            $user = new Account($email, $password, $salt);
+            $user = new Account($email, $password, $salt, $storageSize);
             $this->roleService->addDefaultRole($user);
 
             $this->accountRepository->save($user);

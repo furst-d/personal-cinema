@@ -45,7 +45,7 @@ class JwtServiceTest extends TestCase
             $this->sessionService
         );
 
-        $this->account = new Account('test@example.com', 'password', 'salt');
+        $this->account = new Account('test@example.com', 'password', 'salt', 10);
         $this->account->setId(self::TEST_USER_ID);
     }
 
