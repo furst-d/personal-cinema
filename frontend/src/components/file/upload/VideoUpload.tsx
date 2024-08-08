@@ -152,7 +152,6 @@ const VideoUpload: React.FC<VideoUploadProps> = ({ currentFolderId, handleSingle
                             videos={videos}
                             onNameChange={handleNameChange}
                             onConfirmUpload={handleConfirmUpload}
-                            handleFileChange={handleFileChange}
                         />
                     )}
                 </div>

@@ -72,7 +72,7 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
     };
 
     const handleUploadClick = () => {
-        console.log("Aktuální složka pro nahrání souboru:", currentFolderId);
+        document.getElementById('upload-video-choice')?.click();
     };
 
     const handleCreateFolderClick = () => {
