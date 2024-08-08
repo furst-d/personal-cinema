@@ -5,6 +5,7 @@ namespace App\Tests\Helper\Cdn;
 use App\DTO\Video\CdnVideoRequest;
 use App\DTO\Video\CdnVideoResolutionRequest;
 use App\Entity\Account\Account;
+use App\Entity\Storage\Storage;
 use App\Entity\Video\Video;
 use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
@@ -72,6 +73,7 @@ class CdnSynchronizerTest extends TestCase
     {
         $videoData = $this->createValidCdnVideoRequest();
         $video = $this->createMock(Video::class);
+        $video->storage = new Storage(new Account('email@test.cz', 'password', 'salt', 10), 10);
 
         $this->mockVideoService->method('getVideoByCdnId')->willReturn($video);
         $this->mockJwtService->method('decodeToken')->willReturn(['user_id' => 1]);

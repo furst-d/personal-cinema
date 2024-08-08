@@ -164,9 +164,8 @@ class CdnSynchronizer
         $this->updateVideoResolution($video, $videoData);
         $this->updateVideoMd5($video, $videoData);
 
-        if (!$video->getSize()) {
+        if (!$video->getSize() && $storage = $video->getAccount()->getStorage()) {
             $video->setSize($videoData->size);
-            $storage = $video->getAccount()->getStorage();
             $storage->setUsedStorage($storage->getUsedStorage() + $videoData->size);
         }
     }
