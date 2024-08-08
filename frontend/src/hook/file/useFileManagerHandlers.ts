@@ -274,7 +274,7 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
 
     const handleAllUploadsComplete = () => {
         setUploadingVideos([]);
-        toast.success("Všechna videa byla úspěšně nahrána.");
+        toast.success("Upload videí byl dokončen.");
     };
 
     return {

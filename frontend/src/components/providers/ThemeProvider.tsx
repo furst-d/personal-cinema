@@ -179,7 +179,7 @@ const ThemeProvider: React.FC<ProviderProps> = ({ children }) => {
                 <ToastContainer
                     position="bottom-right"
                     theme="dark"
-                    autoClose={3000}
+                    autoClose={5000}
                     hideProgressBar
                     pauseOnFocusLoss={false}
                     draggable={false}

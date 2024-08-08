@@ -83,7 +83,9 @@ class StorageService
         }
 
         if ($this->hasExceededFileLimit($fileSize)) {
-            throw new TooLargeException('File too large', ['maxFileSize' => $this->settingsRepository->getMaxFileSize()]);
+            $maxFile = $this->settingsRepository->getMaxFileSize();
+            $maxFile = substr($maxFile, 0, -2) . ' ' . substr($maxFile, -2);
+            throw new TooLargeException('File too large', ['maxFileSize' => $maxFile]);
         }
     }
 
