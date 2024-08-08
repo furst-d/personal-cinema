@@ -158,6 +158,11 @@ class VideoService
      */
     public function deleteVideo(Video $video): void
     {
+        if ($size = $video->getSize()) {
+            $storage = $video->getAccount()->getStorage();
+            $storage->setUsedStorage($storage->getUsedStorage() - $size);
+        }
+
         $this->videoRepository->delete($video);
     }
 

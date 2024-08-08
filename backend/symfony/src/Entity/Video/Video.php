@@ -53,7 +53,7 @@ class Video
 
     #[ORM\Column(type: Types::BIGINT)]
     #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
-    private string $size;
+    private ?string $size = null;
 
     #[ORM\Column(type: Types::BIGINT, nullable: true)]
     #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
@@ -217,9 +217,9 @@ class Video
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getSize(): string
+    public function getSize(): ?string
     {
         return $this->size;
     }

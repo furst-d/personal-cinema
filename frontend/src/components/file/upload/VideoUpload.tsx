@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useRef, useState} from 'react';
 import VideoUploadChoice from './VideoUploadChoice';
 import VideoUploadProcess from './VideoUploadProcess';
 import { removeFileExtension } from "../../../utils/namer";
@@ -7,17 +7,17 @@ import { toast } from 'react-toastify';
 
 interface VideoUploadProps {
     currentFolderId: string | null;
-    handleAllUploadsComplete: () => void;
-    setVideos: (videos: any[]) => void;
+    handleSingleUploadCompleted: () => void;
 }
 
-const VideoUpload: React.FC<VideoUploadProps> = ({ currentFolderId, handleAllUploadsComplete }) => {
+const VideoUpload: React.FC<VideoUploadProps> = ({ currentFolderId, handleSingleUploadCompleted }) => {
     const [videos, setUploadVideos] = useState<{ name: string; file: File }[]>([]);
     const [isUploading, setIsUploading] = useState<boolean>(false);
     const [showUploadChoice, setShowUploadChoice] = useState<boolean>(false);
     const [progress, setProgress] = useState<number[]>([]);
     const [speed, setSpeed] = useState<number>(0);
     const [totalRemainingTime, setTotalRemainingTime] = useState<number>(0);
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
@@ -50,7 +50,10 @@ const VideoUpload: React.FC<VideoUploadProps> = ({ currentFolderId, handleAllUpl
         setIsUploading(false);
         setShowUploadChoice(false);
         setUploadVideos([]);
-        handleAllUploadsComplete();
+        if (inputRef.current) {
+            inputRef.current.value = '';
+        }
+        toast.success('Upload videí byl dokončen');
     };
 
     const uploadFiles = async (videos: { name: string; file: File }[]) => {
@@ -81,7 +84,7 @@ const VideoUpload: React.FC<VideoUploadProps> = ({ currentFolderId, handleAllUpl
         try {
             const startTime = Date.now();
             const fileSize = file.size;
-            const metadataResponse = await uploadVideoMetadata(name, currentFolderId, fileSize + 1);
+            const metadataResponse = await uploadVideoMetadata(name, currentFolderId, fileSize);
 
             const formData = new FormData();
             formData.append('video', file);
@@ -104,6 +107,8 @@ const VideoUpload: React.FC<VideoUploadProps> = ({ currentFolderId, handleAllUpl
             });
             setSpeed(0);
             currentProgress = 100;
+
+            handleSingleUploadCompleted();
         } catch (error: any) {
             hasError = true;
             setSpeed(0);
@@ -130,7 +135,9 @@ const VideoUpload: React.FC<VideoUploadProps> = ({ currentFolderId, handleAllUpl
                 multiple
                 onChange={handleFileChange}
                 disabled={isUploading}
+                ref={inputRef}
             />
+
             {showUploadChoice && (
                 <div>
                     {isUploading ? (
