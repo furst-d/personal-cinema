@@ -77,6 +77,7 @@ class VideoController extends BasePersonalController
             ]);
 
             $data = $this->cdnService->createUploadData([
+                'size' => $uploadRequest->size,
                 'params' => json_encode([
                     'video_token' => $videoToken,
                 ])

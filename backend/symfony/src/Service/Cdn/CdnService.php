@@ -108,6 +108,10 @@ class CdnService
             $data['nonce'] = bin2hex(random_bytes(16));
             $this->cdnHasher->addSignature($data, $this->cdnSecretKey);
             $this->logger->info('Generated upload data.', $data);
+
+            // Remove the size from the data array as it is used only for validation a file
+            unlink($data['size']);
+
             return $data;
         } catch (Exception) {
             throw new InternalException("Failed to generate nonce.");
