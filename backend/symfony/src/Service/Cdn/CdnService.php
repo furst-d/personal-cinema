@@ -110,7 +110,9 @@ class CdnService
             $this->logger->info('Generated upload data.', $data);
 
             // Remove the size from the data array as it is used only for validation a file
-            unlink($data['size']);
+            if (isset($data['size'])) {
+                unset($data['size']);
+            }
 
             return $data;
         } catch (Exception) {

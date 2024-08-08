@@ -70,8 +70,7 @@ const VideoUpload: React.FC<VideoUploadProps> = ({ currentFolderId, handleAllUpl
 
     const uploadCurrentFile = async (file: File, fileIndex: number, totalSize: number, startTime: number, uploadedSize: number, name: string) => {
         const fileSize = file.size;
-
-        const metadataResponse = await uploadVideoMetadata(name, currentFolderId);
+        const metadataResponse = await uploadVideoMetadata(name, currentFolderId, fileSize + 1);
 
         const formData = new FormData();
         formData.append('video', file);

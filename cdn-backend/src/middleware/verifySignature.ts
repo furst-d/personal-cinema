@@ -5,7 +5,7 @@ import Nonce from '../entities/nonce';
 import http_build_query from '../utils/http_build_query';
 
 const verifySignature = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-    const { nonce, params, signature, project_id } = req.body;
+    const { nonce, params, signature, project_id, fileSize } = req.body;
 
     if (!nonce || !params || !signature || !project_id) {
         return res.status(400).json({ error: 'Missing required parameters' });
@@ -23,7 +23,12 @@ const verifySignature = async (req: Request, res: Response, next: NextFunction):
     }
 
     const secretKey = project.apiKey;
-    const data = { nonce, params, project_id };
+    const data: any = { nonce, params, project_id };
+
+    if (fileSize) {
+        data.size = fileSize;
+    }
+
     const paramString = http_build_query(data);
     const expectedSignature = crypto.createHmac('sha256', secretKey).update(paramString).digest('hex');
 

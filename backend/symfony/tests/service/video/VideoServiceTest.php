@@ -38,7 +38,7 @@ class VideoServiceTest extends TestCase
 
     public function testGetVideoByCdnId()
     {
-        $account = new Account('email@example.com', 'password', 'salt');
+        $account = new Account('email@example.com', 'password', 'salt', 10);
         $video = new Video('testVideo', $account);
         $this->mockVideoRepository->method('findOneBy')->willReturn($video);
 
@@ -58,7 +58,7 @@ class VideoServiceTest extends TestCase
 
     public function testGetAccountVideoById()
     {
-        $account = new Account('email@example.com', 'password', 'salt');
+        $account = new Account('email@example.com', 'password', 'salt', 10);
         $video = new Video('testVideo', $account);
         $this->mockVideoRepository->method('findOneBy')->willReturn($video);
 
@@ -71,7 +71,7 @@ class VideoServiceTest extends TestCase
     {
         $this->expectException(NotFoundException::class);
 
-        $account = new Account('email@example.com', 'password', 'salt');
+        $account = new Account('email@example.com', 'password', 'salt', 10);
         $this->mockVideoRepository->method('findOneBy')->willReturn(null);
 
         $this->videoService->getAccountVideoById($account, 1);
@@ -79,7 +79,7 @@ class VideoServiceTest extends TestCase
 
     public function testGetVideoById()
     {
-        $account = new Account('email@example.com', 'password', 'salt');
+        $account = new Account('email@example.com', 'password', 'salt', 10);
         $video = new Video('testVideo', $account);
         $this->mockVideoRepository->method('find')->willReturn($video);
 
@@ -118,7 +118,7 @@ class VideoServiceTest extends TestCase
 
     public function testGetVideos()
     {
-        $account = new Account('email@example.com', 'password', 'salt');
+        $account = new Account('email@example.com', 'password', 'salt', 10);
         $folder = new Folder('Test Folder', $account);
         $folderData = new FolderData($folder, false);
         $videos = [new Video('Video 1', $account), new Video('Video 2', $account)];
@@ -138,7 +138,7 @@ class VideoServiceTest extends TestCase
 
     public function testUpdateVideo()
     {
-        $account = new Account('email@example.com', 'password', 'salt');
+        $account = new Account('email@example.com', 'password', 'salt', 10);
         $video = new Video('Old Video', $account);
         $folder = new Folder('Test Folder', $account);
 
@@ -155,7 +155,7 @@ class VideoServiceTest extends TestCase
 
     public function testDeleteVideo()
     {
-        $account = new Account('email@example.com', 'password', 'salt');
+        $account = new Account('email@example.com', 'password', 'salt', 10);
         $video = new Video('testVideo', $account);
 
         $this->mockVideoRepository

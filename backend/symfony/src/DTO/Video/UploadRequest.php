@@ -11,7 +11,7 @@ class UploadRequest extends AbstractRequest
     public string $name;
 
     #[Assert\NotBlank]
-    public string $size;
+    public int $size;
 
     #[Assert\Positive]
     public ?int $folderId = null;

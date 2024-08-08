@@ -11,6 +11,7 @@ use App\Helper\Authenticator\Authenticator;
 use App\Repository\Account\AccountRepository;
 use App\Service\Account\AccountService;
 use App\Service\Account\RoleService;
+use App\Service\Storage\StorageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use PHPUnit\Framework\TestCase;
@@ -24,6 +25,7 @@ class AccountServiceTest extends TestCase
 
     private $entityManager;
     private $roleService;
+    private $storageService;
     private $accountRepository;
     private $authenticator;
     private $accountService;
@@ -32,12 +34,14 @@ class AccountServiceTest extends TestCase
     {
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
         $this->roleService = $this->createMock(RoleService::class);
+        $this->storageService = $this->createMock(StorageService::class);
         $this->accountRepository = $this->createMock(AccountRepository::class);
         $this->authenticator = $this->createMock(Authenticator::class);
 
         $this->accountService = new AccountService(
             $this->entityManager,
             $this->roleService,
+            $this->storageService,
             $this->accountRepository,
             $this->authenticator
         );
@@ -46,7 +50,7 @@ class AccountServiceTest extends TestCase
     public function testRegisterUserSuccess()
     {
         $this->accountRepository->method('findOneBy')->willReturn(null);
-        $this->roleService->method('addDefaultRole')->willReturn(new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT));
+        $this->roleService->method('addDefaultRole')->willReturn(new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT, 10));
 
         $salt = 'random_salt';
         $hashedPassword = hash('sha256', self::TEST_PASSWORD . $salt);
@@ -63,7 +67,7 @@ class AccountServiceTest extends TestCase
     public function testRegisterUserInternalException()
     {
         $this->accountRepository->method('findOneBy')->willReturn(null);
-        $this->roleService->method('addDefaultRole')->willReturn(new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT));
+        $this->roleService->method('addDefaultRole')->willReturn(new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT, 10));
 
         $this->authenticator->method('generateSalt')->willThrowException(new Exception());
 
@@ -74,13 +78,13 @@ class AccountServiceTest extends TestCase
 
     public function testLoginUserSuccess()
     {
-        $account = new Account(self::TEST_EMAIL, hash('sha256', self::TEST_PASSWORD . self::TEST_SALT), self::TEST_SALT);
+        $account = new Account(self::TEST_EMAIL, hash('sha256', self::TEST_PASSWORD . self::TEST_SALT), self::TEST_SALT, 10);
         $account->setActive(true);
         $account->addRole(new Role('User', 'ROLE_USER'));
 
         $this->accountRepository->method('findOneBy')->willReturn($account);
         $this->authenticator->method('verifyPassword')->willReturn(true);
-        $this->roleService->method('hasRoles')->willReturn(true); // Přidejte toto pro kontrolu rolí
+        $this->roleService->method('hasRoles')->willReturn(true);
 
         $result = $this->accountService->loginUser(self::TEST_EMAIL, self::TEST_PASSWORD, ['ROLE_USER']);
 
@@ -91,7 +95,7 @@ class AccountServiceTest extends TestCase
 
     public function testChangePasswordSuccess()
     {
-        $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT);
+        $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT, 10);
         $newPassword = 'new_password';
         $hashedPassword = hash('sha256', $newPassword . self::TEST_SALT);
 
@@ -104,7 +108,7 @@ class AccountServiceTest extends TestCase
 
     public function testActivateAccountSuccess()
     {
-        $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT);
+        $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT, 10);
         $account->setId(self::TEST_ACCOUNT_ID);
         $this->accountRepository->method('find')->willReturn($account);
 
@@ -124,7 +128,7 @@ class AccountServiceTest extends TestCase
 
     public function testActivateAccountAlreadyActive()
     {
-        $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT);
+        $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT, 10);
         $account->setActive(true);
         $this->accountRepository->method('find')->willReturn($account);
 
@@ -135,7 +139,7 @@ class AccountServiceTest extends TestCase
 
     public function testGetAccountByEmailSuccess()
     {
-        $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT);
+        $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT, 10);
         $this->accountRepository->method('findOneBy')->willReturn($account);
 
         $result = $this->accountService->getAccountByEmail(self::TEST_EMAIL);
@@ -155,7 +159,7 @@ class AccountServiceTest extends TestCase
 
     public function testGetAccountByIdSuccess()
     {
-        $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT);
+        $account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT, 10);
         $this->accountRepository->method('findOneBy')->willReturn($account);
 
         $result = $this->accountService->getAccountById(self::TEST_ACCOUNT_ID);

@@ -25,7 +25,7 @@ class RoleServiceTest extends TestCase
     {
         $this->roleRepository = $this->createMock(RoleRepository::class);
         $this->roleService = new RoleService($this->roleRepository);
-        $this->account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT);
+        $this->account = new Account(self::TEST_EMAIL, self::TEST_PASSWORD, self::TEST_SALT, 10);
     }
 
     public function testAddDefaultRoleSuccess()
