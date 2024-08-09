@@ -7,8 +7,6 @@ use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
 use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
-use App\Helper\DTO\SortBy;
-use App\Helper\Folder\FolderDeletionMode;
 use App\Helper\DTO\PaginatorResult;
 use App\Helper\Video\FolderData;
 use App\Repository\Video\FolderRepository;
