@@ -3,8 +3,12 @@
 namespace App\Entity\Video;
 
 use App\Entity\Account\Account;
+use App\Entity\Video\Share\ShareVideo;
+use App\Entity\Video\Share\ShareVideoPublic;
 use App\Repository\Video\VideoRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -95,6 +99,18 @@ class Video
     private ?string $thumbnailUrl = null;
 
     /**
+     * @var Collection<int, ShareVideo>
+     */
+    #[ORM\OneToMany(targetEntity: ShareVideo::class, mappedBy: 'video', orphanRemoval: true)]
+    private Collection $shares;
+
+    /**
+     * @var Collection<int, ShareVideoPublic>
+     */
+    #[ORM\OneToMany(targetEntity: ShareVideoPublic::class, mappedBy: 'video', orphanRemoval: true)]
+    private Collection $sharesPublic;
+
+    /**
      * @param string $name
      * @param Account $account
      */
@@ -105,6 +121,8 @@ class Video
         $this->hash = uniqid();
         $this->isDeleted = false;
         $this->createdAt = new DateTimeImmutable();
+        $this->shares = new ArrayCollection();
+        $this->sharesPublic = new ArrayCollection();
     }
 
     /**
@@ -409,5 +427,21 @@ class Video
     public function setThumbnailUrl(?string $thumbnailUrl): void
     {
         $this->thumbnailUrl = $thumbnailUrl;
+    }
+
+    /**
+     * @return Collection<int, ShareVideo>
+     */
+    public function getShares(): Collection
+    {
+        return $this->shares;
+    }
+
+    /**
+     * @return Collection<int, ShareVideoPublic>
+     */
+    public function getSharesPublic(): Collection
+    {
+        return $this->sharesPublic;
     }
 }

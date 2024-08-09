@@ -4,6 +4,8 @@ namespace App\Entity\Account;
 
 use App\Entity\Storage\Storage;
 use App\Entity\Video\Folder;
+use App\Entity\Video\Share\ShareFolder;
+use App\Entity\Video\Share\ShareVideo;
 use App\Entity\Video\Video;
 use App\Repository\Account\AccountRepository;
 use DateTimeImmutable;
@@ -69,6 +71,18 @@ class Account implements UserInterface
     #[ORM\OneToMany(targetEntity: Video::class, mappedBy: 'account', orphanRemoval: true)]
     private Collection $videos;
 
+    /**
+     * @var Collection<int, Video>
+     */
+    #[ORM\OneToMany(targetEntity: ShareVideo::class, mappedBy: 'account', orphanRemoval: true)]
+    private Collection $sharedVideos;
+
+    /**
+     * @var Collection<int, Video>
+     */
+    #[ORM\OneToMany(targetEntity: ShareFolder::class, mappedBy: 'account', orphanRemoval: true)]
+    private Collection $sharedFolders;
+
     #[ORM\OneToOne(mappedBy: 'account', cascade: ['persist', 'remove'])]
     private Storage $storage;
 
@@ -89,6 +103,8 @@ class Account implements UserInterface
         $this->folders = new ArrayCollection();
         $this->videos = new ArrayCollection();
         $this->storage = new Storage($this, $maxStorage);
+        $this->sharedVideos = new ArrayCollection();
+        $this->sharedFolders = new ArrayCollection();
     }
 
     /**
@@ -263,20 +279,27 @@ class Account implements UserInterface
         return $this->videos;
     }
 
+    /**
+     * @return Storage|null
+     */
     public function getStorage(): ?Storage
     {
         return $this->storage;
     }
 
-    public function setStorage(Storage $storage): static
+    /**
+     * @return Collection<int, ShareVideo>
+     */
+    public function getSharedVideos(): Collection
     {
-        // set the owning side of the relation if necessary
-        if ($storage->getAccount() !== $this) {
-            $storage->setAccount($this);
-        }
+        return $this->sharedVideos;
+    }
 
-        $this->storage = $storage;
-
-        return $this;
+    /**
+     * @return Collection<int, ShareFolder>
+     */
+    public function getSharedFolders(): Collection
+    {
+        return $this->sharedFolders;
     }
 }
