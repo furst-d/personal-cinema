@@ -79,6 +79,28 @@ class MailerService
 
     /**
      * @param string $to
+     * @param string $itemName
+     * @param string $sender
+     * @param string $token
+     * @param bool $isFolder
+     * @return void
+     * @throws BadGatewayException
+     */
+    public function sendShareItem(string $to, string $itemName, string $sender, string $token, bool $isFolder): void
+    {
+        $templateId = '3z0vklor88xl7qrx';
+        $dynamicTemplateData = [
+            'name' => $to,
+            'itemName' => $itemName,
+            'sender' => $sender,
+            'link' => $_ENV['FRONTEND_URL'] . '/share-accept?type=' . ($isFolder ? 'folder' : 'file') . '&token=' . $token
+        ];
+
+        $this->sendEmail($to, $templateId, 'Sdílení ' . ($isFolder ? 'složky' : 'souboru'), $dynamicTemplateData);
+    }
+
+    /**
+     * @param string $to
      * @param string $templateId
      * @param string $subject
      * @param array $dynamicTemplateData

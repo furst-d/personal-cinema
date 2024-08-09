@@ -6,9 +6,7 @@ use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Video\UploadRequest;
 use App\DTO\Video\VideoQueryRequest;
 use App\DTO\Video\VideoRequest;
-use App\Entity\Video\Video;
 use App\Exception\ApiException;
-use App\Helper\Generator\UrlGenerator;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Cdn\CdnService;
 use App\Service\Jwt\JwtService;
@@ -62,7 +60,7 @@ class VideoController extends BasePersonalController
         CdnService $cdnService,
         VideoService $videoService,
         FolderService $folderService,
-        StorageService $storageService
+        StorageService $storageService,
     )
     {
         parent::__construct($locator);

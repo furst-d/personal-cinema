@@ -22,18 +22,31 @@ class FolderService
     private FolderRepository $folderRepository;
 
     /**
+     * @var ShareService $shareService
+     */
+    private ShareService $shareService;
+
+    /**
      * @var EntityManagerInterface $em
      */
     private EntityManagerInterface $em;
 
+    private const NOT_FOUND_MESSAGE = 'Folder not found';
+
     /**
      * @param FolderRepository $folderRepository
      * @param EntityManagerInterface $em
+     * @param ShareService $shareService
      */
-    public function __construct(FolderRepository $folderRepository, EntityManagerInterface $em)
+    public function __construct(
+        FolderRepository $folderRepository,
+        EntityManagerInterface $em,
+        ShareService $shareService
+    )
     {
         $this->folderRepository = $folderRepository;
         $this->em = $em;
+        $this->shareService = $shareService;
     }
 
     /**
@@ -46,7 +59,7 @@ class FolderService
         $folder = $this->folderRepository->find($id);
 
         if (!$folder) {
-            throw new NotFoundException('Folder not found');
+            throw new NotFoundException(self::NOT_FOUND_MESSAGE);
         }
 
         return $folder;
@@ -60,10 +73,10 @@ class FolderService
      */
     public function getAccountFolderById(Account $account, int $id): Folder
     {
-        $folder = $this->folderRepository->findOneBy(['owner' => $account, 'id' => $id]);
+        $folder = $this->folderRepository->findOneBy(['id' => $id, 'owner' => $account]);
 
         if (!$folder) {
-            throw new NotFoundException('Folder not found');
+            throw new NotFoundException(self::NOT_FOUND_MESSAGE);
         }
 
         return $folder;
@@ -86,6 +99,42 @@ class FolderService
         }
 
         return new FolderData($this->getAccountFolderById($account, $id), false);
+    }
+
+    /**
+     * @param Account $account
+     * @param int|null $id
+     * @return FolderData
+     * @throws NotFoundException
+     */
+    public function getSharedFolderDataById(Account $account, ?int $id): FolderData
+    {
+        if (is_null($id)) {
+            return new FolderData(null, false);
+        }
+
+        if ($id === 0) {
+            return new FolderData(null, true);
+        }
+
+        return new FolderData($this->getSharedFolderById($account, $id), false);
+    }
+
+    /**
+     * @param Account $account
+     * @param int $id
+     * @return Folder
+     * @throws NotFoundException
+     */
+    public function getSharedFolderById(Account $account, int $id): Folder
+    {
+        $folder = $this->folderRepository->find($id);
+
+        if (!$folder || !$this->shareService->hasSharedFolderAccess($account, $folder)) {
+            throw new NotFoundException(self::NOT_FOUND_MESSAGE);
+        }
+
+        return $folder;
     }
 
     /**
