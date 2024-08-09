@@ -54,6 +54,9 @@ class ShareService
      */
     private RandomGenerator $generator;
 
+    private const VIDEO_NOT_FOUND_MESSAGE = "Video not found";
+    private const NO_PERMISSION_MESSAGE = "You don't have permission to see this video";
+
     /**
      * @param ShareFolderRepository $shareFolderRepository
      * @param ShareVideoPublicRepository $shareVideoPublicRepository
@@ -181,10 +184,17 @@ class ShareService
     public function addView(Video $video, string $sessionId): void
     {
         $publicVideoShare = $this->shareVideoPublicRepository->findValidByVideo($video);
-        $this->checkPublicAccess($publicVideoShare, $sessionId);
+
+        if (!$publicVideoShare) {
+            throw new NotFoundException(self::VIDEO_NOT_FOUND_MESSAGE);
+        }
 
         if ($this->alreadySawPublicVideo($publicVideoShare, $sessionId)) {
             return;
+        }
+
+        if ($this->viewsLimitExceeded($publicVideoShare)) {
+            throw new ForbiddenException(self::NO_PERMISSION_MESSAGE);
         }
 
         $view = new ShareVideoPublicView($publicVideoShare, $sessionId);
@@ -205,11 +215,11 @@ class ShareService
     private function checkPublicAccess(?ShareVideoPublic $publicVideoShare, string $sessionId): void
     {
         if (!$publicVideoShare) {
-            throw new NotFoundException("Video not found");
+            throw new NotFoundException(self::VIDEO_NOT_FOUND_MESSAGE);
         }
 
         if (!$this->casSeePublicVideo($publicVideoShare, $sessionId)) {
-            throw new ForbiddenException("You don't have permission to see this video");
+            throw new ForbiddenException(self::NO_PERMISSION_MESSAGE);
         }
     }
 
@@ -234,7 +244,16 @@ class ShareService
             return true;
         }
 
-        return count($publicVideoShare->getViews()) < $this->getPublicLinkViewLimit();
+        return !$this->viewsLimitExceeded($publicVideoShare);
+    }
+
+    /**
+     * @param ShareVideoPublic $publicVideoShare
+     * @return bool
+     */
+    private function viewsLimitExceeded(ShareVideoPublic $publicVideoShare): bool
+    {
+        return count($publicVideoShare->getViews()) >= $this->getPublicLinkViewLimit();
     }
 
     /**
