@@ -7,6 +7,7 @@ use App\Entity\Account\Account;
 use App\Exception\NotFoundException;
 use App\Repository\Video\FolderRepository;
 use App\Service\Video\FolderService;
+use App\Service\Video\ShareService;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -27,13 +28,16 @@ class FolderServiceTest extends TestCase
     /**
      * @var FolderService
      */
-    private $folderService;
+    private $folderService
+    ;
+    private $shareService;
 
     protected function setUp(): void
     {
         $this->folderRepository = $this->createMock(FolderRepository::class);
         $this->em = $this->createMock(EntityManagerInterface::class);
-        $this->folderService = new FolderService($this->folderRepository, $this->em);
+        $this->shareService = $this->createMock(ShareService::class);
+        $this->folderService = new FolderService($this->folderRepository, $this->em, $this->shareService);
     }
 
     public function testGetFolderByIdReturnsFolder(): void
