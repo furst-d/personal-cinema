@@ -59,4 +59,18 @@ class UrlGenerator
 
         return "$this->backendUrl/v1/private/videos/url?token=$token";
     }
+
+    /**
+     * @param Video $video
+     * @return string
+     * @throws InternalException
+     */
+    public function generatePublicVideo(Video $video): string
+    {
+        $token = $this->jwtService->generateToken(null, JwtUsage::USAGE_PUBLIC_VIDEO_ACCESS, [
+            'video_id' => $video->getId(),
+        ]);
+
+        return "$this->backendUrl/v1/share/url?token=$token";
+    }
 }

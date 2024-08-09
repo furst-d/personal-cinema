@@ -11,6 +11,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use phpDocumentor\Reflection\Types\Self_;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: VideoRepository::class)]
@@ -18,6 +19,7 @@ class Video
 {
     private const VIDEO_READ = 'video:read';
     private const VIDEOS_READ = 'videos:read';
+    private const VIDEO_PUBLIC_READ = 'video:public:read';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -92,7 +94,7 @@ class Video
     #[ORM\Column(nullable: true)]
     private ?DateTimeImmutable $deletedAt = null;
 
-    #[Groups([self::VIDEO_READ])]
+    #[Groups([self::VIDEO_READ, self::VIDEO_PUBLIC_READ])]
     private ?string $videoUrl = null;
 
     #[Groups([self::VIDEOS_READ])]

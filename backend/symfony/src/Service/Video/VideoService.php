@@ -215,4 +215,15 @@ class VideoService
             $video->setVideoUrl($this->urlGenerator->generateVideo($account, $video));
         }
     }
+
+    /**
+     * @param Video $video
+     * @return void
+     */
+    public function addPublicVideoUrlToVideo(Video $video): void
+    {
+        if ($video->getPath()) {
+            $video->setVideoUrl($this->urlGenerator->generatePublicVideo($video));
+        }
+    }
 }

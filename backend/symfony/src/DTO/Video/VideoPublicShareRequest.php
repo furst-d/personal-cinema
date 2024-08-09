@@ -2,10 +2,10 @@
 
 namespace App\DTO\Video;
 
-use App\DTO\Account\EmailRequest;
+use App\DTO\AbstractRequest;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class VideoShareRequest extends EmailRequest
+class VideoPublicShareRequest extends AbstractRequest
 {
     #[Assert\NotBlank]
     #[Assert\Positive]

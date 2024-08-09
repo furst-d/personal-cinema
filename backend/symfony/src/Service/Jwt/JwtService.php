@@ -62,25 +62,28 @@ class JwtService
 
     /**
      * Generate a token for a user based on the usage
-     * @param UserInterface $user
+     * @param UserInterface|null $user
      * @param JwtUsage $usage
      * @param array $data
      * @return string
      * @throws InternalException
      */
-    public function generateToken(UserInterface $user, JwtUsage $usage, array $data = []): string
+    public function generateToken(?UserInterface $user, JwtUsage $usage, array $data = []): string
     {
         try {
-            if (!$user instanceof Account) {
+            if ($user && !$user instanceof Account) {
                 throw new InvalidArgumentException('Expected an instance of ' . Account::class);
             }
 
             $expiration = $this->getExpirationForUsage($usage);
             $payload = [
-                'user_id' => $user->getId(),
                 'usage' => $usage->value,
                 'exp' => (time() + $expiration),
             ];
+
+            if ($user) {
+                $payload['user_id'] = $user->getId();
+            }
 
             $payload = array_merge($payload, $data);
 
@@ -180,7 +183,7 @@ class JwtService
             JwtUsage::USAGE_API_REFRESH => JwtExpiration::EXPIRATION_1_YEAR->value,
             JwtUsage::USAGE_ACCOUNT_ACTIVATION, JwtUsage::USAGE_PASSWORD_RESET => JwtExpiration::EXPIRATION_1_HOUR->value,
             JwtUsage::USAGE_UPLOAD => JwtExpiration::EXPIRATION_1_WEEK->value,
-            JwtUsage::USAGE_VIDEO_ACCESS, JwtUsage::USAGE_SHARE_VIDEO, JwtUsage::USAGE_SHARE_FOLDER => JwtExpiration::EXPIRATION_1_DAY->value,
+            JwtUsage::USAGE_VIDEO_ACCESS, JwtUsage::USAGE_PUBLIC_VIDEO_ACCESS, JwtUsage::USAGE_SHARE_VIDEO, JwtUsage::USAGE_SHARE_FOLDER => JwtExpiration::EXPIRATION_1_DAY->value,
         };
     }
 }

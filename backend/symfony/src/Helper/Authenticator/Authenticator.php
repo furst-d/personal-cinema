@@ -2,17 +2,32 @@
 
 namespace App\Helper\Authenticator;
 
+use App\Exception\InternalException;
+use App\Helper\Generator\RandomGenerator;
 use Exception;
 
 class Authenticator
 {
     /**
+     * @var RandomGenerator $generator
+     */
+    private RandomGenerator $generator;
+
+    /**
+     * @param RandomGenerator $generator
+     */
+    public function __construct(RandomGenerator $generator)
+    {
+        $this->generator = $generator;
+    }
+
+    /**
      * @return string
-     * @throws Exception
+     * @throws InternalException
      */
     public function generateSalt(): string
     {
-        return bin2hex(random_bytes(32));
+        return $this->generator->generateString(32);
     }
 
     /**

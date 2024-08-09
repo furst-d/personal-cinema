@@ -7,6 +7,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class FolderShareRequest extends EmailRequest
 {
+    #[Assert\NotBlank]
     #[Assert\Positive]
     public int $folderId;
 }

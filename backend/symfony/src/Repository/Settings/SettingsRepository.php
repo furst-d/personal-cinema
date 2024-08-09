@@ -31,4 +31,12 @@ class SettingsRepository extends ServiceEntityRepository
     {
         return $this->findOneBy(['key' => 'default_user_storage_limit'])->getValue();
     }
+
+    /**
+     * @return string
+     */
+    public function getPublicLinkViewLimit(): string
+    {
+        return $this->findOneBy(['key' => 'public_link_limit'])->getValue();
+    }
 }

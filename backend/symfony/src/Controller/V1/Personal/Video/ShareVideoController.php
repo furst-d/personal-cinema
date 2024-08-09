@@ -5,6 +5,7 @@ namespace App\Controller\V1\Personal\Video;
 use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Account\EmailRequest;
 use App\DTO\Account\TokenRequest;
+use App\DTO\Video\VideoPublicShareRequest;
 use App\DTO\Video\VideoQueryRequest;
 use App\DTO\Video\VideoShareRequest;
 use App\Exception\ApiException;
@@ -19,6 +20,7 @@ use App\Service\Video\ShareService;
 use App\Service\Video\VideoService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/personal/videos/share')]
@@ -147,6 +149,21 @@ class ShareVideoController extends BasePersonalController
             $this->shareService->createVideoShare($account, $video);
 
             return $this->re->withMessage('Video share accepted.');
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('/public', name: 'user_create_public_link', methods: ['POST'])]
+    public function createPublicLink(Request $request, VideoPublicShareRequest $shareRequest): JsonResponse
+    {
+        try {
+            $account = $this->getAccount($request);
+
+            $video = $this->videoService->getAccountVideoById($account, $shareRequest->videoId);
+            $sharedPublic = $this->shareService->createPublicVideoShareLink($video);
+
+            return $this->re->withData($sharedPublic, ['videoSharedPublic:read'], Response::HTTP_CREATED);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }

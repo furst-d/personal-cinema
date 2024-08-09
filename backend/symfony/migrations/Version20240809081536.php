@@ -36,6 +36,7 @@ final class Version20240809081536 extends AbstractMigration
         $this->addSql('ALTER TABLE share_video ADD CONSTRAINT FK_F5A936C19B6B5FBA FOREIGN KEY (account_id) REFERENCES "account" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE share_video_public ADD CONSTRAINT FK_B641A26329C1004E FOREIGN KEY (video_id) REFERENCES video (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE share_video_public_view ADD CONSTRAINT FK_59EFE94FB13A1F92 FOREIGN KEY (share_video_public_id) REFERENCES share_video_public (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
+        $this->addSql('INSERT INTO settings (id, key, value) VALUES (4, \'public_link_limit\', \'3\')');
     }
 
     public function down(Schema $schema): void
@@ -52,5 +53,6 @@ final class Version20240809081536 extends AbstractMigration
         $this->addSql('DROP TABLE share_video');
         $this->addSql('DROP TABLE share_video_public');
         $this->addSql('DROP TABLE share_video_public_view');
+        $this->addSql('DELETE FROM settings WHERE key = \'public_link_limit\'');
     }
 }

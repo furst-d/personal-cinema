@@ -8,10 +8,13 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ShareVideoPublicRepository::class)]
 class ShareVideoPublic
 {
+    private const VIDEO_SHARED_PUBLIC_READ = 'videoSharedPublic:read';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -21,13 +24,16 @@ class ShareVideoPublic
     #[ORM\JoinColumn(nullable: false)]
     private Video $video;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
+    #[Groups([self::VIDEO_SHARED_PUBLIC_READ])]
     private string $hash;
 
     #[ORM\Column]
+    #[Groups([self::VIDEO_SHARED_PUBLIC_READ])]
     private DateTimeImmutable $createdAt;
 
     #[ORM\Column]
+    #[Groups([self::VIDEO_SHARED_PUBLIC_READ])]
     private DateTimeImmutable $expiredAt;
 
     /**
@@ -97,25 +103,9 @@ class ShareVideoPublic
         return $this->views;
     }
 
-    public function addView(ShareVideoPublicView $view): static
+    #[Groups([self::VIDEO_SHARED_PUBLIC_READ])]
+    public function getViewCount(): int
     {
-        if (!$this->views->contains($view)) {
-            $this->views->add($view);
-            $view->setShareVideoPublic($this);
-        }
-
-        return $this;
-    }
-
-    public function removeView(ShareVideoPublicView $view): static
-    {
-        if ($this->views->removeElement($view)) {
-            // set the owning side to null (unless already changed)
-            if ($view->getShareVideoPublic() === $this) {
-                $view->setShareVideoPublic(null);
-            }
-        }
-
-        return $this;
+        return $this->views->count();
     }
 }

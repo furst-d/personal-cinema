@@ -12,4 +12,5 @@ enum JwtUsage: int
     case USAGE_VIDEO_ACCESS = 6;
     case USAGE_SHARE_VIDEO = 7;
     case USAGE_SHARE_FOLDER = 8;
+    case USAGE_PUBLIC_VIDEO_ACCESS = 9;
 }
