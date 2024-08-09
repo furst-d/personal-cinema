@@ -14,11 +14,11 @@ import {
 } from "@mui/material";
 import React from "react";
 import MenuIcon from '@mui/icons-material/Menu';
-import { useTheme } from 'styled-components';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from "../providers/AuthProvider";
 // @ts-ignore
 import Logo from '/public/images/logo.svg?react';
+import {useTheme} from "styled-components";
 
 const Navbar = () => {
     const theme = useTheme();
@@ -170,10 +170,10 @@ const Navbar = () => {
                                     display: 'block',
                                     fontWeight: 'bold',
                                     '&:hover': {
-                                        backgroundColor: theme.primary_darker
+                                        backgroundColor: theme.primaryDarker
                                     },
                                     '&.active': {
-                                        backgroundColor: theme.primary_darker
+                                        backgroundColor: theme.primaryDarker
                                     }
                                 }}
                             >
