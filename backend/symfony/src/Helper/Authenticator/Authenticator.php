@@ -27,7 +27,7 @@ class Authenticator
      */
     public function generateSalt(): string
     {
-        return $this->generator->generateString(32);
+        return $this->generator->generateString(64);
     }
 
     /**

@@ -49,6 +49,150 @@ class ShareServiceTest extends TestCase
         );
     }
 
+    public function testHasSharedVideoAccess()
+    {
+        $account = $this->createMock(Account::class);
+        $video = $this->createMock(Video::class);
+
+        $this->mockShareVideoRepository->expects($this->once())
+            ->method('hasSharedVideoAccess')
+            ->with($account, $video)
+            ->willReturn(true);
+
+        $result = $this->shareService->hasSharedVideoAccess($account, $video);
+
+        $this->assertTrue($result);
+    }
+
+    public function testHasSharedFolderAccess()
+    {
+        $account = $this->createMock(Account::class);
+        $folder = $this->createMock(Folder::class);
+
+        $this->mockShareFolderRepository->expects($this->once())
+            ->method('hasSharedFolderAccess')
+            ->with($account, $folder)
+            ->willReturn(true);
+
+        $result = $this->shareService->hasSharedFolderAccess($account, $folder);
+
+        $this->assertTrue($result);
+    }
+
+    public function testCreateVideoShareSuccess()
+    {
+        $account = $this->createMock(Account::class);
+        $video = $this->createMock(Video::class);
+
+        $this->mockShareVideoRepository->expects($this->once())
+            ->method('isVideoAlreadyShared')
+            ->with($account, $video)
+            ->willReturn(false);
+
+        $this->mockShareVideoRepository->expects($this->once())
+            ->method('save')
+            ->with($this->isInstanceOf(ShareVideo::class));
+
+        $result = $this->shareService->createVideoShare($account, $video);
+
+        $this->assertInstanceOf(ShareVideo::class, $result);
+    }
+
+    public function testCreateVideoShareThrowsConflictException()
+    {
+        $this->expectException(ConflictException::class);
+
+        $account = $this->createMock(Account::class);
+        $video = $this->createMock(Video::class);
+
+        $this->mockShareVideoRepository->expects($this->once())
+            ->method('isVideoAlreadyShared')
+            ->with($account, $video)
+            ->willReturn(true);
+
+        $this->shareService->createVideoShare($account, $video);
+    }
+
+    public function testCreatePublicVideoShareLinkSuccess()
+    {
+        $video = $this->createMock(Video::class);
+
+        $this->mockShareVideoPublicRepository->expects($this->once())
+            ->method('findValidByVideo')
+            ->with($video)
+            ->willReturn(null);
+
+        $this->mockRandomGenerator->expects($this->once())
+            ->method('generateString')
+            ->with(64)
+            ->willReturn('random_hash');
+
+        $this->mockShareVideoPublicRepository->expects($this->once())
+            ->method('save')
+            ->with($this->isInstanceOf(ShareVideoPublic::class));
+
+        $result = $this->shareService->createPublicVideoShareLink($video);
+
+        $this->assertInstanceOf(ShareVideoPublic::class, $result);
+        $this->assertEquals('random_hash', $result->getHash());
+    }
+
+    public function testCreatePublicVideoShareLinkThrowsForbiddenException()
+    {
+        $this->expectException(ForbiddenException::class);
+
+        $video = $this->createMock(Video::class);
+        $publicShare = $this->createMock(ShareVideoPublic::class);
+
+        $this->mockShareVideoPublicRepository->expects($this->once())
+            ->method('findValidByVideo')
+            ->with($video)
+            ->willReturn($publicShare);
+
+        $this->shareService->createPublicVideoShareLink($video);
+    }
+
+    public function testGetPublicVideoByHashSuccess()
+    {
+        $hash = 'valid_hash';
+        $sessionId = 'session_id';
+
+        $publicShare = $this->createMock(ShareVideoPublic::class);
+
+        $this->mockShareVideoPublicRepository->expects($this->once())
+            ->method('findValidByHash')
+            ->with($hash)
+            ->willReturn($publicShare);
+
+        $this->mockShareVideoPublicViewRepository->expects($this->once())
+            ->method('findShareViews')
+            ->with($publicShare, $sessionId)
+            ->willReturn([]);
+
+        $this->mockSettingsRepository->expects($this->once())
+            ->method('getPublicLinkViewLimit')
+            ->willReturn('10');
+
+        $result = $this->shareService->getPublicVideoByHash($hash, $sessionId);
+
+        $this->assertInstanceOf(ShareVideoPublic::class, $result);
+    }
+
+    public function testGetPublicVideoByHashThrowsNotFoundException()
+    {
+        $this->expectException(NotFoundException::class);
+
+        $hash = 'invalid_hash';
+        $sessionId = 'session_id';
+
+        $this->mockShareVideoPublicRepository->expects($this->once())
+            ->method('findValidByHash')
+            ->with($hash)
+            ->willReturn(null);
+
+        $this->shareService->getPublicVideoByHash($hash, $sessionId);
+    }
+
     public function testAddViewSuccess()
     {
         $video = $this->createMock(Video::class);

@@ -15,7 +15,7 @@ class RandomGenerator
     public function generateString(int $length): string
     {
         try {
-            return bin2hex(random_bytes($length));
+            return bin2hex(random_bytes($length / 2));
         } catch (Exception) {
             throw new InternalException('Failed to generate random string');
         }
