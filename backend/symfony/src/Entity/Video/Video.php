@@ -3,10 +3,15 @@
 namespace App\Entity\Video;
 
 use App\Entity\Account\Account;
+use App\Entity\Video\Share\ShareVideo;
+use App\Entity\Video\Share\ShareVideoPublic;
 use App\Repository\Video\VideoRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use phpDocumentor\Reflection\Types\Self_;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: VideoRepository::class)]
@@ -14,6 +19,7 @@ class Video
 {
     private const VIDEO_READ = 'video:read';
     private const VIDEOS_READ = 'videos:read';
+    private const VIDEO_PUBLIC_READ = 'video:public:read';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -88,11 +94,23 @@ class Video
     #[ORM\Column(nullable: true)]
     private ?DateTimeImmutable $deletedAt = null;
 
-    #[Groups([self::VIDEO_READ])]
+    #[Groups([self::VIDEO_READ, self::VIDEO_PUBLIC_READ])]
     private ?string $videoUrl = null;
 
     #[Groups([self::VIDEOS_READ])]
     private ?string $thumbnailUrl = null;
+
+    /**
+     * @var Collection<int, ShareVideo>
+     */
+    #[ORM\OneToMany(targetEntity: ShareVideo::class, mappedBy: 'video', orphanRemoval: true)]
+    private Collection $shares;
+
+    /**
+     * @var Collection<int, ShareVideoPublic>
+     */
+    #[ORM\OneToMany(targetEntity: ShareVideoPublic::class, mappedBy: 'video', orphanRemoval: true)]
+    private Collection $sharesPublic;
 
     /**
      * @param string $name
@@ -105,6 +123,8 @@ class Video
         $this->hash = uniqid();
         $this->isDeleted = false;
         $this->createdAt = new DateTimeImmutable();
+        $this->shares = new ArrayCollection();
+        $this->sharesPublic = new ArrayCollection();
     }
 
     /**
@@ -409,5 +429,21 @@ class Video
     public function setThumbnailUrl(?string $thumbnailUrl): void
     {
         $this->thumbnailUrl = $thumbnailUrl;
+    }
+
+    /**
+     * @return Collection<int, ShareVideo>
+     */
+    public function getShares(): Collection
+    {
+        return $this->shares;
+    }
+
+    /**
+     * @return Collection<int, ShareVideoPublic>
+     */
+    public function getSharesPublic(): Collection
+    {
+        return $this->sharesPublic;
     }
 }

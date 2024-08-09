@@ -86,7 +86,7 @@ class AuthServiceTest extends TestCase
             ->with(1)
             ->willReturn($video);
 
-        $result = $this->authService->authVideo($request);
+        $result = $this->authService->authVideo($request, JwtUsage::USAGE_VIDEO_ACCESS);
 
         $this->assertInstanceOf(Video::class, $result);
     }
@@ -98,7 +98,7 @@ class AuthServiceTest extends TestCase
 
         $request = new Request();
 
-        $this->authService->authVideo($request);
+        $this->authService->authVideo($request, JwtUsage::USAGE_VIDEO_ACCESS);
     }
 
     public function testAuthVideoInvalidToken()
@@ -113,7 +113,7 @@ class AuthServiceTest extends TestCase
             ->with('invalidToken', JwtUsage::USAGE_VIDEO_ACCESS)
             ->willThrowException(new UnauthorizedException('Invalid token'));
 
-        $this->authService->authVideo($request);
+        $this->authService->authVideo($request, JwtUsage::USAGE_VIDEO_ACCESS);
     }
 
     public function testAuthVideoNotFound()
@@ -134,6 +134,6 @@ class AuthServiceTest extends TestCase
             ->with(1)
             ->willThrowException(new NotFoundException('Video not found'));
 
-        $this->authService->authVideo($request);
+        $this->authService->authVideo($request, JwtUsage::USAGE_VIDEO_ACCESS);
     }
 }

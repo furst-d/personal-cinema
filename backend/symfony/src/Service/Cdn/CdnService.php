@@ -10,6 +10,7 @@ use App\Exception\NotFoundException;
 use App\Helper\Cdn\CdnHasher;
 use App\Helper\Cdn\CdnManager;
 use App\Helper\Cdn\CdnSynchronizer;
+use App\Helper\Generator\RandomGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
@@ -58,6 +59,11 @@ class CdnService
     private EntityManagerInterface $em;
 
     /**
+     * @var RandomGenerator $generator
+     */
+    private RandomGenerator $generator;
+
+    /**
      * @param string $cdnProjectId
      * @param string $cdnSecretKey
      * @param string $cdnCallbackKey
@@ -66,6 +72,7 @@ class CdnService
      * @param CdnSynchronizer $cdnSynchronizer
      * @param CdnManager $cdnManager
      * @param EntityManagerInterface $em
+     * @param RandomGenerator $generator
      */
     public function __construct(
         string $cdnProjectId,
@@ -75,7 +82,8 @@ class CdnService
         CdnHasher $cdnHasher,
         CdnSynchronizer $cdnSynchronizer,
         CdnManager $cdnManager,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        RandomGenerator $generator
     )
     {
         $this->cdnProjectId = $cdnProjectId;
@@ -86,6 +94,7 @@ class CdnService
         $this->cdnSynchronizer = $cdnSynchronizer;
         $this->cdnManager = $cdnManager;
         $this->em = $em;
+        $this->generator = $generator;
     }
 
     /**
@@ -103,21 +112,17 @@ class CdnService
      */
     public function createUploadData(array $data): array
     {
-        try {
-            $data['project_id'] = $this->cdnProjectId;
-            $data['nonce'] = bin2hex(random_bytes(16));
-            $this->cdnHasher->addSignature($data, $this->cdnSecretKey);
-            $this->logger->info('Generated upload data.', $data);
+        $data['project_id'] = $this->cdnProjectId;
+        $data['nonce'] = $this->generator->generateString(32);
+        $this->cdnHasher->addSignature($data, $this->cdnSecretKey);
+        $this->logger->info('Generated upload data.', $data);
 
-            // Remove the size from the data array as it is used only for validation a file
-            if (isset($data['size'])) {
-                unset($data['size']);
-            }
-
-            return $data;
-        } catch (Exception) {
-            throw new InternalException("Failed to generate nonce.");
+        // Remove the size from the data array as it is used only for validation a file
+        if (isset($data['size'])) {
+            unset($data['size']);
         }
+
+        return $data;
     }
 
     /**

@@ -65,18 +65,19 @@ class AuthService
 
     /**
      * @param Request $request
+     * @param JwtUsage $usage
      * @return Video
-     * @throws UnauthorizedException
      * @throws NotFoundException
+     * @throws UnauthorizedException
      */
-    public function authVideo(Request $request): Video
+    public function authVideo(Request $request, JwtUsage $usage): Video
     {
         $token = $request->query->get('token');
         if (!$token) {
             throw new UnauthorizedException('Token is required');
         }
 
-        $decodedToken = $this->jwtService->decodeToken($token, JwtUsage::USAGE_VIDEO_ACCESS);
+        $decodedToken = $this->jwtService->decodeToken($token, $usage);
         $videoId = $decodedToken['video_id'] ?? null;
 
         return $this->videoService->getVideoById($videoId);

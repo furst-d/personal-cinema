@@ -6,9 +6,9 @@ use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Video\FolderQueryRequest;
 use App\DTO\Video\FolderRequest;
 use App\Exception\ApiException;
-use App\Helper\Folder\FolderDeletionMode;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Video\FolderService;
+use App\Service\Video\ShareService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -27,7 +27,7 @@ class FolderController extends BasePersonalController
      */
     public function __construct(
         BaseControllerLocator $locator,
-        FolderService $folderService
+        FolderService $folderService,
     )
     {
         parent::__construct($locator);

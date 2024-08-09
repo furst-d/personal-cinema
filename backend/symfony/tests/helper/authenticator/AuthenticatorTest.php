@@ -3,6 +3,7 @@
 namespace App\Tests\Helper\Authenticator;
 
 use App\Helper\Authenticator\Authenticator;
+use App\Helper\Generator\RandomGenerator;
 use PHPUnit\Framework\TestCase;
 
 class AuthenticatorTest extends TestCase
@@ -11,7 +12,8 @@ class AuthenticatorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->authenticator = new Authenticator();
+        $this->randomGenerator = $this->createMock(RandomGenerator::class);
+        $this->authenticator = new Authenticator(new RandomGenerator());
     }
 
     public function testGenerateSalt()

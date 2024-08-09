@@ -6,6 +6,7 @@ use App\Controller\V1\Private\BasePrivateController;
 use App\Exception\ApiException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
+use App\Helper\Jwt\JwtUsage;
 use App\Service\Auth\AuthService;
 use App\Service\Cdn\CdnService;
 use App\Service\Locator\BaseControllerLocator;
@@ -40,7 +41,7 @@ class VideoController extends BasePrivateController
     public function getManifest(Request $request): Response
     {
         try {
-            $video = $this->authService->authVideo($request);
+            $video = $this->authService->authVideo($request, JwtUsage::USAGE_VIDEO_ACCESS);
             $manifestContent = $this->cdnService->getManifest($video);
 
             return new Response($manifestContent, 200, ['Content-Type' => 'application/vnd.apple.mpegurl']);
@@ -53,7 +54,7 @@ class VideoController extends BasePrivateController
     public function getThumbnail(Request $request): Response
     {
         try {
-            $video = $this->authService->authVideo($request);
+            $video = $this->authService->authVideo($request, JwtUsage::USAGE_VIDEO_ACCESS);
             $thumbnail = $video->getThumbnail();
 
             if (!$thumbnail) {

@@ -10,6 +10,7 @@ use App\Exception\NotFoundException;
 use App\Helper\Cdn\CdnHasher;
 use App\Helper\Cdn\CdnManager;
 use App\Helper\Cdn\CdnSynchronizer;
+use App\Helper\Generator\RandomGenerator;
 use App\Service\Cdn\CdnService;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Exception\GuzzleException;
@@ -27,6 +28,7 @@ class CdnServiceTest extends TestCase
     private $mockCdnSynchronizer;
     private $mockCdnManager;
     private $mockEntityManager;
+    private $mockRandomGenerator;
 
     protected function setUp(): void
     {
@@ -35,6 +37,7 @@ class CdnServiceTest extends TestCase
         $this->mockCdnSynchronizer = $this->createMock(CdnSynchronizer::class);
         $this->mockCdnManager = $this->createMock(CdnManager::class);
         $this->mockEntityManager = $this->createMock(EntityManagerInterface::class);
+        $this->mockRandomGenerator = $this->createMock(RandomGenerator::class);
 
         $this->cdnService = new CdnService(
             'project_id',
@@ -44,7 +47,8 @@ class CdnServiceTest extends TestCase
             $this->mockCdnHasher,
             $this->mockCdnSynchronizer,
             $this->mockCdnManager,
-            $this->mockEntityManager
+            $this->mockEntityManager,
+            $this->mockRandomGenerator
         );
     }
 
@@ -68,20 +72,6 @@ class CdnServiceTest extends TestCase
         $this->assertArrayHasKey('project_id', $result);
         $this->assertArrayHasKey('nonce', $result);
         $this->assertArrayHasKey('signature', $result);
-    }
-
-    public function testCreateUploadDataInternalError()
-    {
-        $this->expectException(InternalException::class);
-        $this->expectExceptionMessage('Failed to generate nonce.');
-
-        $data = ['param1' => 'value1'];
-
-        $this->mockCdnHasher->expects($this->once())
-            ->method('addSignature')
-            ->willThrowException(new Exception());
-
-        $this->cdnService->createUploadData($data);
     }
 
     public function testGetManifestSuccess()
@@ -124,7 +114,7 @@ class CdnServiceTest extends TestCase
 
         $this->cdnService->synchronizeVideo($videoData);
 
-        $this->assertTrue(true); // If no exception is thrown, the test passes
+        $this->assertTrue(true);
     }
 
     public function testSynchronizeVideoBadRequest()

@@ -3,13 +3,13 @@
 namespace App\Entity\Video;
 
 use App\Entity\Account\Account;
+use App\Entity\Video\Share\ShareFolder;
 use App\Repository\Video\FolderRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: FolderRepository::class)]
 class Folder
@@ -53,6 +53,12 @@ class Folder
     private Collection $subFolders;
 
     /**
+     * @var Collection<int, ShareFolder>
+     */
+    #[ORM\OneToMany(targetEntity: ShareFolder::class, mappedBy: 'folder', orphanRemoval: true)]
+    private Collection $shares;
+
+    /**
      * @param string $name
      * @param Account $owner
      * @param Folder|null $parent
@@ -66,6 +72,7 @@ class Folder
         $this->subFolders = new ArrayCollection();
         $this->parent = $parent;
         $this->update();
+        $this->shares = new ArrayCollection();
     }
 
     /**
@@ -168,5 +175,13 @@ class Folder
 
         $parent = $this->getParent();
         $parent?->update();
+    }
+
+    /**
+     * @return Collection<int, ShareFolder>
+     */
+    public function getShares(): Collection
+    {
+        return $this->shares;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Service\Video;
 
 use App\DTO\PaginatorRequest;
+use App\DTO\Video\VideoQueryRequest;
 use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
 use App\Entity\Video\MD5;
@@ -32,22 +33,30 @@ class VideoService
      */
     private UrlGenerator $urlGenerator;
 
+    /**
+     * @var ShareService $shareService
+     */
+    private ShareService $shareService;
+
     private const NOT_FOUND_MESSAGE = 'Video not found';
 
     /**
      * @param VideoRepository $videoRepository
      * @param MD5Repository $md5Repository
      * @param UrlGenerator $urlGenerator
+     * @param ShareService $shareService
      */
     public function __construct(
         VideoRepository $videoRepository,
         MD5Repository $md5Repository,
-        UrlGenerator $urlGenerator
+        UrlGenerator $urlGenerator,
+        ShareService $shareService
     )
     {
         $this->videoRepository = $videoRepository;
         $this->md5Repository = $md5Repository;
         $this->urlGenerator = $urlGenerator;
+        $this->shareService = $shareService;
     }
 
     /**
@@ -84,9 +93,11 @@ class VideoService
      */
     public function getAccountVideoByHash(Account $account, string $hash): Video
     {
-        $video = $this->videoRepository->findOneBy(['account' => $account, 'hash' => $hash]);
+        $video = $this->videoRepository->findOneBy(['hash' => $hash]);
 
-        if (!$video) {
+        $hasSharedAccess = $this->shareService->hasSharedVideoAccess($account, $video);
+
+        if (!$video || ($video->getAccount() !== $account && !$hasSharedAccess)) {
             throw new NotFoundException(self::NOT_FOUND_MESSAGE);
         }
 
@@ -202,6 +213,17 @@ class VideoService
     {
         if ($video->getPath()) {
             $video->setVideoUrl($this->urlGenerator->generateVideo($account, $video));
+        }
+    }
+
+    /**
+     * @param Video $video
+     * @return void
+     */
+    public function addPublicVideoUrlToVideo(Video $video): void
+    {
+        if ($video->getPath()) {
+            $video->setVideoUrl($this->urlGenerator->generatePublicVideo($video));
         }
     }
 }
