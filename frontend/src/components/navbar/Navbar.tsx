@@ -10,7 +10,8 @@ import {
     MenuItem,
     Toolbar,
     Tooltip,
-    Typography
+    Typography,
+    ListItemIcon
 } from "@mui/material";
 import React from "react";
 import MenuIcon from '@mui/icons-material/Menu';
@@ -18,7 +19,10 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from "../providers/AuthProvider";
 // @ts-ignore
 import Logo from '/public/images/logo.svg?react';
-import {useTheme} from "styled-components";
+import { useTheme } from "styled-components";
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 const Navbar = () => {
     const theme = useTheme();
@@ -31,10 +35,10 @@ const Navbar = () => {
     ];
 
     const settings = [
-        { title: 'Profil', path: '/profile' },
-        { title: 'Nastavení', path: '/settings' },
+        { title: 'Profil', path: '/profile', icon: <AccountCircleIcon /> },
+        { title: 'Nastavení', path: '/settings', icon: <SettingsIcon /> },
         { isDivider: true },
-        { title: 'Odhlásit se', path: '/login', color: theme.primary, weight: '700', onClick: logout }
+        { title: 'Odhlásit se', path: '/login', color: theme.primary, weight: '700', icon: <LogoutIcon />, onClick: logout }
     ];
 
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
@@ -217,14 +221,23 @@ const Navbar = () => {
                                         }}
                                         sx={{
                                             color: setting.color ? setting.color : 'inherit',
+                                            display: 'flex',
+                                            alignItems: 'center',
                                         }}
                                     >
+                                        {setting.icon && (
+                                            <ListItemIcon sx={{ color: setting.color ? setting.color : 'inherit' }}>
+                                                {setting.icon}
+                                            </ListItemIcon>
+                                        )}
                                         <Typography
                                             textAlign="center"
                                             sx={{
                                                 fontWeight: setting.weight ? setting.weight : 'inherit',
                                             }}
-                                        >{setting.title}</Typography>
+                                        >
+                                            {setting.title}
+                                        </Typography>
                                     </MenuItem>
                             ))}
                         </Menu>
