@@ -85,4 +85,15 @@ class ShareVideoRepository extends ServiceEntityRepository
         $em->persist($shareVideo);
         $em->flush();
     }
+
+    /**
+     * @param ShareVideo $videoShare
+     * @return void
+     */
+    public function delete(ShareVideo $videoShare): void
+    {
+        $em = $this->getEntityManager();
+        $em->remove($videoShare);
+        $em->flush();
+    }
 }

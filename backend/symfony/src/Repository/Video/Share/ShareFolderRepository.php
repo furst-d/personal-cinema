@@ -59,4 +59,15 @@ class ShareFolderRepository extends ServiceEntityRepository
 
         return $this->getPaginatorResult($qb, $paginatorRequest);
     }
+
+    /**
+     * @param ShareFolder $videoShare
+     * @return void
+     */
+    public function delete(ShareFolder $videoShare): void
+    {
+        $em = $this->getEntityManager();
+        $em->remove($videoShare);
+        $em->flush();
+    }
 }

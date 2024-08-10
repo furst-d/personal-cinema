@@ -8,8 +8,11 @@ use App\DTO\Account\TokenRequest;
 use App\DTO\Video\VideoPublicShareRequest;
 use App\DTO\Video\VideoQueryRequest;
 use App\DTO\Video\VideoShareRequest;
+use App\Entity\Video\Share\ShareVideoPublic;
+use App\Entity\Video\Video;
 use App\Exception\ApiException;
 use App\Exception\BadRequestException;
+use App\Exception\ForbiddenException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
@@ -101,7 +104,7 @@ class ShareVideoController extends BasePersonalController
 
             $this->videoService->addThumbnailToVideos($videos->getData(), $account);
 
-            return $this->re->withData($videos, ['videos:read']);
+            return $this->re->withData($videos, [Video::VIDEOS_READ]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
@@ -112,6 +115,10 @@ class ShareVideoController extends BasePersonalController
     {
         try {
             $account = $this->getAccount($request);
+
+            if ($account->getEmail() === $shareRequest->email) {
+                throw new ForbiddenException('You can not share video with yourself');
+            }
 
             $video = $this->videoService->getAccountVideoById($account, $shareRequest->videoId);
 
@@ -163,7 +170,22 @@ class ShareVideoController extends BasePersonalController
             $video = $this->videoService->getAccountVideoById($account, $shareRequest->videoId);
             $sharedPublic = $this->shareService->createPublicVideoShareLink($video);
 
-            return $this->re->withData($sharedPublic, ['videoSharedPublic:read'], Response::HTTP_CREATED);
+            return $this->re->withData($sharedPublic, [ShareVideoPublic::VIDEO_SHARED_PUBLIC_READ], Response::HTTP_CREATED);
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('/{id<\d+>}', name: 'user_delete_video_share', methods: ['DELETE'])]
+    public function deleteVideoShare(Request $request, int $id): JsonResponse
+    {
+        try {
+            $account = $this->getAccount($request);
+
+            $videoShare = $this->shareService->getAccountVideoShareById($account, $id);
+            $this->shareService->deleteVideoShare($videoShare);
+
+            return $this->re->withMessage('Video share deleted.');
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }

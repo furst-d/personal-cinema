@@ -5,6 +5,7 @@ namespace App\Service\Video;
 use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
+use App\Entity\Video\Share\ShareFolder;
 use App\Entity\Video\Share\ShareVideo;
 use App\Entity\Video\Share\ShareVideoPublic;
 use App\Entity\Video\Share\ShareVideoPublicView;
@@ -199,6 +200,58 @@ class ShareService
 
         $view = new ShareVideoPublicView($publicVideoShare, $sessionId);
         $this->shareVideoPublicViewRepository->save($view);
+    }
+
+    /**
+     * @param Account $account
+     * @param int $id
+     * @return ShareVideo
+     * @throws NotFoundException
+     */
+    public function getAccountVideoShareById(Account $account, int $id): ShareVideo
+    {
+        $videoShare = $this->shareVideoRepository->findOneBy(['account' => $account, 'id' => $id]);
+
+        if (!$videoShare) {
+            throw new NotFoundException("Video share not found");
+        }
+
+        return $videoShare;
+    }
+
+    /**
+     * @param Account $account
+     * @param int $id
+     * @return ShareFolder
+     * @throws NotFoundException
+     */
+    public function getAccountFolderShareById(Account $account, int $id): ShareFolder
+    {
+        $folderShare = $this->shareFolderRepository->findOneBy(['account' => $account, 'id' => $id]);
+
+        if (!$folderShare) {
+            throw new NotFoundException("Folder share not found");
+        }
+
+        return $folderShare;
+    }
+
+    /**
+     * @param ShareVideo $videoShare
+     * @return void
+     */
+    public function deleteVideoShare(ShareVideo $videoShare): void
+    {
+        $this->shareVideoRepository->delete($videoShare);
+    }
+
+    /**
+     * @param ShareFolder $videoShare
+     * @return void
+     */
+    public function deleteFolderShare(ShareFolder $videoShare): void
+    {
+        $this->shareFolderRepository->delete($videoShare);
     }
 
     private function alreadySawPublicVideo(ShareVideoPublic $publicVideoShare, string $sessionId): bool {

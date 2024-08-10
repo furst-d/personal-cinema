@@ -7,13 +7,17 @@ use App\Entity\Video\Video;
 use App\Repository\Video\Share\ShareVideoRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ShareVideoRepository::class)]
 class ShareVideo
 {
+    public const SHARE_VIDEO_READ = 'shareVideo:read';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups([self::SHARE_VIDEO_READ])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'shares')]
@@ -22,9 +26,11 @@ class ShareVideo
 
     #[ORM\ManyToOne(inversedBy: 'sharedVideos')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups([self::SHARE_VIDEO_READ])]
     private Account $account;
 
     #[ORM\Column]
+    #[Groups([self::SHARE_VIDEO_READ])]
     private DateTimeImmutable $createdAt;
 
     /**

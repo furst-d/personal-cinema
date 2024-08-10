@@ -13,7 +13,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: ShareVideoPublicRepository::class)]
 class ShareVideoPublic
 {
-    private const VIDEO_SHARED_PUBLIC_READ = 'videoSharedPublic:read';
+    public const VIDEO_SHARED_PUBLIC_READ = 'videoSharedPublic:read';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

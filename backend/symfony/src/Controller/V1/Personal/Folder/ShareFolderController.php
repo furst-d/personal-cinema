@@ -6,6 +6,8 @@ use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Video\FolderQueryRequest;
 use App\DTO\Video\FolderShareRequest;
 use App\Exception\ApiException;
+use App\Exception\BadRequestException;
+use App\Exception\ForbiddenException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Jwt\JwtService;
 use App\Service\Locator\BaseControllerLocator;
@@ -88,6 +90,10 @@ class ShareFolderController extends BasePersonalController
         try {
             $account = $this->getAccount($request);
 
+            if ($account->getEmail() === $shareRequest->email) {
+                throw new ForbiddenException('You can not share folder with yourself');
+            }
+
             $folder = $this->folderService->getAccountFolderById($account, $shareRequest->folderId);
 
             $token = $this->jwtService->generateToken($account, JwtUsage::USAGE_SHARE_FOLDER, [
@@ -104,6 +110,21 @@ class ShareFolderController extends BasePersonalController
             );
 
             return $this->re->withMessage('Folder share request was send to the target email');
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('/{id<\d+>}', name: 'user_delete_folder_share', methods: ['DELETE'])]
+    public function deleteFolderShare(Request $request, int $id): JsonResponse
+    {
+        try {
+            $account = $this->getAccount($request);
+
+            $videoShare = $this->shareService->getAccountFolderShareById($account, $id);
+            $this->shareService->deleteFolderShare($videoShare);
+
+            return $this->re->withMessage('Folder share deleted.');
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
