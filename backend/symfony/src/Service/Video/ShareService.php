@@ -143,6 +143,23 @@ class ShareService
     }
 
     /**
+     * @param Account $account
+     * @param Folder $folder
+     * @return ShareFolder
+     * @throws ConflictException
+     */
+    public function createFolderShare(Account $account, Folder $folder): ShareFolder
+    {
+        if ($this->isFolderAlreadyShared($account, $folder)) {
+            throw new ConflictException("Folder is already shared with this user");
+        }
+
+        $shareFolder = new ShareFolder($folder, $account);
+        $this->shareFolderRepository->save($shareFolder);
+        return $shareFolder;
+    }
+
+    /**
      * @param Video $video
      * @return ShareVideoPublic
      * @throws ForbiddenException|InternalException
@@ -254,6 +271,44 @@ class ShareService
         $this->shareFolderRepository->delete($videoShare);
     }
 
+    /**
+     * @param Account $account
+     * @param Folder $folder
+     * @param string $email
+     * @return void
+     * @throws ConflictException
+     * @throws ForbiddenException
+     */
+    public function allowedToShareFolder(Account $account, Folder $folder, string $email): void
+    {
+        if ($account->getEmail() === $email) {
+            throw new ForbiddenException('You can not share folder with yourself');
+        }
+
+        if ($this->isFolderAlreadyShared($account, $folder)) {
+            throw new ConflictException("Folder is already shared with this user");
+        }
+    }
+
+    /**
+     * @param Account $account
+     * @param Video $video
+     * @param string $email
+     * @return void
+     * @throws ConflictException
+     * @throws ForbiddenException
+     */
+    public function allowedToShareVideo(Account $account, Video $video, string $email): void
+    {
+        if ($account->getEmail() === $email) {
+            throw new ForbiddenException('You can not share video with yourself');
+        }
+
+        if ($this->isVideoAlreadyShared($account, $video)) {
+            throw new ConflictException("Video is already shared with this user");
+        }
+    }
+
     private function alreadySawPublicVideo(ShareVideoPublic $publicVideoShare, string $sessionId): bool {
         return (bool) $this->shareVideoPublicViewRepository->findShareViews($publicVideoShare, $sessionId);
     }
@@ -284,6 +339,16 @@ class ShareService
     private function isVideoAlreadyShared(Account $account, Video $video): bool
     {
         return $this->shareVideoRepository->isVideoAlreadyShared($account, $video);
+    }
+
+    /**
+     * @param Account $account
+     * @param Folder $folder
+     * @return bool
+     */
+    private function isFolderAlreadyShared(Account $account, Folder $folder): bool
+    {
+        return $this->shareFolderRepository->isFolderAlreadyShared($account, $folder);
     }
 
     /**

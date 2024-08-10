@@ -116,11 +116,8 @@ class ShareVideoController extends BasePersonalController
         try {
             $account = $this->getAccount($request);
 
-            if ($account->getEmail() === $shareRequest->email) {
-                throw new ForbiddenException('You can not share video with yourself');
-            }
-
             $video = $this->videoService->getAccountVideoById($account, $shareRequest->videoId);
+            $this->shareService->allowedToShareVideo($account, $video, $shareRequest->email);
 
             $token = $this->jwtService->generateToken($account, JwtUsage::USAGE_SHARE_VIDEO, [
                 'target_email' => $shareRequest->email,
