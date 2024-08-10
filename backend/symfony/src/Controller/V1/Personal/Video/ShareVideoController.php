@@ -3,7 +3,6 @@
 namespace App\Controller\V1\Personal\Video;
 
 use App\Controller\V1\Personal\BasePersonalController;
-use App\DTO\Account\EmailRequest;
 use App\DTO\Account\TokenRequest;
 use App\DTO\Video\VideoPublicShareRequest;
 use App\DTO\Video\VideoQueryRequest;
@@ -12,7 +11,6 @@ use App\Entity\Video\Share\ShareVideoPublic;
 use App\Entity\Video\Video;
 use App\Exception\ApiException;
 use App\Exception\BadRequestException;
-use App\Exception\ForbiddenException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;

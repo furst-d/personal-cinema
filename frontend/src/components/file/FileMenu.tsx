@@ -34,27 +34,6 @@ const FileMenu: React.FC<FileMenuProps> = ({
         onContextMenuClose();
     };
 
-    const handleShareWithUser = (email: string) => {
-        console.log(selectedItem);
-        if (selectedItem.hash) {
-            // Handle file sharing with user
-            console.log(`Sharing file with ${email}`);
-        } else {
-            // Handle folder sharing with user
-            console.log(`Sharing folder with ${email}`);
-        }
-    };
-
-    const handleGeneratePublicLink = () => {
-        if (selectedItem.hash) {
-            // Handle generating public link for file
-            console.log('Generating public link for file');
-        } else {
-            // Handle generating public link for folder
-            console.log('Generating public link for folder');
-        }
-    };
-
     return (
         <>
             <Menu
@@ -114,8 +93,6 @@ const FileMenu: React.FC<FileMenuProps> = ({
                 open={shareDialogOpen}
                 onClose={() => setShareDialogOpen(false)}
                 selectedItem={selectedItem}
-                onShareWithUser={handleShareWithUser}
-                onGeneratePublicLink={handleGeneratePublicLink}
             />
         </>
     );

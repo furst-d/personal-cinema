@@ -1,24 +1,28 @@
 import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import PublicLinkShare from './PublicLinkShare';
-import UserShareForm from "../../form/UserShareForm";
+import UserShare from "./UserShare";
 
 interface ShareDialogProps {
     open: boolean;
     onClose: () => void;
     selectedItem: any;
-    onShareWithUser: (email: string) => void;
-    onGeneratePublicLink: () => void;
 }
 
-const ShareDialog: React.FC<ShareDialogProps> = ({ open, onClose, selectedItem, onShareWithUser, onGeneratePublicLink }) => {
+const ShareDialog: React.FC<ShareDialogProps> = ({ open, onClose, selectedItem }) => {
     const [shareType, setShareType] = useState<string>('user');
+
+    if (!selectedItem) {
+        return null;
+    }
+
+    const isVideo = Boolean(selectedItem?.hash);
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth>
-            <DialogTitle>{selectedItem?.hash ? 'Sdílet soubor' : 'Sdílet složku'}</DialogTitle>
+            <DialogTitle>{isVideo ? 'Sdílet soubor' : 'Sdílet složku'}</DialogTitle>
             <DialogContent>
-                {selectedItem?.hash ? (
+                {isVideo ? (
                     <FormControl fullWidth margin="dense">
                         <InputLabel>Typ sdílení</InputLabel>
                         <Select
@@ -31,13 +35,13 @@ const ShareDialog: React.FC<ShareDialogProps> = ({ open, onClose, selectedItem, 
                             <MenuItem value="public">Veřejný odkaz</MenuItem>
                         </Select>
                         {shareType === 'user' ? (
-                            <UserShareForm onShare={onShareWithUser} onClose={onClose} />
+                            <UserShare onClose={onClose} isVideo={isVideo} selectedItem={selectedItem} />
                         ) : (
                             <PublicLinkShare />
                         )}
                     </FormControl>
                 ) : (
-                    <UserShareForm onShare={onShareWithUser} onClose={onClose} />
+                    <UserShare onClose={onClose} isVideo={isVideo} selectedItem={selectedItem} />
                 )}
             </DialogContent>
         </Dialog>

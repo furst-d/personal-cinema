@@ -1,22 +1,25 @@
 import React from 'react';
-import { TextField } from '@mui/material';
+import UserShareForm from "../../form/UserShareForm";
+import ShareVideoList from './ShareVideoList';
+import ShareFolderList from './ShareFolderList';
 
 interface UserShareProps {
-    email: string;
-    setEmail: (email: string) => void;
+    onClose: () => void;
+    isVideo: boolean;
+    selectedItem: any;
 }
 
-const UserShare: React.FC<UserShareProps> = ({ email, setEmail }) => {
+const UserShare: React.FC<UserShareProps> = ({ onClose, isVideo, selectedItem }) => {
     return (
-        <TextField
-            autoFocus
-            margin="dense"
-            label="Email uživatele"
-            type="email"
-            fullWidth
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-        />
+        <>
+            <UserShareForm onClose={onClose} isVideo={isVideo} selectedItem={selectedItem} />
+
+            {isVideo ? (
+                <ShareVideoList videoId={selectedItem.id} />
+            ) : (
+                <ShareFolderList folderId={selectedItem.id} />
+            )}
+        </>
     );
 };
 

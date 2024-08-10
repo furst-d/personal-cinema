@@ -8,7 +8,6 @@ use App\DTO\Video\FolderQueryRequest;
 use App\DTO\Video\FolderShareRequest;
 use App\Exception\ApiException;
 use App\Exception\BadRequestException;
-use App\Exception\ForbiddenException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;

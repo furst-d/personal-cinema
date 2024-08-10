@@ -227,9 +227,9 @@ class ShareService
      */
     public function getAccountVideoShareById(Account $account, int $id): ShareVideo
     {
-        $videoShare = $this->shareVideoRepository->findOneBy(['account' => $account, 'id' => $id]);
+        $videoShare = $this->shareVideoRepository->findOneBy(['id' => $id]);
 
-        if (!$videoShare) {
+        if (!$videoShare || $videoShare->getVideo()->getAccount() !== $account) {
             throw new NotFoundException("Video share not found");
         }
 
@@ -244,9 +244,9 @@ class ShareService
      */
     public function getAccountFolderShareById(Account $account, int $id): ShareFolder
     {
-        $folderShare = $this->shareFolderRepository->findOneBy(['account' => $account, 'id' => $id]);
+        $folderShare = $this->shareFolderRepository->findOneBy(['id' => $id]);
 
-        if (!$folderShare) {
+        if (!$folderShare || $folderShare->getFolder()->getOwner() !== $account) {
             throw new NotFoundException("Folder share not found");
         }
 
