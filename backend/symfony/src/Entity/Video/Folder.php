@@ -14,27 +14,29 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: FolderRepository::class)]
 class Folder
 {
+    public const FOLDER_READ = 'folder:read';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['folder:read'])]
+    #[Groups([self::FOLDER_READ])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['folder:read'])]
+    #[Groups([self::FOLDER_READ])]
     private string $name;
 
     #[ORM\ManyToOne(inversedBy: 'folders')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['folder:read'])]
+    #[Groups([self::FOLDER_READ])]
     private Account $owner;
 
     #[ORM\Column]
-    #[Groups(['folder:read'])]
+    #[Groups([self::FOLDER_READ])]
     private DateTimeImmutable $createdAt;
 
     #[ORM\Column]
-    #[Groups(['folder:read'])]
+    #[Groups([self::FOLDER_READ])]
     private DateTimeImmutable $updatedAt;
 
     #[ORM\ManyToOne(inversedBy: 'folders')]
@@ -133,7 +135,7 @@ class Folder
         return $this->parent;
     }
 
-    #[Groups(['folder:read'])]
+    #[Groups([self::FOLDER_READ])]
     public function getParentId(): ?int
     {
         return $this->parent?->getId();
@@ -183,5 +185,14 @@ class Folder
     public function getShares(): Collection
     {
         return $this->shares;
+    }
+
+    /**
+     * @return bool
+     */
+    #[Groups([self::FOLDER_READ])]
+    public function isShared(): bool
+    {
+        return $this->shares->count() > 0;
     }
 }

@@ -446,4 +446,13 @@ class Video
     {
         return $this->sharesPublic;
     }
+
+    /**
+     * @return bool
+     */
+    #[Groups([self::VIDEOS_READ])]
+    public function isShared(): bool
+    {
+        return $this->shares->count() > 0 || $this->sharesPublic->count() > 0;
+    }
 }

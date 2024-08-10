@@ -1,12 +1,13 @@
 import React from "react";
-import {useDrag} from "react-dnd";
-import {Box, Grid, IconButton, ListItemIcon, ListItemText, Typography} from "@mui/material";
-import {FileManagerListItemStyle} from "../../styles/file/FileManager";
+import { useDrag } from "react-dnd";
+import { Box, Grid, IconButton, ListItemIcon, ListItemText, Typography, Tooltip } from "@mui/material";
+import { FileManagerListItemStyle } from "../../styles/file/FileManager";
 import VideoFileIcon from "@mui/icons-material/VideoFile";
-import {formatDate} from "../../utils/formatter";
+import ShareIcon from "@mui/icons-material/Share";
+import { formatDate } from "../../utils/formatter";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import {ItemTypes} from "../../types/file";
-import {useTheme} from "styled-components";
+import { ItemTypes } from "../../types/file";
+import { useTheme } from "styled-components";
 
 interface VideoItemProps {
     video: any;
@@ -16,11 +17,11 @@ interface VideoItemProps {
 }
 
 const VideoItem: React.FC<VideoItemProps> = ({
-     video,
-     onVideoDoubleClick,
-     onContextMenuOpen,
-     isProcessing
- }) => {
+                                                 video,
+                                                 onVideoDoubleClick,
+                                                 onContextMenuOpen,
+                                                 isProcessing
+                                             }) => {
     const theme = useTheme();
 
     const [, drag] = useDrag({
@@ -44,7 +45,20 @@ const VideoItem: React.FC<VideoItemProps> = ({
                                 </Typography>
                             )}
                         </Box>
-                        <Typography variant="body2" className="date">{formatDate(video.createdAt)}</Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            {video.shared && (
+                                <Tooltip title="Video je sdílené">
+                                    <ShareIcon
+                                        sx={{
+                                            color: 'green',
+                                            fontSize: '1.2rem',
+                                            marginRight: '8px'
+                                        }}
+                                    />
+                                </Tooltip>
+                            )}
+                            <Typography variant="body2" className="date">{formatDate(video.createdAt)}</Typography>
+                        </Box>
                     </Box>
                 </Box>
                 <IconButton onClick={(e) => onContextMenuOpen(e, video)} sx={{ color: theme.textLight }}>
