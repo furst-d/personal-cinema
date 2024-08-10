@@ -74,6 +74,36 @@ const muiTheme = createTheme({
                 },
             },
         },
+        MuiSelect: {
+            styleOverrides: {
+                root: {
+                    color: theme.textLight,
+                    '& .MuiSelect-outlined': {
+                        borderColor: theme.textLight,
+                    },
+                },
+                icon: {
+                    color: theme.textLight,
+                },
+            },
+        },
+        MuiInputLabel: {
+            styleOverrides: {
+                root: {
+                    color: theme.textLight,
+                    '&.Mui-focused': {
+                        color: theme.primary,
+                    },
+                },
+            },
+        },
+        MuiOutlinedInput: {
+            styleOverrides: {
+                notchedOutline: {
+                    borderColor: theme.textLight,
+                },
+            },
+        },
         MuiLink: {
             styleOverrides: {
                 root: {
@@ -145,6 +175,10 @@ const muiTheme = createTheme({
         },
     },
 });
+
+
+
+
 
 const GlobalStyle = createGlobalStyle`
     * {

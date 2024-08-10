@@ -17,7 +17,7 @@ class MD5
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
-    #[Groups(['video:read'])]
+    #[Groups([Video::VIDEO_READ])]
     private string $md5;
 
     #[ORM\Column]

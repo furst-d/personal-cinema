@@ -19,14 +19,16 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Table(name: '`account`')]
 class Account implements UserInterface
 {
+    public const ACCOUNT_READ = 'account:read';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['account:read', 'video:read'])]
+    #[Groups([self::ACCOUNT_READ, Video::VIDEO_READ])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['account:read', 'video:read'])]
+    #[Groups([self::ACCOUNT_READ, Video::VIDEO_READ, ShareVideo::SHARE_VIDEO_READ, ShareFolder::SHARE_FOLDER_READ])]
     private string $email;
 
     #[ORM\Column(length: 255)]
@@ -36,11 +38,11 @@ class Account implements UserInterface
     private string $salt;
 
     #[ORM\Column]
-    #[Groups(['account:read'])]
+    #[Groups([self::ACCOUNT_READ])]
     private DateTimeImmutable $createdAt;
 
     #[ORM\Column]
-    #[Groups(['account:read'])]
+    #[Groups([self::ACCOUNT_READ])]
     private bool $isActive = false;
 
     #[ORM\Column]
@@ -50,7 +52,7 @@ class Account implements UserInterface
      * @var Collection<int, Role>
      */
     #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: "users")]
-    #[Groups(['account:read'])]
+    #[Groups([self::ACCOUNT_READ])]
     private Collection $roles;
 
     /**

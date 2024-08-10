@@ -5,6 +5,7 @@ namespace App\Controller\V1\Personal\Folder;
 use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Video\FolderQueryRequest;
 use App\DTO\Video\FolderRequest;
+use App\Entity\Video\Share\ShareFolder;
 use App\Exception\ApiException;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Video\FolderService;
@@ -50,6 +51,21 @@ class FolderController extends BasePersonalController
             );
 
             return $this->re->withData($folders, ['folder:read']);
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('/{id<\d+>}/share', name: 'user_folder_shares', methods: ['GET'])]
+    public function getVideoSharedUsers(Request $request, int $id): JsonResponse
+    {
+        try {
+            $account = $this->getAccount($request);
+            $folder = $this->folderService->getAccountFolderById($account, $id);
+
+            $shares = $folder->getShares();
+
+            return $this->re->withData($shares, [ShareFolder::SHARE_FOLDER_READ]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }

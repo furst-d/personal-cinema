@@ -5,6 +5,7 @@ namespace App\Service\Video;
 use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
 use App\Entity\Video\Folder;
+use App\Entity\Video\Share\ShareFolder;
 use App\Entity\Video\Share\ShareVideo;
 use App\Entity\Video\Share\ShareVideoPublic;
 use App\Entity\Video\Share\ShareVideoPublicView;
@@ -142,6 +143,23 @@ class ShareService
     }
 
     /**
+     * @param Account $account
+     * @param Folder $folder
+     * @return ShareFolder
+     * @throws ConflictException
+     */
+    public function createFolderShare(Account $account, Folder $folder): ShareFolder
+    {
+        if ($this->isFolderAlreadyShared($account, $folder)) {
+            throw new ConflictException("Folder is already shared with this user");
+        }
+
+        $shareFolder = new ShareFolder($folder, $account);
+        $this->shareFolderRepository->save($shareFolder);
+        return $shareFolder;
+    }
+
+    /**
      * @param Video $video
      * @return ShareVideoPublic
      * @throws ForbiddenException|InternalException
@@ -201,6 +219,104 @@ class ShareService
         $this->shareVideoPublicViewRepository->save($view);
     }
 
+    /**
+     * @param Account $account
+     * @param int $id
+     * @return ShareVideo
+     * @throws NotFoundException
+     */
+    public function getAccountVideoShareById(Account $account, int $id): ShareVideo
+    {
+        $videoShare = $this->shareVideoRepository->findOneBy(['id' => $id]);
+
+        if (!$videoShare || $videoShare->getVideo()->getAccount() !== $account) {
+            throw new NotFoundException("Video share not found");
+        }
+
+        return $videoShare;
+    }
+
+    /**
+     * @param Account $account
+     * @param int $id
+     * @return ShareFolder
+     * @throws NotFoundException
+     */
+    public function getAccountFolderShareById(Account $account, int $id): ShareFolder
+    {
+        $folderShare = $this->shareFolderRepository->findOneBy(['id' => $id]);
+
+        if (!$folderShare || $folderShare->getFolder()->getOwner() !== $account) {
+            throw new NotFoundException("Folder share not found");
+        }
+
+        return $folderShare;
+    }
+
+    /**
+     * @param ShareVideo $videoShare
+     * @return void
+     */
+    public function deleteVideoShare(ShareVideo $videoShare): void
+    {
+        $this->shareVideoRepository->delete($videoShare);
+    }
+
+    /**
+     * @param ShareFolder $videoShare
+     * @return void
+     */
+    public function deleteFolderShare(ShareFolder $videoShare): void
+    {
+        $this->shareFolderRepository->delete($videoShare);
+    }
+
+    /**
+     * @param Account $account
+     * @param Folder $folder
+     * @param string $email
+     * @return void
+     * @throws ConflictException
+     * @throws ForbiddenException
+     */
+    public function allowedToShareFolder(Account $account, Folder $folder, string $email): void
+    {
+        if ($account->getEmail() === $email) {
+            throw new ForbiddenException('You can not share folder with yourself');
+        }
+
+        if ($this->isFolderAlreadyShared($account, $folder)) {
+            throw new ConflictException("Folder is already shared with this user");
+        }
+    }
+
+    /**
+     * @param Account $account
+     * @param Video $video
+     * @param string $email
+     * @return void
+     * @throws ConflictException
+     * @throws ForbiddenException
+     */
+    public function allowedToShareVideo(Account $account, Video $video, string $email): void
+    {
+        if ($account->getEmail() === $email) {
+            throw new ForbiddenException('You can not share video with yourself');
+        }
+
+        if ($this->isVideoAlreadyShared($account, $video)) {
+            throw new ConflictException("Video is already shared with this user");
+        }
+    }
+
+    /**
+     * @return int
+     */
+    public function getPublicLinkViewLimit(): int
+    {
+        return (int) $this->settingsRepository->getPublicLinkViewLimit();
+    }
+
     private function alreadySawPublicVideo(ShareVideoPublic $publicVideoShare, string $sessionId): bool {
         return (bool) $this->shareVideoPublicViewRepository->findShareViews($publicVideoShare, $sessionId);
     }
@@ -234,6 +350,16 @@ class ShareService
     }
 
     /**
+     * @param Account $account
+     * @param Folder $folder
+     * @return bool
+     */
+    private function isFolderAlreadyShared(Account $account, Folder $folder): bool
+    {
+        return $this->shareFolderRepository->isFolderAlreadyShared($account, $folder);
+    }
+
+    /**
      * @param ShareVideoPublic $publicVideoShare
      * @param string $sessionId
      * @return bool
@@ -254,13 +380,5 @@ class ShareService
     private function viewsLimitExceeded(ShareVideoPublic $publicVideoShare): bool
     {
         return count($publicVideoShare->getViews()) >= $this->getPublicLinkViewLimit();
-    }
-
-    /**
-     * @return int
-     */
-    private function getPublicLinkViewLimit(): int
-    {
-        return (int) $this->settingsRepository->getPublicLinkViewLimit();
     }
 }

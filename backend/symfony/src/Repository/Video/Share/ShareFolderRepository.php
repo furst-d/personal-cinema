@@ -59,4 +59,40 @@ class ShareFolderRepository extends ServiceEntityRepository
 
         return $this->getPaginatorResult($qb, $paginatorRequest);
     }
+
+    /**
+     * @param Account $account
+     * @param Folder $folder
+     * @return bool
+     */
+    public function isFolderAlreadyShared(Account $account, Folder $folder): bool
+    {
+        return $this->createQueryBuilder('sf')
+                ->select('COUNT(sf)')
+                ->where('sf.folder = :folder')->setParameter('folder', $folder)
+                ->andWhere('sf.account = :account')->setParameter('account', $account)
+                ->getQuery()->getSingleScalarResult() > 0;
+    }
+
+    /**
+     * @param ShareFolder $videoShare
+     * @return void
+     */
+    public function delete(ShareFolder $videoShare): void
+    {
+        $em = $this->getEntityManager();
+        $em->remove($videoShare);
+        $em->flush();
+    }
+
+    /**
+     * @param ShareFolder $shareFolder
+     * @return void
+     */
+    public function save(ShareFolder $shareFolder): void
+    {
+        $em = $this->getEntityManager();
+        $em->persist($shareFolder);
+        $em->flush();
+    }
 }

@@ -6,6 +6,9 @@ use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Video\UploadRequest;
 use App\DTO\Video\VideoQueryRequest;
 use App\DTO\Video\VideoRequest;
+use App\Entity\Account\Account;
+use App\Entity\Video\Share\ShareVideo;
+use App\Entity\Video\Share\ShareVideoPublic;
 use App\Exception\ApiException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Cdn\CdnService;
@@ -13,6 +16,7 @@ use App\Service\Jwt\JwtService;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Storage\StorageService;
 use App\Service\Video\FolderService;
+use App\Service\Video\ShareService;
 use App\Service\Video\VideoService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,12 +51,18 @@ class VideoController extends BasePersonalController
     private StorageService $storageService;
 
     /**
+     * @var ShareService $shareService
+     */
+    private ShareService $shareService;
+
+    /**
      * @param BaseControllerLocator $locator
      * @param JwtService $jwtService
      * @param CdnService $cdnService
      * @param VideoService $videoService
      * @param FolderService $folderService
      * @param StorageService $storageService
+     * @param ShareService $shareService
      */
     public function __construct(
         BaseControllerLocator $locator,
@@ -61,6 +71,7 @@ class VideoController extends BasePersonalController
         VideoService $videoService,
         FolderService $folderService,
         StorageService $storageService,
+        ShareService $shareService
     )
     {
         parent::__construct($locator);
@@ -69,6 +80,7 @@ class VideoController extends BasePersonalController
         $this->videoService = $videoService;
         $this->folderService = $folderService;
         $this->storageService = $storageService;
+        $this->shareService = $shareService;
     }
 
 
@@ -151,6 +163,39 @@ class VideoController extends BasePersonalController
             $this->videoService->addThumbnailToVideos($videos->getData(), $account);
 
             return $this->re->withData($videos, ['videos:read']);
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('/{videoId<\d+>}/share', name: 'user_video_shares', methods: ['GET'])]
+    public function getVideoSharedUsers(Request $request, int $videoId): JsonResponse
+    {
+        try {
+            $account = $this->getAccount($request);
+            $video = $this->videoService->getAccountVideoById($account, $videoId);
+
+            $shares = $video->getShares();
+
+            return $this->re->withData($shares, [ShareVideo::SHARE_VIDEO_READ]);
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('/{videoId<\d+>}/share/public', name: 'user_video_shares_public', methods: ['GET'])]
+    public function getVideoSharesPublic(Request $request, int $videoId): JsonResponse
+    {
+        try {
+            $account = $this->getAccount($request);
+            $video = $this->videoService->getAccountVideoById($account, $videoId);
+
+            $shares = $video->getSharesPublic();
+
+            return $this->re->withData([
+                'maxViews' => $this->shareService->getPublicLinkViewLimit(),
+                'shares' => $this->serialize($shares, [ShareVideoPublic::VIDEO_SHARED_PUBLIC_READ])
+            ]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }

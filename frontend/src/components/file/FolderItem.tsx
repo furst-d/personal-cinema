@@ -1,11 +1,12 @@
 import React from "react";
-import {useDrag, useDrop} from "react-dnd";
-import {Box, Grid, IconButton, ListItemIcon, ListItemText, Typography} from "@mui/material";
-import {FileManagerListItemStyle} from "../../styles/file/FileManager";
+import { useDrag, useDrop } from "react-dnd";
+import { Box, Grid, IconButton, ListItemIcon, ListItemText, Typography, Tooltip } from "@mui/material";
+import { FileManagerListItemStyle } from "../../styles/file/FileManager";
 import FolderIcon from "@mui/icons-material/Folder";
-import {formatDate} from "../../utils/formatter";
+import ShareIcon from "@mui/icons-material/Share";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import {ItemTypes} from "../../types/file";
+import { formatDate } from "../../utils/formatter";
+import { ItemTypes } from "../../types/file";
 
 interface FolderItemProps {
     folder: any;
@@ -37,7 +38,20 @@ const FolderItem: React.FC<FolderItemProps> = ({ folder, onFolderClick, onContex
                 <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, marginRight: '5px' }}>
                     <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' } }}>
                         <ListItemText primary={folder.name} />
-                        <Typography variant="body2" className="date">{formatDate(folder.updatedAt)}</Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            {folder.shared && (
+                                <Tooltip title="Složka je sdílená">
+                                    <ShareIcon
+                                        sx={{
+                                            color: 'green',
+                                            fontSize: '1.2rem',
+                                            marginRight: '16px'
+                                        }}
+                                    />
+                                </Tooltip>
+                            )}
+                            <Typography variant="body2" className="date">{formatDate(folder.updatedAt)}</Typography>
+                        </Box>
                     </Box>
                 </Box>
                 <IconButton onClick={(e) => onContextMenuOpen(e, folder)} sx={{ color: theme.textLight }}>

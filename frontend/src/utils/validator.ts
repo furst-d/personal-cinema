@@ -108,3 +108,17 @@ export const validatePasswordChangeForm = (oldPassword: string, newPassword: str
 
     return errors;
 };
+
+export const validateShareForm = (email: string) => {
+    const errors: { missing?: boolean, email?: string } = {};
+
+    if (!email) {
+        errors.missing = true;
+    }
+
+    if (!validateEmail(email)) {
+        errors.email = "Neplatný formát emailu";
+    }
+
+    return errors;
+};

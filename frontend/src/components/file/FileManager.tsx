@@ -103,7 +103,7 @@ const FileManager: React.FC = () => {
                         <ListItemIcon>
                             <UploadFileIcon sx={{ color: theme.textLight }} />
                         </ListItemIcon>
-                        Nahrát soubor
+                        Nahrát soubory
                     </MenuItem>
                     <MenuItem onClick={() => { handleCreateFolderClick(); handleUploadMenuClose(); }}>
                         <ListItemIcon>

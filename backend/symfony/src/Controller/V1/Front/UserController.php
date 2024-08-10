@@ -6,6 +6,7 @@ use App\Controller\ApiController;
 use App\DTO\Account\LoginRequest;
 use App\DTO\Account\RegisterRequest;
 use App\DTO\Account\TokenRequest;
+use App\Entity\Account\Account;
 use App\Exception\ApiException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\AccountService;
@@ -92,7 +93,7 @@ class UserController extends ApiController
                     'access_token' => $accessToken,
                     'refresh_token' => $refreshToken
                 ],
-                'user' => $this->serialize($user, ['account:read'])
+                'user' => $this->serialize($user, [Account::ACCOUNT_READ])
             ]);
 
         } catch (ApiException $e) {
