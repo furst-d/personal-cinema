@@ -66,6 +66,11 @@ export const fetchFolderShare = async (folderId: string): Promise<{ id: string; 
     }));
 };
 
+export const fetchPublicVideoShare = async (videoId: string): Promise<{ maxViews: number; shares: { hash: string; createdAt: string; expiredAt: string; viewCount: number }[] }> => {
+    const response = await axiosPrivate.get(`/v1/personal/videos/${videoId}/share/public`);
+    return response.data.payload.data;
+};
+
 export const createFolder = async (requestData: CreateFolderRequest): Promise<Folder> => {
     const response = await axiosPrivate.post('/v1/personal/folders', requestData);
     return response.data.payload.data;
@@ -116,3 +121,9 @@ export const shareVideo = async (videoId: string, email: string): Promise<void> 
 export const shareFolder = async (folderId: string, email: string): Promise<void> => {
     await axiosPrivate.post('/v1/personal/folders/share', { folderId, email });
 };
+
+export const generatePublicVideoShare = async (videoId: string): Promise<{ hash: string; createdAt: string; expiredAt: string; viewCount: number }> => {
+    const response = await axiosPrivate.post('/v1/personal/videos/share/public', { videoId });
+    return response.data.payload.data;
+};
+

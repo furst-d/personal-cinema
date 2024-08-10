@@ -19,7 +19,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Table(name: '`account`')]
 class Account implements UserInterface
 {
-    private const ACCOUNT_READ = 'account:read';
+    public const ACCOUNT_READ = 'account:read';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

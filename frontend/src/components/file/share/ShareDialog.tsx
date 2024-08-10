@@ -37,7 +37,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({ open, onClose, selectedItem }
                         {shareType === 'user' ? (
                             <UserShare onClose={onClose} isVideo={isVideo} selectedItem={selectedItem} />
                         ) : (
-                            <PublicLinkShare />
+                            <PublicLinkShare onClose={onClose} videoId={selectedItem.id} />
                         )}
                     </FormControl>
                 ) : (

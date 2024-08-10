@@ -309,6 +309,14 @@ class ShareService
         }
     }
 
+    /**
+     * @return int
+     */
+    public function getPublicLinkViewLimit(): int
+    {
+        return (int) $this->settingsRepository->getPublicLinkViewLimit();
+    }
+
     private function alreadySawPublicVideo(ShareVideoPublic $publicVideoShare, string $sessionId): bool {
         return (bool) $this->shareVideoPublicViewRepository->findShareViews($publicVideoShare, $sessionId);
     }
@@ -372,13 +380,5 @@ class ShareService
     private function viewsLimitExceeded(ShareVideoPublic $publicVideoShare): bool
     {
         return count($publicVideoShare->getViews()) >= $this->getPublicLinkViewLimit();
-    }
-
-    /**
-     * @return int
-     */
-    private function getPublicLinkViewLimit(): int
-    {
-        return (int) $this->settingsRepository->getPublicLinkViewLimit();
     }
 }
