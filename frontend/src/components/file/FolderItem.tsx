@@ -45,7 +45,7 @@ const FolderItem: React.FC<FolderItemProps> = ({ folder, onFolderClick, onContex
                                         sx={{
                                             color: 'green',
                                             fontSize: '1.2rem',
-                                            marginRight: '8px'
+                                            marginRight: '16px'
                                         }}
                                     />
                                 </Tooltip>

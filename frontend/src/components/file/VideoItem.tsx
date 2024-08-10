@@ -52,7 +52,7 @@ const VideoItem: React.FC<VideoItemProps> = ({
                                         sx={{
                                             color: 'green',
                                             fontSize: '1.2rem',
-                                            marginRight: '8px'
+                                            marginRight: '16px'
                                         }}
                                     />
                                 </Tooltip>
