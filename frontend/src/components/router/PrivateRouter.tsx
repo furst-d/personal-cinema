@@ -9,6 +9,8 @@ import NotFoundPage from "../pages/NotFoundPage";
 import Navbar from "../navbar/Navbar";
 import {ContainerStyle, ContentStyle, ContentWrapperStyle} from "../../styles/layout/Application";
 import VideoDetailPage from "../pages/VideoDetailPage";
+import ResetPasswordPage from "../pages/ResetPasswordPage";
+import ShareAcceptPage from "../pages/ShareAcceptPage";
 
 const PrivateRouter: React.FC = () => (
     <>
@@ -23,6 +25,7 @@ const PrivateRouter: React.FC = () => (
                         <Route path="/disc" element={<DiscPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
                         <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="/share-accept" element={<ShareAcceptPage />} />
                         <Route path="*" element={<NotFoundPage />} />
                     </Routes>
                 </ContentStyle>

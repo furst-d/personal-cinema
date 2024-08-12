@@ -1,5 +1,5 @@
 import React from 'react';
-import UserShareForm from "../../form/UserShareForm";
+import UserShareForm from "../form/UserShareForm";
 import ShareVideoList from './ShareVideoList';
 import ShareFolderList from './ShareFolderList';
 

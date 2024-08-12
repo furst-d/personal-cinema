@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Typography, CircularProgress, List, ListItem, ListItemText, Button, Box, Tooltip } from '@mui/material';
-import { fetchPublicVideoShare, generatePublicVideoShare } from "../../../service/fileManagerService";
 import { toast } from "react-toastify";
 import { useTheme } from 'styled-components';
+import {fetchPublicVideoShare, generatePublicVideoShare} from "../../service/shareService";
 
 interface PublicLinkShareProps {
     onClose: () => void;

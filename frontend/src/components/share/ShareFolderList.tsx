@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { CircularProgress } from '@mui/material';
-import { fetchVideoShare, deleteVideoShare } from "../../../service/fileManagerService";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 import ShareList from "./ShareList";
+import {deleteFolderShare, fetchFolderShare} from "../../service/shareService";
 
-interface ShareVideoListProps {
-    videoId: string;
+interface ShareFolderListProps {
+    folderId: string;
 }
 
-const ShareVideoList: React.FC<ShareVideoListProps> = ({ videoId }) => {
+const ShareFolderList: React.FC<ShareFolderListProps> = ({ folderId }) => {
     const [shared, setShared] = useState<{ id: string; email: string; createdAt: string }[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        fetchVideoShare(videoId)
+        fetchFolderShare(folderId)
             .then(data => {
                 setShared(data);
             })
@@ -23,16 +23,16 @@ const ShareVideoList: React.FC<ShareVideoListProps> = ({ videoId }) => {
             .finally(() => {
                 setLoading(false);
             });
-    }, [videoId]);
+    }, [folderId]);
 
     const handleUnShare = (shareId: string) => {
-        deleteVideoShare(shareId)
+        deleteFolderShare(shareId)
             .then(() => {
                 setShared(prevShared => prevShared.filter(share => share.id !== shareId));
                 toast.success('Sdílení zrušeno');
             })
             .catch(error => {
-                console.error(`Failed to unshare video with id ${shareId}`, error);
+                console.error(`Failed to unshare folder with id ${shareId}`, error);
                 toast.error('Nepodařilo se zrušit sdílení');
             });
     };
@@ -44,4 +44,4 @@ const ShareVideoList: React.FC<ShareVideoListProps> = ({ videoId }) => {
     return <ShareList shared={shared} onUnShare={handleUnShare} />
 };
 
-export default ShareVideoList;
+export default ShareFolderList;

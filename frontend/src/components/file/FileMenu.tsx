@@ -5,7 +5,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import ShareIcon from '@mui/icons-material/Share';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {useTheme} from "styled-components";
-import ShareDialog from "./share/ShareDialog";
+import ShareDialog from "../share/ShareDialog";
 
 interface FileMenuProps {
     contextMenuAnchor: HTMLElement | null;
