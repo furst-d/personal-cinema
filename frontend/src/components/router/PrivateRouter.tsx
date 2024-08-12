@@ -10,12 +10,14 @@ import Navbar from "../navbar/Navbar";
 import { ContainerStyle, ContentStyle, ContentWrapperStyle } from "../../styles/layout/Application";
 import VideoDetailPage from "../pages/VideoDetailPage";
 import ShareAcceptPage from "../pages/ShareAcceptPage";
+import SharePublicVideoPage from "../pages/SharePublicVideoPage";
 
 const PrivateRouter: React.FC = () => {
     return (
         <>
             <Routes>
                 <Route path="/share-accept" element={<ShareAcceptPage />} />
+                <Route path="/share/:hash" element={<SharePublicVideoPage />} />
                 <Route
                     path="/*"
                     element={

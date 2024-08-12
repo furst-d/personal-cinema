@@ -8,6 +8,7 @@ export const ApplicationStyle = styled.div`
   flex-direction: column;
   flex: 1 1 auto;
   width: 100%;  
+  height: 100vh;
 `
 
 export const ContainerStyle = styled.div`

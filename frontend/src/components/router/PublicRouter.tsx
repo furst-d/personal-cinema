@@ -4,6 +4,7 @@ import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import ForgottenPasswordPage from "../pages/ForgottenPasswordPage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
+import SharePublicVideoPage from "../pages/SharePublicVideoPage";
 
 const PublicRouter: React.FC = () => {
     const location = useLocation();
@@ -14,6 +15,7 @@ const PublicRouter: React.FC = () => {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgotten-password" element={<ForgottenPasswordPage />} />
             <Route path="/password-reset" element={<ResetPasswordPage />} />
+            <Route path="/share/:hash" element={<SharePublicVideoPage />} />
             <Route path="*" element={<Navigate to="/login" state={{ from: location }} />} />
         </Routes>
     );

@@ -3,6 +3,7 @@
 namespace App\Controller\V1\Front;
 
 use App\Controller\ApiController;
+use App\Entity\Video\Video;
 use App\Exception\ApiException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\SessionService;
@@ -95,7 +96,7 @@ class ShareVideoPublicController extends ApiController
             $video = $videoShare->getVideo();
             $this->videoService->addPublicVideoUrlToVideo($video);
 
-            return $this->re->withData($video, ['video:public:read']);
+            return $this->re->withData($video, [Video::VIDEO_PUBLIC_READ]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
