@@ -6,7 +6,6 @@ use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Video\UploadRequest;
 use App\DTO\Video\VideoQueryRequest;
 use App\DTO\Video\VideoRequest;
-use App\Entity\Account\Account;
 use App\Entity\Video\Share\ShareVideo;
 use App\Entity\Video\Share\ShareVideoPublic;
 use App\Exception\ApiException;
@@ -163,6 +162,20 @@ class VideoController extends BasePersonalController
             $this->videoService->addThumbnailToVideos($videos->getData(), $account);
 
             return $this->re->withData($videos, ['videos:read']);
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('/{videoId<\d+>}/download', name: 'user_video_download', methods: ['GET'])]
+    public function downloadVideo(Request $request, int $videoId): JsonResponse
+    {
+        try {
+            $account = $this->getAccount($request);
+            $video = $this->videoService->getAccountVideoById($account, $videoId);
+
+            $link = $this->cdnService->getDownloadLink($video);
+            return $this->re->withData(['downloadLink' => $link]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }

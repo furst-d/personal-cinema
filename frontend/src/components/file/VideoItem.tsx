@@ -17,11 +17,11 @@ interface VideoItemProps {
 }
 
 const VideoItem: React.FC<VideoItemProps> = ({
-                                                 video,
-                                                 onVideoDoubleClick,
-                                                 onContextMenuOpen,
-                                                 isProcessing
-                                             }) => {
+     video,
+     onVideoDoubleClick,
+     onContextMenuOpen,
+     isProcessing
+ }) => {
     const theme = useTheme();
 
     const [, drag] = useDrag({

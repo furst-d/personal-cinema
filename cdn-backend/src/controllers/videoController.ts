@@ -99,3 +99,29 @@ export const getThumbnailRoute = async (req: Request, res: Response): Promise<vo
         res.status(500).send('Internal Server Error');
     }
 };
+
+export const getVideoDownloadLinkRoute = async (req: Request, res: Response): Promise<void> => {
+    const videoId = req.params.id;
+
+    try {
+        const video = await Video.findByPk(videoId);
+        if (!video) {
+            res.status(404).json({ error: "Video not found" });
+            return;
+        }
+
+        if (!video.originalPath) {
+            res.status(404).json({ error: "Video not processed" });
+            return;
+        }
+
+        const signedUrl = await minioClient.presignedUrl('GET', bucketName, video.originalPath, 24 * 60 * 60, {
+            "response-content-disposition": `attachment; filename="${encodeURIComponent(video.title)}"`
+        });
+
+        res.status(200).json({ downloadLink: signedUrl });
+    } catch (error) {
+        console.error('Error generating download link:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};

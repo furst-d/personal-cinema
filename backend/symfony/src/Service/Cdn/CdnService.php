@@ -136,6 +136,16 @@ class CdnService
     }
 
     /**
+     * @param Video $video
+     * @return string
+     * @throws InternalException
+     */
+    public function getDownloadLink(Video $video): string
+    {
+        return $this->cdnManager->getDownloadContent($video)['downloadLink'];
+    }
+
+    /**
      * @param CdnVideoRequest $videoData
      * @return void
      * @throws BadRequestException
