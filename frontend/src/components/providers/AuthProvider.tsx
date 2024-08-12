@@ -27,7 +27,8 @@ export const AuthProvider: React.FC<ProviderProps> = ({ children }) => {
         setLoading(false);
     }, [navigate]);
 
-    const login = (userData: any) => {
+    const login = (userData: any, from: string = "/") => {
+
         setIsAuthenticated(false);
         setLoading(true);
         localStorage.setItem("user_data", JSON.stringify(userData));
@@ -36,7 +37,7 @@ export const AuthProvider: React.FC<ProviderProps> = ({ children }) => {
         if (!userData.user.isActive) {
             navigate("/account-not-activated");
         } else {
-            navigate("/");
+            navigate(from);
             toast.success("Úspěšně přihlášen");
         }
     };

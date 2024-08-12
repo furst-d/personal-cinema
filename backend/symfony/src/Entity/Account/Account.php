@@ -24,11 +24,11 @@ class Account implements UserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups([self::ACCOUNT_READ, Video::VIDEO_READ])]
+    #[Groups([self::ACCOUNT_READ, Video::VIDEO_READ, Video::VIDEOS_READ, Folder::FOLDER_READ])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups([self::ACCOUNT_READ, Video::VIDEO_READ, ShareVideo::SHARE_VIDEO_READ, ShareFolder::SHARE_FOLDER_READ])]
+    #[Groups([self::ACCOUNT_READ, Video::VIDEO_READ, Video::VIDEOS_READ, ShareVideo::SHARE_VIDEO_READ, ShareFolder::SHARE_FOLDER_READ, Folder::FOLDER_READ])]
     private string $email;
 
     #[ORM\Column(length: 255)]

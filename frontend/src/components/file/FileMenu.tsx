@@ -5,7 +5,8 @@ import DownloadIcon from '@mui/icons-material/Download';
 import ShareIcon from '@mui/icons-material/Share';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {useTheme} from "styled-components";
-import ShareDialog from "./share/ShareDialog";
+import ShareDialog from "../share/ShareDialog";
+import {getDownloadVideoLink} from "../../service/videoService";
 
 interface FileMenuProps {
     contextMenuAnchor: HTMLElement | null;
@@ -34,6 +35,22 @@ const FileMenu: React.FC<FileMenuProps> = ({
         onContextMenuClose();
     };
 
+    const handleDownload = () => {
+        onContextMenuClose();
+
+        getDownloadVideoLink(selectedItem.id)
+            .then((data) => {
+                const link = document.createElement('a');
+                link.href = data.downloadLink;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            })
+            .catch(error => {
+                console.error(`Failed download video`, error);
+            });
+    }
+
     return (
         <>
             <Menu
@@ -49,7 +66,7 @@ const FileMenu: React.FC<FileMenuProps> = ({
                         </ListItemIcon>
                         <ListItemText primary="Upravit" />
                     </MenuItem>,
-                    <MenuItem key="download" onClick={onContextMenuClose}>
+                    <MenuItem key="download" onClick={handleDownload}>
                         <ListItemIcon>
                             <DownloadIcon style={{ color: theme.textLight }} />
                         </ListItemIcon>

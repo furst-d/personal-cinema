@@ -28,7 +28,7 @@ class Video
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ, self::VIDEO_PUBLIC_READ])]
     private string $name;
 
     #[ORM\ManyToOne(inversedBy: 'videos')]

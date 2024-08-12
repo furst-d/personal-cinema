@@ -1,6 +1,6 @@
 import { Button, TextField, Typography } from "@mui/material";
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import { CenterFormWrapperStyle, StyledLink } from "../../styles/form/Form";
 import { login } from "../../service/authService";
 import { useAuth } from "../providers/AuthProvider";
@@ -12,7 +12,12 @@ const LoginForm = () => {
     const [errors, setErrors] = useState<{ missing?: boolean; email?: string; password?: string }>({});
     const [errorMessage, setErrorMessage] = useState("");
     const navigate = useNavigate();
+    const location = useLocation()
     const { login: authLogin } = useAuth();
+
+    const from = location.state?.from
+        ? location.state.from.pathname + (location.state.from.search || "")
+        : "/";
 
     useEffect(() => {
         setErrors(validateLoginForm(email, password));
@@ -28,8 +33,7 @@ const LoginForm = () => {
         }
         const result: any = await login(email, password);
         if (result.success) {
-            authLogin(result.data);
-            navigate("/");
+            authLogin(result.data, from);
         } else {
             setErrorMessage(result.message);
         }

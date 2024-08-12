@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {Button, TextField, Box, Typography} from '@mui/material';
 import { validateShareForm } from '../../utils/validator';
-import { shareVideo, shareFolder } from '../../service/fileManagerService';
 import { toast } from 'react-toastify';
+import {shareFolder, shareVideo} from "../../service/shareService";
 
 interface UserShareFormProps {
     onClose: () => void;

@@ -104,4 +104,29 @@ class CdnManager
             throw new InternalException('Error communicating with CDN: ' . $e->getMessage());
         }
     }
+
+    /**
+     * @param Video $video
+     * @return array
+     * @throws InternalException
+     */
+    public function getDownloadContent(Video $video): array
+    {
+        try {
+            $response = $this->client->get("{$this->cdnUrl}/videos/{$video->getCdnId()}/download", [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->cdnSecretKey,
+                ],
+            ]);
+
+            $body = $response->getBody()->getContents();
+            if ($response->getStatusCode() !== 200 || empty($body)) {
+                throw new InternalException('Invalid response from CDN');
+            }
+
+            return json_decode($body, true);
+        } catch (RequestException|GuzzleException $e) {
+            throw new InternalException('Error communicating with CDN: ' . $e->getMessage());
+        }
+    }
 }

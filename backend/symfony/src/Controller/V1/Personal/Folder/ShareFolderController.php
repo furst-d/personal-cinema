@@ -6,6 +6,7 @@ use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Account\TokenRequest;
 use App\DTO\Video\FolderQueryRequest;
 use App\DTO\Video\FolderShareRequest;
+use App\Entity\Video\Folder;
 use App\Exception\ApiException;
 use App\Exception\BadRequestException;
 use App\Helper\Jwt\JwtUsage;
@@ -132,10 +133,10 @@ class ShareFolderController extends BasePersonalController
                 throw new BadRequestException('Invalid token.');
             }
 
-            $folder = $this->folderService->getFolderById($decodedToken['video_id']);
+            $folder = $this->folderService->getFolderById($decodedToken['folder_id']);
             $this->shareService->createFolderShare($account, $folder);
 
-            return $this->re->withMessage('Folder share accepted.');
+            return $this->re->withData($folder, [Folder::FOLDER_READ]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }

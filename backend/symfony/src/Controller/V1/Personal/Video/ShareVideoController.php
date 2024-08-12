@@ -150,7 +150,7 @@ class ShareVideoController extends BasePersonalController
             $video = $this->videoService->getVideoById($decodedToken['video_id']);
             $this->shareService->createVideoShare($account, $video);
 
-            return $this->re->withMessage('Video share accepted.');
+            return $this->re->withData($video, [Video::VIDEOS_READ]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
