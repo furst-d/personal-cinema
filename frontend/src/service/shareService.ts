@@ -43,3 +43,13 @@ export const generatePublicVideoShare = async (videoId: string): Promise<{ hash:
     const response = await axiosPrivate.post('/v1/personal/videos/share/public', { videoId });
     return response.data.payload.data;
 };
+
+export const acceptFileShare = async (token: string): Promise<void> => {
+    const response = await axiosPrivate.post('/v1/personal/videos/share/accept', { token });
+    return response.data.payload.data;
+};
+
+export const acceptFolderShare = async (token: string): Promise<void> => {
+    const response = await axiosPrivate.post('/v1/personal/folders/share/accept', { token });
+    return response.data.payload.data;
+};
