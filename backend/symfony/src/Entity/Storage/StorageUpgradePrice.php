@@ -21,7 +21,7 @@ class StorageUpgradePrice
     private ?int $id = null;
 
     #[ORM\Column(type: Types::BIGINT)]
-    #[Groups([self::STORAGE_UPGRADE_PRICE_READ, self::STORAGE_UPGRADE_PRICE_ADMIN_READ])]
+    #[Groups([self::STORAGE_UPGRADE_PRICE_ADMIN_READ])]
     private int $size;
 
     #[ORM\Column]
@@ -148,5 +148,14 @@ class StorageUpgradePrice
         }
 
         return $this->priceCzk - ($this->priceCzk * $this->percentageDiscount / 100);
+    }
+
+    /**
+     * @return int
+     */
+    #[Groups([self::STORAGE_UPGRADE_PRICE_READ])]
+    public function getSizeInGB(): int
+    {
+        return (int) ($this->size / 1024 / 1024 / 1024);
     }
 }

@@ -5,7 +5,7 @@ import { fetchStoragePrices } from "../../service/storageService";
 import Loading from "../loading/Loading";
 
 const StoragePriceList: React.FC = () => {
-    const [prices, setPrices] = useState<{ id: number, size: number, priceCzk: number, activePercentageDiscount: number, discountedPriceCzk: number }[]>([]);
+    const [prices, setPrices] = useState<{ id: number, sizeInGB: number, priceCzk: number, activePercentageDiscount: number, discountedPriceCzk: number }[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
@@ -35,12 +35,12 @@ const StoragePriceList: React.FC = () => {
                     <Grid item xs={12} sm={6} md={4} lg={3} key={price.id}>
                         <StoragePriceItem
                             key={price.id}
-                            sizeGB={price.size / (1024 * 1024 * 1024)}
+                            id={price.id}
+                            sizeGB={price.sizeInGB}
                             priceCzk={price.priceCzk}
                             discountedPriceCzk={price.discountedPriceCzk}
                             percentageDiscount={price.activePercentageDiscount}
                             isBestValue={index === prices.length - 1}
-                            onSelect={() => console.log("Selected plan with ID:", price.id)}
                         />
                     </Grid>
                 ))}

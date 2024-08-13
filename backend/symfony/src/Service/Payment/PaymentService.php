@@ -2,7 +2,10 @@
 
 namespace App\Service\Payment;
 
+use App\Entity\Account\Account;
+use App\Entity\Storage\StorageUpgradePrice;
 use App\Exception\InternalException;
+use Stripe\Checkout\Session;
 use Stripe\Exception\ApiErrorException;
 use Stripe\PaymentIntent;
 use Stripe\Stripe;
@@ -10,28 +13,52 @@ use Stripe\Stripe;
 class PaymentService
 {
     /**
-     * @param string $stripeSecretKey
+     * @var string $frontendUrl
      */
-    public function __construct(string $stripeSecretKey)
+    private string $frontendUrl;
+
+    /**
+     * @param string $stripeSecretKey
+     * @param string $frontendUrl
+     */
+    public function __construct(string $stripeSecretKey, string $frontendUrl)
     {
         Stripe::setApiKey($stripeSecretKey);
+        $this->frontendUrl = $frontendUrl;
     }
 
     /**
-     * @param int $amount
-     * @return PaymentIntent
+     * @param Account $account
+     * @param StorageUpgradePrice $price
+     * @return Session
      * @throws InternalException
      */
-    public function createPaymentIntent(int $amount): PaymentIntent
+    public function createCheckoutSession(Account $account, StorageUpgradePrice $price): Session
     {
         try {
-            return PaymentIntent::create([
-                'amount' => $amount * 100, // amount in cents
-                'currency' => 'czk',
+            return Session::create([
                 'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'czk',
+                        'product_data' => [
+                            'name' => "Soukromé kino - navýšení úložiště o {$price->getSizeInGB()} GB",
+                        ],
+                        'unit_amount' => $price->getDiscountedPriceCzk() * 100, // amount in cents
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'success_url' => "$this->frontendUrl/payment/success",
+                'cancel_url' => "$this->frontendUrl/payment/cancel",
+                'metadata' => [
+                    'user_id' => $account->getId(),
+                    'price_id' => $price->getId(),
+                    'price_czk' => $price->getDiscountedPriceCzk(),
+                ],
             ]);
-        } catch (ApiErrorException $e) {
-            throw new InternalException('Failed to create payment intent: ' . $e->getMessage());
+        } catch (ApiErrorException) {
+            throw new InternalException('Failed to create checkout session');
         }
     }
 

@@ -41,16 +41,15 @@ class StorageUpgradeController extends BasePersonalController
         $this->paymentService = $paymentService;
     }
 
-    #[Route('', name: 'user_storage_pay', methods: ['POST'])]
-    public function createPaymentIntent(StoragePaymentRequest $storagePaymentRequest): JsonResponse
+    #[Route('/payment/session', name: 'user_storage_payment_session', methods: ['GET'])]
+    public function createCheckoutSession(Request $request, StoragePaymentRequest $storagePaymentRequest): JsonResponse
     {
         try {
+            $account = $this->getAccount($request);
             $storagePrice = $this->storageService->getPriceById($storagePaymentRequest->storagePriceId);
-            $amount = $storagePrice->getDiscountedPriceCzk();
+            $checkoutSession = $this->paymentService->createCheckoutSession($account, $storagePrice);
 
-            $paymentIntent = $this->paymentService->createPaymentIntent($amount);
-
-            return $this->re->withData(['clientSecret' => $paymentIntent->client_secret]);
+            return $this->re->withData(['checkoutSessionId' => $checkoutSession->id]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }

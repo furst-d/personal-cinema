@@ -53,6 +53,7 @@ services:
     App\Service\Payment\PaymentService:
         arguments:
             $stripeSecretKey: '%env(STRIPE_SECRET_KEY)%'
+            $frontendUrl: '%env(FRONTEND_URL)%'
 
     App\Helper\Cdn\CdnManager:
         arguments:

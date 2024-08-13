@@ -5,7 +5,16 @@ export const fetchStorageInfo = async (): Promise<{ totalStorage: number; usedSt
     return response.data.payload.data;
 };
 
-export const fetchStoragePrices = async (): Promise<{ id: number, size: number, priceCzk: number, activePercentageDiscount: number, discountedPriceCzk: number }[]> => {
+export const fetchStoragePrices = async (): Promise<{ id: number, sizeInGB: number, priceCzk: number, activePercentageDiscount: number, discountedPriceCzk: number }[]> => {
     const response = await axiosPrivate.get(`/v1/personal/storage/upgrade/price`);
+    return response.data.payload.data;
+}
+
+export const fetchCheckoutSession = async (storagePriceId: number): Promise<{ checkoutSessionId: string }> => {
+    const response = await axiosPrivate.get('/v1/personal/storage/upgrade/payment/session', {
+        params: {
+            storagePriceId: storagePriceId,
+        }
+    });
     return response.data.payload.data;
 }

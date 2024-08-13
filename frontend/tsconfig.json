@@ -101,6 +101,6 @@
     "skipLibCheck": true,
     /* Skip type checking all .d.ts files. */
   },
-  "include": ["src"],
+  "include": ["src", "vite-env.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

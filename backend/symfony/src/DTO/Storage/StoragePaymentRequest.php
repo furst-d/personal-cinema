@@ -2,10 +2,10 @@
 
 namespace App\DTO\Storage;
 
-use App\DTO\AbstractRequest;
+use App\DTO\AbstractQueryRequest;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class StoragePaymentRequest extends AbstractRequest
+class StoragePaymentRequest extends AbstractQueryRequest
 {
     #[Assert\NotBlank]
     #[Assert\Positive]
