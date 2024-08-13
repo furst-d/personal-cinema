@@ -6,6 +6,7 @@ use App\Entity\Storage\Storage;
 use App\Exception\FullStorageException;
 use App\Exception\TooLargeException;
 use App\Repository\Settings\SettingsRepository;
+use App\Repository\Storage\StorageUpgradePriceRepository;
 use App\Service\Storage\StorageService;
 use PHPUnit\Framework\TestCase;
 
@@ -13,11 +14,13 @@ class StorageServiceTest extends TestCase
 {
     private StorageService $storageService;
     private $mockSettingsRepository;
+    private $mockStorageUpgradePriceRepository;
 
     protected function setUp(): void
     {
         $this->mockSettingsRepository = $this->createMock(SettingsRepository::class);
-        $this->storageService = new StorageService($this->mockSettingsRepository);
+        $this->mockStorageUpgradePriceRepository = $this->createMock(StorageUpgradePriceRepository::class);
+        $this->storageService = new StorageService($this->mockSettingsRepository, $this->mockStorageUpgradePriceRepository);
     }
 
     public function testCheckStorageBeforeUploadSuccess()
