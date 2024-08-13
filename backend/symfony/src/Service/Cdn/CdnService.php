@@ -12,8 +12,6 @@ use App\Helper\Cdn\CdnManager;
 use App\Helper\Cdn\CdnSynchronizer;
 use App\Helper\Generator\RandomGenerator;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use GuzzleHttp\Exception\GuzzleException;
 use Psr\Log\LoggerInterface;
 
 class CdnService

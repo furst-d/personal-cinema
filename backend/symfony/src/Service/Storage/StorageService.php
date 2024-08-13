@@ -3,7 +3,9 @@
 namespace App\Service\Storage;
 
 use App\Entity\Storage\Storage;
+use App\Entity\Storage\StorageUpgradePrice;
 use App\Exception\FullStorageException;
+use App\Exception\NotFoundException;
 use App\Exception\TooLargeException;
 use App\Repository\Settings\SettingsRepository;
 use App\Repository\Storage\StorageUpgradePriceRepository;
@@ -115,5 +117,22 @@ class StorageService
     private function hasExceededFileLimit(int $fileSize): bool
     {
         return $fileSize > $this->getMaxFileSize();
+    }
+
+    /**
+     * @param int $storagePriceId
+     * @return StorageUpgradePrice
+     * @throws NotFoundException
+     */
+    public function getPriceById(int $storagePriceId): StorageUpgradePrice
+    {
+        /** @var StorageUpgradePrice $price */
+        $price = $this->storageUpgradePriceRepository->find($storagePriceId);
+
+        if (!$price) {
+            throw new NotFoundException('Invalid storage price ID');
+        }
+
+        return $price;
     }
 }

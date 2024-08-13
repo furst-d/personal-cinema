@@ -31,6 +31,7 @@ jobs:
           sed -i 's|cdn_callback_key|${{ secrets.CDN_CALLBACK_KEY }}|' backend/symfony/.env
           sed -i 's|cdn_url|${{ secrets.CDN_URL }}|' backend/symfony/.env
           sed -i 's|backend_url|${{ secrets.BACKEND_URL }}|' backend/symfony/.env
+          sed -i 's|stripe_secret_key|${{ secrets.STRIPE_SECRET_KEY }}|' backend/symfony/.env
           sed -i 's|api_url|${{ secrets.API_URL }}|' frontend/.env
           sed -i 's|cdn_url|${{ secrets.CDN_URL }}|' frontend/.env
           sed -i 's|api_url|${{ secrets.API_URL }}|' admin-frontend/.env

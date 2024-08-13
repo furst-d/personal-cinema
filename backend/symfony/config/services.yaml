@@ -50,6 +50,10 @@ services:
             $cdnCallbackKey: '%env(CDN_CALLBACK_KEY)%'
             $logger: '@monolog.logger.cdn'
 
+    App\Service\Payment\PaymentService:
+        arguments:
+            $stripeSecretKey: '%env(STRIPE_SECRET_KEY)%'
+
     App\Helper\Cdn\CdnManager:
         arguments:
             $cdnSecretKey: '%env(CDN_API_KEY)%'
