@@ -2,7 +2,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import HomePage from "../pages/HomePage";
 import VideoPage from "../pages/VideoPage";
-import DiscPage from "../pages/DiscPage";
+import StoragePage from "../pages/StoragePage";
 import ProfilePage from "../pages/ProfilePage";
 import SettingsPage from "../pages/SettingsPage";
 import NotFoundPage from "../pages/NotFoundPage";
@@ -30,7 +30,7 @@ const PrivateRouter: React.FC = () => {
                                             <Route path="/" element={<HomePage />} />
                                             <Route path="/videos-management" element={<VideoPage />} />
                                             <Route path="/videos/:hash" element={<VideoDetailPage />} />
-                                            <Route path="/disc" element={<DiscPage />} />
+                                            <Route path="/storage" element={<StoragePage />} />
                                             <Route path="/profile" element={<ProfilePage />} />
                                             <Route path="/settings" element={<SettingsPage />} />
                                             <Route path="*" element={<NotFoundPage />} />

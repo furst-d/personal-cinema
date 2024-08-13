@@ -5,6 +5,10 @@ export const formatSize = (size: number) => {
     return `${(size / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 };
 
+export const formatBytesToGigabytes = (bytes: number) => {
+    return (bytes / (1024 * 1024 * 1024)).toFixed(2);
+}
+
 export const formatDuration = (duration: number) => {
     const seconds = Math.floor(duration % 60);
     const minutes = Math.floor((duration / 60) % 60);
