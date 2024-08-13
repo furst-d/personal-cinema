@@ -3,9 +3,12 @@
 namespace App\Service\Storage;
 
 use App\Entity\Storage\Storage;
+use App\Entity\Storage\StorageUpgradePrice;
 use App\Exception\FullStorageException;
+use App\Exception\NotFoundException;
 use App\Exception\TooLargeException;
 use App\Repository\Settings\SettingsRepository;
+use App\Repository\Storage\StorageUpgradePriceRepository;
 
 class StorageService
 {
@@ -15,12 +18,58 @@ class StorageService
     private SettingsRepository $settingsRepository;
 
     /**
-     * @param SettingsRepository $settingsRepository
+     * @var StorageUpgradePriceRepository $storageUpgradePriceRepository
      */
-    public function __construct(SettingsRepository $settingsRepository)
+    private StorageUpgradePriceRepository $storageUpgradePriceRepository;
+
+    /**
+     * @param SettingsRepository $settingsRepository
+     * @param StorageUpgradePriceRepository $storageUpgradePriceRepository
+     */
+    public function __construct(
+        SettingsRepository $settingsRepository,
+        StorageUpgradePriceRepository $storageUpgradePriceRepository
+    )
     {
         $this->settingsRepository = $settingsRepository;
+        $this->storageUpgradePriceRepository = $storageUpgradePriceRepository;
     }
+
+    /**
+     * @param Storage $storage
+     * @param int $fileSize
+     * @return void
+     * @throws TooLargeException|FullStorageException
+     */
+    public function checkStorageBeforeUpload(Storage $storage, int $fileSize): void
+    {
+        if ($this->hasExceededStorageLimit($storage->getMaxStorage(), $storage->getUsedStorage() + $fileSize)) {
+            throw new FullStorageException('File exceeds storage limit');
+        }
+
+        if ($this->hasExceededFileLimit($fileSize)) {
+            $maxFile = $this->settingsRepository->getMaxFileSize();
+            $maxFile = substr($maxFile, 0, -2) . ' ' . substr($maxFile, -2);
+            throw new TooLargeException('File too large', ['maxFileSize' => $maxFile]);
+        }
+    }
+
+    /**
+     * @return int
+     */
+    public function getDefaultUserStorageLimit(): int
+    {
+        return $this->convertSizeToBytes($this->settingsRepository->getDefaultUserStorageLimit());
+    }
+
+    /**
+     * @return array
+     */
+    public function getPrices(): array
+    {
+        return $this->storageUpgradePriceRepository->getAllBySize();
+    }
+
 
     /**
      * Convert a size string (e.g., "500MB", "10GB") to bytes.
@@ -71,29 +120,19 @@ class StorageService
     }
 
     /**
-     * @param Storage $storage
-     * @param int $fileSize
-     * @return void
-     * @throws TooLargeException|FullStorageException
+     * @param int $storagePriceId
+     * @return StorageUpgradePrice
+     * @throws NotFoundException
      */
-    public function checkStorageBeforeUpload(Storage $storage, int $fileSize): void
+    public function getPriceById(int $storagePriceId): StorageUpgradePrice
     {
-        if ($this->hasExceededStorageLimit($storage->getMaxStorage(), $storage->getUsedStorage() + $fileSize)) {
-            throw new FullStorageException('File exceeds storage limit');
+        /** @var StorageUpgradePrice $price */
+        $price = $this->storageUpgradePriceRepository->find($storagePriceId);
+
+        if (!$price) {
+            throw new NotFoundException('Invalid storage price ID');
         }
 
-        if ($this->hasExceededFileLimit($fileSize)) {
-            $maxFile = $this->settingsRepository->getMaxFileSize();
-            $maxFile = substr($maxFile, 0, -2) . ' ' . substr($maxFile, -2);
-            throw new TooLargeException('File too large', ['maxFileSize' => $maxFile]);
-        }
-    }
-
-    /**
-     * @return int
-     */
-    public function getDefaultUserStorageLimit(): int
-    {
-        return $this->convertSizeToBytes($this->settingsRepository->getDefaultUserStorageLimit());
+        return $price;
     }
 }

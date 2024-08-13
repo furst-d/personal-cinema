@@ -1,15 +1,16 @@
 import React from "react";
 import {Helmet, HelmetProvider} from "react-helmet-async";
+import Storage from "../storage/Storage";
 
-const DiscPage: React.FC = () => {
+const StoragePage: React.FC = () => {
     return (
         <HelmetProvider>
             <Helmet>
-                <title>Správa disku</title>
+                <title>Správa úložiště</title>
             </Helmet>
-            <h1>Správa disku</h1>
+            <Storage />
         </HelmetProvider>
     );
 }
 
-export default DiscPage;
+export default StoragePage;

@@ -31,7 +31,7 @@ const Navbar = () => {
     const pages = [
         { title: 'Vaše videa', path: '/' },
         { title: 'Správa videí', path: '/videos-management' },
-        { title: 'Správa disku', path: '/disc' }
+        { title: 'Správa úložiště', path: '/storage' }
     ];
 
     const settings = [
