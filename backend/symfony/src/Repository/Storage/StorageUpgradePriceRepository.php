@@ -2,12 +2,13 @@
 
 namespace App\Repository\Storage;
 
+use App\Entity\Storage\StorageCardPayment;
 use App\Entity\Storage\StorageUpgradePrice;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<StorageUpgradePrice>
+ * @extends ServiceEntityRepository<StorageCardPayment>
  */
 class StorageUpgradePriceRepository extends ServiceEntityRepository
 {

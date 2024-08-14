@@ -4,6 +4,8 @@ namespace App\Controller\V1\Personal\Storage;
 
 use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Storage\StoragePaymentRequest;
+use App\DTO\Storage\StoragePaymentSuccessRequest;
+use App\Entity\Storage\StorageUpgrade;
 use App\Exception\ApiException;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Payment\PaymentService;
@@ -41,6 +43,14 @@ class StorageUpgradeController extends BasePersonalController
         $this->paymentService = $paymentService;
     }
 
+    #[Route('', name: 'user_storage_upgrades', methods: ['GET'])]
+    public function getUserUpgrades(Request $request): JsonResponse
+    {
+        $account = $this->getAccount($request);
+
+        return $this->re->withData($account->getStorageUpgrades(), [StorageUpgrade::STORAGE_UPGRADE_READ]);
+    }
+
     #[Route('/payment/session', name: 'user_storage_payment_session', methods: ['GET'])]
     public function createCheckoutSession(Request $request, StoragePaymentRequest $storagePaymentRequest): JsonResponse
     {
@@ -55,26 +65,21 @@ class StorageUpgradeController extends BasePersonalController
         }
     }
 
-    #[Route('/personal/storage/upgrade/success', name: 'user_storage_upgrade_success', methods: ['POST'])]
-    public function handlePaymentSuccess(Request $request): JsonResponse
+    #[Route('', name: 'user_storage_upgrade_success', methods: ['POST'])]
+    public function handlePaymentSuccess(Request $request, StoragePaymentSuccessRequest $storagePaymentSuccessRequest): JsonResponse
     {
-//        $requestData = json_decode($request->getContent(), true);
-//        $paymentIntentId = $requestData['paymentIntentId'] ?? null;
-//
-//        if (!$paymentIntentId) {
-//            throw new ApiException('Missing payment intent ID');
-//        }
-//
-//        // Ověřte, že Payment Intent je skutečně úspěšný (můžete volat Stripe API zde)
-//        $paymentIntent = $this->storageService->retrievePaymentIntent($paymentIntentId);
-//        if ($paymentIntent->status !== 'succeeded') {
-//            throw new ApiException('Payment not completed');
-//        }
-//
-//        // Logika pro navýšení úložiště pro uživatele
-//        $user = $this->getUser(); // Získejte aktuálního uživatele
-//        $this->storageService->upgradeUserStorage($user, $paymentIntent->amount); // Logika pro navýšení úložiště
-//
-        return $this->re->withMessage('Storage upgraded successfully');
+        try {
+            $account = $this->getAccount($request);
+            $sessionId = $storagePaymentSuccessRequest->checkoutSessionId;
+
+            $session = $this->paymentService->validatePayment($sessionId);
+            $metadata = $this->paymentService->validateMetadata($session->metadata);
+
+            $this->storageService->createUpgrade($account, $metadata, $sessionId);
+
+            return $this->re->withMessage('Storage upgraded successfully');
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
     }
 }

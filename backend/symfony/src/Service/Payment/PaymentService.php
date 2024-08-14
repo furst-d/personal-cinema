@@ -5,10 +5,14 @@ namespace App\Service\Payment;
 use App\Entity\Account\Account;
 use App\Entity\Storage\StorageUpgradePrice;
 use App\Exception\InternalException;
+use App\Exception\NotFoundException;
+use App\Exception\PaymentRequiredException;
+use App\Helper\Storage\StoragePaymentMetadata;
+use App\Service\Account\AccountService;
 use Stripe\Checkout\Session;
 use Stripe\Exception\ApiErrorException;
-use Stripe\PaymentIntent;
 use Stripe\Stripe;
+use Stripe\StripeObject;
 
 class PaymentService
 {
@@ -18,13 +22,24 @@ class PaymentService
     private string $frontendUrl;
 
     /**
+     * @var AccountService $accountService
+     */
+    private AccountService $accountService;
+
+    /**
      * @param string $stripeSecretKey
      * @param string $frontendUrl
+     * @param AccountService $accountService
      */
-    public function __construct(string $stripeSecretKey, string $frontendUrl)
+    public function __construct(
+        string $stripeSecretKey,
+        string $frontendUrl,
+        AccountService $accountService
+    )
     {
         Stripe::setApiKey($stripeSecretKey);
         $this->frontendUrl = $frontendUrl;
+        $this->accountService = $accountService;
     }
 
     /**
@@ -49,12 +64,12 @@ class PaymentService
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
-                'success_url' => "$this->frontendUrl/payment/success",
-                'cancel_url' => "$this->frontendUrl/payment/cancel",
+                'success_url' => "$this->frontendUrl/storage?payment=success&session_id={CHECKOUT_SESSION_ID}",
+                'cancel_url' => "$this->frontendUrl/storage?payment=failure",
                 'metadata' => [
                     'user_id' => $account->getId(),
-                    'price_id' => $price->getId(),
                     'price_czk' => $price->getDiscountedPriceCzk(),
+                    'size' => $price->getSize(),
                 ],
             ]);
         } catch (ApiErrorException) {
@@ -63,16 +78,44 @@ class PaymentService
     }
 
     /**
-     * @param string $paymentIntentId
-     * @return PaymentIntent
-     * @throws InternalException
+     * @param string $sessionId
+     * @return Session
+     * @throws InternalException|PaymentRequiredException
      */
-    public function retrievePaymentIntent(string $paymentIntentId): PaymentIntent
+    public function validatePayment(string $sessionId): Session
     {
         try {
-            return PaymentIntent::retrieve($paymentIntentId);
-        } catch (ApiErrorException $e) {
-            throw new InternalException('Failed to retrieve payment intent');
+            $session = Session::retrieve($sessionId);
+
+            if ($session->payment_status !== 'paid') {
+                throw new PaymentRequiredException('Payment not completed');
+            }
+
+            return $session;
+
+        } catch (ApiErrorException) {
+            throw new InternalException('Failed to retrieve checkout session');
         }
+    }
+
+    /**
+     * @param StripeObject|null $metadata
+     * @return StoragePaymentMetadata
+     * @throws InternalException
+     * @throws NotFoundException
+     */
+    public function validateMetadata(?StripeObject $metadata): StoragePaymentMetadata
+    {
+        if (!$metadata) {
+            throw new InternalException('Metadata not found');
+        }
+
+        if (!isset($metadata->user_id, $metadata->price_czk, $metadata->size)) {
+            throw new InternalException('Invalid metadata');
+        }
+
+        $account = $this->accountService->getAccountById($metadata->user_id);
+
+        return new StoragePaymentMetadata($account, $metadata->price_czk, $metadata->size);
     }
 }
