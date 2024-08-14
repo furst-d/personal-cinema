@@ -105,6 +105,50 @@ class StorageService
         return $this->storageCardPaymentRepository->findBySessionId($sessionId);
     }
 
+    /**
+     * @param int $storagePriceId
+     * @return StorageUpgradePrice
+     * @throws NotFoundException
+     */
+    public function getPriceById(int $storagePriceId): StorageUpgradePrice
+    {
+        /** @var StorageUpgradePrice $price */
+        $price = $this->storageUpgradePriceRepository->find($storagePriceId);
+
+        if (!$price) {
+            throw new NotFoundException('Invalid storage price ID');
+        }
+
+        return $price;
+    }
+
+    /**
+     * @param Account $account
+     * @param StoragePaymentMetadata $metadata
+     * @param string $sessionId
+     * @return void
+     * @throws ConflictException
+     */
+    public function createUpgrade(Account $account, StoragePaymentMetadata $metadata, string $sessionId): void
+    {
+        if ($this->getStorageCardPaymentBySession($sessionId)) {
+            throw new ConflictException('Upgrade already exists');
+        }
+
+        $storageUpgrade = new StorageUpgrade(
+            $account,
+            $metadata->getPriceCzk(),
+            $metadata->getSize(),
+            StoragePaymentType::CARD,
+            $sessionId
+        );
+
+        $storage = $account->getStorage();
+        $storage->setMaxStorage($storage->getMaxStorage() + $metadata->getSize());
+
+        $this->storageUpgradeRepository->save($storageUpgrade);
+    }
+
 
     /**
      * Convert a size string (e.g., "500MB", "10GB") to bytes.
@@ -152,49 +196,5 @@ class StorageService
     private function hasExceededFileLimit(int $fileSize): bool
     {
         return $fileSize > $this->getMaxFileSize();
-    }
-
-    /**
-     * @param int $storagePriceId
-     * @return StorageUpgradePrice
-     * @throws NotFoundException
-     */
-    public function getPriceById(int $storagePriceId): StorageUpgradePrice
-    {
-        /** @var StorageUpgradePrice $price */
-        $price = $this->storageUpgradePriceRepository->find($storagePriceId);
-
-        if (!$price) {
-            throw new NotFoundException('Invalid storage price ID');
-        }
-
-        return $price;
-    }
-
-    /**
-     * @param Account $account
-     * @param StoragePaymentMetadata $metadata
-     * @param string $sessionId
-     * @return void
-     * @throws ConflictException
-     */
-    public function createUpgrade(Account $account, StoragePaymentMetadata $metadata, string $sessionId): void
-    {
-        if ($this->getStorageCardPaymentBySession($sessionId)) {
-            throw new ConflictException('Upgrade already exists');
-        }
-
-        $storageUpgrade = new StorageUpgrade(
-            $account,
-            $metadata->getPriceCzk(),
-            $metadata->getSize(),
-            StoragePaymentType::CARD,
-            $sessionId
-        );
-
-        $storage = $account->getStorage();
-        $storage->setMaxStorage($storage->getMaxStorage() + $metadata->getSize());
-
-        $this->storageUpgradeRepository->save($storageUpgrade);
     }
 }
