@@ -76,7 +76,7 @@ class Folder
         $this->videos = new ArrayCollection();
         $this->subFolders = new ArrayCollection();
         $this->parent = $parent;
-		$this->setName($name);
+        $this->setName($name);
         $this->shares = new ArrayCollection();
     }
 
