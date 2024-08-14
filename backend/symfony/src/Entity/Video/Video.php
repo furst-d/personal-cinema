@@ -5,6 +5,7 @@ namespace App\Entity\Video;
 use App\Entity\Account\Account;
 use App\Entity\Video\Share\ShareVideo;
 use App\Entity\Video\Share\ShareVideoPublic;
+use App\Helper\Video\NameNormalizer;
 use App\Repository\Video\VideoRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -30,6 +31,9 @@ class Video
     #[ORM\Column(length: 255)]
     #[Groups([self::VIDEO_READ, self::VIDEOS_READ, self::VIDEO_PUBLIC_READ])]
     private string $name;
+
+    #[ORM\Column(length: 255)]
+    private string $normalizedName;
 
     #[ORM\ManyToOne(inversedBy: 'videos')]
     #[ORM\JoinColumn(nullable: false)]
@@ -118,7 +122,7 @@ class Video
      */
     public function __construct(string $name, Account $account)
     {
-        $this->name = $name;
+        $this->setName($name);
         $this->account = $account;
         $this->hash = uniqid();
         $this->isDeleted = false;
@@ -150,6 +154,15 @@ class Video
     public function setName(string $name): void
     {
         $this->name = $name;
+        $this->normalizedName = NameNormalizer::normalize($name);
+    }
+
+    /**
+     * @return string
+     */
+    public function getNormalizedName(): string
+    {
+        return $this->normalizedName;
     }
 
     /**
