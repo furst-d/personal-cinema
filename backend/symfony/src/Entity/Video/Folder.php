@@ -71,13 +71,12 @@ class Folder
      */
     public function __construct(string $name, Account $owner, ?Folder $parent = null)
     {
-        $this->setName($name);
         $this->owner = $owner;
         $this->createdAt = new DateTimeImmutable();
         $this->videos = new ArrayCollection();
         $this->subFolders = new ArrayCollection();
         $this->parent = $parent;
-        $this->update();
+		$this->setName($name);
         $this->shares = new ArrayCollection();
     }
 
