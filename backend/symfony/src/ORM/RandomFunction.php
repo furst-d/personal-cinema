@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DQL;
+namespace App\ORM;
 
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 use Doctrine\ORM\Query\Parser;

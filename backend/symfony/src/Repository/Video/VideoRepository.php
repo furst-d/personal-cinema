@@ -2,7 +2,7 @@
 
 namespace App\Repository\Video;
 
-use App\DQL\RandomFunction;
+use App\ORM\RandomFunction;
 use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
 use App\Entity\Video\Folder;

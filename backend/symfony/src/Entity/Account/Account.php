@@ -3,6 +3,7 @@
 namespace App\Entity\Account;
 
 use App\Entity\Storage\Storage;
+use App\Entity\Storage\StorageUpgrade;
 use App\Entity\Video\Folder;
 use App\Entity\Video\Share\ShareFolder;
 use App\Entity\Video\Share\ShareVideo;
@@ -89,6 +90,12 @@ class Account implements UserInterface
     private Storage $storage;
 
     /**
+     * @var Collection<int, StorageUpgrade>
+     */
+    #[ORM\OneToMany(targetEntity: StorageUpgrade::class, mappedBy: 'account', orphanRemoval: true)]
+    private Collection $storageUpgrades;
+
+    /**
      * @param string $email
      * @param string $password
      * @param string $salt
@@ -107,6 +114,7 @@ class Account implements UserInterface
         $this->storage = new Storage($this, $maxStorage);
         $this->sharedVideos = new ArrayCollection();
         $this->sharedFolders = new ArrayCollection();
+        $this->storageUpgrades = new ArrayCollection();
     }
 
     /**
@@ -303,5 +311,13 @@ class Account implements UserInterface
     public function getSharedFolders(): Collection
     {
         return $this->sharedFolders;
+    }
+
+    /**
+     * @return Collection<int, StorageUpgrade>
+     */
+    public function getStorageUpgrades(): Collection
+    {
+        return $this->storageUpgrades;
     }
 }

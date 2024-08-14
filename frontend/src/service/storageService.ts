@@ -18,3 +18,9 @@ export const fetchCheckoutSession = async (storagePriceId: number): Promise<{ ch
     });
     return response.data.payload.data;
 }
+
+export const upgradeStorage = async (checkoutSessionId: string): Promise<void> => {
+    await axiosPrivate.post('/v1/personal/storage/upgrade', {
+        checkoutSessionId: checkoutSessionId,
+    });
+}
