@@ -5,6 +5,7 @@ namespace App\Controller\V1\Personal\Storage;
 use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Storage\StoragePaymentRequest;
 use App\DTO\Storage\StoragePaymentSuccessRequest;
+use App\Entity\Storage\StorageUpgrade;
 use App\Exception\ApiException;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Payment\PaymentService;
@@ -40,6 +41,14 @@ class StorageUpgradeController extends BasePersonalController
         parent::__construct($locator);
         $this->storageService = $storageService;
         $this->paymentService = $paymentService;
+    }
+
+    #[Route('', name: 'user_storage_upgrades', methods: ['GET'])]
+    public function getUserUpgrades(Request $request): JsonResponse
+    {
+        $account = $this->getAccount($request);
+
+        return $this->re->withData($account->getStorageUpgrades(), [StorageUpgrade::STORAGE_UPGRADE_READ]);
     }
 
     #[Route('/payment/session', name: 'user_storage_payment_session', methods: ['GET'])]

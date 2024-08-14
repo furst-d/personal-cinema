@@ -8,10 +8,13 @@ use App\Repository\Storage\StorageUpgradeRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: StorageUpgradeRepository::class)]
 class StorageUpgrade
 {
+    public const STORAGE_UPGRADE_READ = 'storage_upgrade:read';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -25,12 +28,14 @@ class StorageUpgrade
     private int $paymentType;
 
     #[ORM\Column(type: Types::INTEGER)]
+    #[Groups([self::STORAGE_UPGRADE_READ])]
     private int $priceCzk;
 
     #[ORM\Column(type: Types::BIGINT)]
     private int $size;
 
     #[ORM\Column]
+    #[Groups([self::STORAGE_UPGRADE_READ])]
     private DateTimeImmutable $createdAt;
 
     #[ORM\OneToOne(mappedBy: 'storageUpgrade', cascade: ['persist', 'remove'])]
@@ -80,6 +85,12 @@ class StorageUpgrade
         return StoragePaymentType::from($this->paymentType);
     }
 
+    #[Groups([self::STORAGE_UPGRADE_READ])]
+    public function getPaymentTypeName(): string
+    {
+        return $this->getPaymentType()->name;
+    }
+
     /**
      * @return int
      */
@@ -94,6 +105,15 @@ class StorageUpgrade
     public function getSize(): int
     {
         return $this->size;
+    }
+
+    /**
+     * @return int
+     */
+    #[Groups([self::STORAGE_UPGRADE_READ])]
+    public function getSizeInGB(): int
+    {
+        return (int) ($this->size / 1024 / 1024 / 1024);
     }
 
     /**
