@@ -4,6 +4,7 @@ namespace App\Entity\Video;
 
 use App\Entity\Account\Account;
 use App\Entity\Video\Share\ShareFolder;
+use App\Helper\Video\NameNormalizer;
 use App\Repository\Video\FolderRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -25,6 +26,9 @@ class Folder
     #[ORM\Column(length: 255)]
     #[Groups([self::FOLDER_READ])]
     private string $name;
+
+    #[ORM\Column(length: 255)]
+    private string $normalizedName;
 
     #[ORM\ManyToOne(inversedBy: 'folders')]
     #[ORM\JoinColumn(nullable: false)]
@@ -67,7 +71,7 @@ class Folder
      */
     public function __construct(string $name, Account $owner, ?Folder $parent = null)
     {
-        $this->name = $name;
+        $this->setName($name);
         $this->owner = $owner;
         $this->createdAt = new DateTimeImmutable();
         $this->videos = new ArrayCollection();
@@ -100,6 +104,7 @@ class Folder
     public function setName(string $name): void
     {
         $this->name = $name;
+        $this->normalizedName = NameNormalizer::normalize($name);
         $this->update();
     }
 
