@@ -26,12 +26,19 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
     const [deletingType, setDeletingType] = useState<"folder" | "video" | null>(null);
     const [uploadMenuAnchor, setUploadMenuAnchor] = useState<null | { mouseX: number, mouseY: number }>(null);
 
+    const limit = 1000;
+    const offset = 0;
+    const sortBy = 'name';
+
     useEffect(() => {
         setLoading(true);
-        Promise.all([fetchFolders(currentFolderId), fetchVideos(currentFolderId)])
+        Promise.all([
+            fetchFolders(limit, offset, sortBy, currentFolderId),
+            fetchVideos(limit, offset, sortBy, currentFolderId)
+        ])
             .then(([foldersData, videosData]) => {
-                setFolders(foldersData);
-                setVideos(videosData);
+                setFolders(foldersData.data);
+                setVideos(videosData.data);
             })
             .finally(() => setLoading(false));
     }, [currentFolderId]);
@@ -242,8 +249,8 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
     }, [folders, videos]);
 
     const handleSingleUploadCompleted = async () => {
-        const videosData = await fetchVideos(currentFolderId);
-        setVideos(videosData);
+        const videosData = await fetchVideos(1000, 0, 'name', currentFolderId);
+        setVideos(videosData.data);
     };
 
     return {

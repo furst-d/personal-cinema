@@ -6,6 +6,12 @@ interface Folder {
     updatedAt: string;
 }
 
+interface FolderPayload {
+    data: Folder[];
+    count: number;
+    totalCount?: number;
+}
+
 interface Video {
     id: string;
     name: string;
@@ -13,6 +19,12 @@ interface Video {
     thumbnailUrl?: string;
     path?: string;
     createdAt: string;
+}
+
+interface VideoPayload {
+    data: Video[];
+    count: number;
+    totalCount?: number;
 }
 
 interface CreateFolderRequest {
@@ -26,26 +38,50 @@ interface UpdateRequest {
     folderId?: string;
 }
 
-export const fetchFolders = async (currentFolderId: string | null): Promise<Folder[]> => {
+export const fetchFolders = async (limit: number, offset: number, sortBy: string, currentFolderId: string | null): Promise<FolderPayload> => {
     const response = await axiosPrivate.get('/v1/personal/folders', {
         params: {
-            limit: 1000,
-            sortBy: 'name',
+            limit: limit,
+            offset: offset,
+            sortBy: sortBy,
             parentId: currentFolderId || 0
         }
     });
-    return response.data.payload.data;
+    return response.data.payload;
 };
 
-export const fetchVideos = async (currentFolderId: string | null): Promise<Video[]> => {
+export const fetchSharedFolders = async (limit: number, offset: number, sortBy: string): Promise<FolderPayload> => {
+    const response = await axiosPrivate.get('/v1/personal/folders/share', {
+        params: {
+            limit: limit,
+            offset: offset,
+            sortBy: sortBy,
+        }
+    });
+    return response.data.payload;
+};
+
+export const fetchVideos = async (limit: number, offset: number, sortBy: string, currentFolderId: string | null): Promise<VideoPayload> => {
     const response = await axiosPrivate.get('/v1/personal/videos', {
         params: {
-            limit: 1000,
-            sortBy: 'name',
+            limit: limit,
+            offset: offset,
+            sortBy: sortBy,
             folderId: currentFolderId || 0
         }
     });
-    return response.data.payload.data;
+    return response.data.payload;
+};
+
+export const fetchSharedVideos = async (limit: number, offset: number, sortBy: string): Promise<VideoPayload> => {
+    const response = await axiosPrivate.get('/v1/personal/videos/share', {
+        params: {
+            limit: limit,
+            offset: offset,
+            sortBy: sortBy,
+        }
+    });
+    return response.data.payload;
 };
 
 export const createFolder = async (requestData: CreateFolderRequest): Promise<Folder> => {

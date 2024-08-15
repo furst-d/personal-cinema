@@ -16,12 +16,13 @@ use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Helper\DTO\PaginatorResult;
 use App\Helper\Generator\RandomGenerator;
-use App\Helper\Video\FolderData;
 use App\Repository\Settings\SettingsRepository;
+use App\Repository\Video\FolderRepository;
 use App\Repository\Video\Share\ShareFolderRepository;
 use App\Repository\Video\Share\ShareVideoPublicRepository;
 use App\Repository\Video\Share\ShareVideoPublicViewRepository;
 use App\Repository\Video\Share\ShareVideoRepository;
+use App\Repository\Video\VideoRepository;
 
 class ShareService
 {
@@ -51,6 +52,16 @@ class ShareService
     private SettingsRepository $settingsRepository;
 
     /**
+     * @var VideoRepository $videoRepository
+     */
+    private VideoRepository $videoRepository;
+
+    /**
+     * @var FolderRepository $folderRepository
+     */
+    private FolderRepository $folderRepository;
+
+    /**
      * @var RandomGenerator $generator
      */
     private RandomGenerator $generator;
@@ -64,6 +75,8 @@ class ShareService
      * @param ShareVideoPublicViewRepository $shareVideoPublicViewRepository
      * @param ShareVideoRepository $shareVideoRepository
      * @param SettingsRepository $settingsRepository
+     * @param VideoRepository $videoRepository
+     * @param FolderRepository $folderRepository
      * @param RandomGenerator $generator
      */
     public function __construct(
@@ -72,6 +85,8 @@ class ShareService
         ShareVideoPublicViewRepository $shareVideoPublicViewRepository,
         ShareVideoRepository $shareVideoRepository,
         SettingsRepository $settingsRepository,
+        VideoRepository $videoRepository,
+        FolderRepository $folderRepository,
         RandomGenerator $generator
     )
     {
@@ -80,6 +95,8 @@ class ShareService
         $this->shareVideoPublicViewRepository = $shareVideoPublicViewRepository;
         $this->shareVideoRepository = $shareVideoRepository;
         $this->settingsRepository = $settingsRepository;
+        $this->videoRepository = $videoRepository;
+        $this->folderRepository = $folderRepository;
         $this->generator = $generator;
     }
 
@@ -105,24 +122,22 @@ class ShareService
 
     /**
      * @param Account $account
-     * @param FolderData $folderData
      * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult<Folder>
      */
-    public function getSharedFolders(Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
+    public function getSharedFolders(Account $account, PaginatorRequest $paginatorRequest): PaginatorResult
     {
-        return $this->shareFolderRepository->findSharedFolders($account, $folderData, $paginatorRequest);
+        return $this->folderRepository->findSharedFolders($account, $paginatorRequest);
     }
 
     /**
      * @param Account $account
-     * @param FolderData $folderData
      * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult<Video>
      */
-    public function getSharedVideos(Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
+    public function getSharedVideos(Account $account, PaginatorRequest $paginatorRequest): PaginatorResult
     {
-        return $this->shareVideoRepository->findSharedVideos($account, $folderData, $paginatorRequest);
+        return $this->videoRepository->findSharedVideos($account, $paginatorRequest);
     }
 
     /**

@@ -13,6 +13,7 @@ use App\Helper\DTO\PaginatorResult;
 use App\Helper\Video\FolderData;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
+use App\Service\Video\FolderService;
 use App\Service\Video\ShareService;
 use App\Service\Video\VideoService;
 use PHPUnit\Framework\TestCase;
@@ -23,20 +24,23 @@ class VideoServiceTest extends TestCase
     private $mockVideoRepository;
     private $mockMd5Repository;
     private $mockUrlGenerator;
-    private $shareService;
+    private $mockShareService;
+    private $mockFolderService;
 
     protected function setUp(): void
     {
         $this->mockVideoRepository = $this->createMock(VideoRepository::class);
         $this->mockMd5Repository = $this->createMock(MD5Repository::class);
         $this->mockUrlGenerator = $this->createMock(UrlGenerator::class);
-        $this->shareService = $this->createMock(ShareService::class);
+        $this->mockShareService = $this->createMock(ShareService::class);
+        $this->mockFolderService = $this->createMock(FolderService::class);
 
         $this->videoService = new VideoService(
             $this->mockVideoRepository,
             $this->mockMd5Repository,
             $this->mockUrlGenerator,
-            $this->shareService
+            $this->mockShareService,
+            $this->mockFolderService
         );
     }
 

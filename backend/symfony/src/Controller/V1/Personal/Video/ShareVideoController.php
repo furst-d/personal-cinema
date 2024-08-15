@@ -12,6 +12,7 @@ use App\Entity\Video\Video;
 use App\Exception\ApiException;
 use App\Exception\BadRequestException;
 use App\Helper\Jwt\JwtUsage;
+use App\Helper\Video\FolderData;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
 use App\Service\Locator\BaseControllerLocator;
@@ -90,13 +91,9 @@ class ShareVideoController extends BasePersonalController
     {
         try {
             $account = $this->getAccount($request);
-            $folderId = $videoQueryRequest->getFolderId();
-
-            $folderData = $this->folderService->getSharedFolderDataById($account, $folderId);
 
             $videos = $this->shareService->getSharedVideos(
                 $account,
-                $folderData,
                 $videoQueryRequest
             );
 
