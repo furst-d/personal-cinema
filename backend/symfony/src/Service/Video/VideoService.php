@@ -38,6 +38,11 @@ class VideoService
      */
     private ShareService $shareService;
 
+    /**
+     * @var FolderService $folderService
+     */
+    private FolderService $folderService;
+
     private const NOT_FOUND_MESSAGE = 'Video not found';
 
     /**
@@ -45,18 +50,21 @@ class VideoService
      * @param MD5Repository $md5Repository
      * @param UrlGenerator $urlGenerator
      * @param ShareService $shareService
+     * @param FolderService $folderService
      */
     public function __construct(
         VideoRepository $videoRepository,
         MD5Repository $md5Repository,
         UrlGenerator $urlGenerator,
-        ShareService $shareService
+        ShareService $shareService,
+        FolderService $folderService
     )
     {
         $this->videoRepository = $videoRepository;
         $this->md5Repository = $md5Repository;
         $this->urlGenerator = $urlGenerator;
         $this->shareService = $shareService;
+        $this->folderService = $folderService;
     }
 
     /**
@@ -95,9 +103,9 @@ class VideoService
     {
         $video = $this->videoRepository->findOneBy(['hash' => $hash]);
 
-        $hasSharedAccess = $this->shareService->hasSharedVideoAccess($account, $video);
-
-        if (!$video || ($video->getAccount() !== $account && !$hasSharedAccess)) {
+        if (!$video || ($video->getAccount() !== $account
+                && !$this->shareService->hasSharedVideoAccess($account, $video))
+                && !$this->folderService->hasUserAccessToFolder($account, $video->getFolder())) {
             throw new NotFoundException(self::NOT_FOUND_MESSAGE);
         }
 
@@ -219,6 +227,7 @@ class VideoService
     /**
      * @param Video $video
      * @return void
+     * @throws InternalException
      */
     public function addPublicVideoUrlToVideo(Video $video): void
     {

@@ -1,5 +1,7 @@
 import styled from "styled-components";
-import {Box, Link} from "@mui/material";
+import {Box, InputAdornment, Link, TextField} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import React from "react";
 
 export const CenterFormWrapperStyle = styled.div`
     display: flex;
@@ -38,5 +40,37 @@ export const StyledLink = styled(Link)`
     cursor: pointer;
     &:hover {
         text-decoration: underline !important;
+    }
+`;
+
+export const SearchTextFieldStyle = styled(({ ...props }) => (
+    <TextField
+        {...props}
+        InputProps={{
+            endAdornment: (
+                <InputAdornment position="end">
+                    <SearchIcon />
+                </InputAdornment>
+            ),
+        }}
+    />
+))`
+    width: 100%;
+    .MuiOutlinedInput-root {
+        border-radius: 8px;
+        fieldset {
+            border-color: ${({ theme }) => theme.textLight};
+        }
+        &:hover fieldset {
+            border-color: #888;
+        }
+        &.Mui-focused fieldset {
+            border-color: ${({ theme }) => theme.primary};
+        }
+    }
+    .MuiInputAdornment-root {
+        .MuiSvgIcon-root {
+            color: ${({ theme }) => theme.primary};
+        }
     }
 `;

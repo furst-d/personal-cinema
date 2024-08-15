@@ -49,12 +49,12 @@ class VideoRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('v')
             ->where('v.isDeleted = false');
 
-        if ($account) {
-            $qb->andWhere('v.account = :account')->setParameter('account', $account);
-        }
-
         if ($folderData->isDefaultFolder()) {
             $qb->andWhere('v.folder IS NULL');
+            if ($account) {
+                $qb->andWhere('(v.account = :account)')
+                    ->setParameter('account', $account);
+            }
         } else {
             if ($folderData->getFolder()) {
                 $qb->andWhere('v.folder = :folder')->setParameter('folder', $folderData->getFolder());
@@ -64,8 +64,24 @@ class VideoRepository extends ServiceEntityRepository
         if ($sortBy = $paginatorRequest->getOrderBy()) {
             if ($sortBy === SortBy::NAME) {
                 $qb->orderBy('v.name');
+            } elseif ($sortBy === SortBy::UPDATE_DATE) {
+                $qb->orderBy('v.createdAt', 'DESC');
             }
         }
+
+        return $this->getPaginatorResult($qb, $paginatorRequest);
+    }
+
+    /**
+     * @param Account $account
+     * @param PaginatorRequest $paginatorRequest
+     * @return PaginatorResult<Video>
+     */
+    public function findSharedVideos(Account $account, PaginatorRequest $paginatorRequest): PaginatorResult
+    {
+        $qb = $this->createQueryBuilder('v')
+            ->join('v.shares', 'sv')
+            ->where('sv.account = :account')->setParameter('account', $account);
 
         return $this->getPaginatorResult($qb, $paginatorRequest);
     }

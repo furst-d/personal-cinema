@@ -82,6 +82,48 @@ class FolderService
 
     /**
      * @param Account $account
+     * @param int $id
+     * @return Folder
+     * @throws NotFoundException
+     */
+    public function getAccountAllowedFolderById(Account $account, int $id): Folder
+    {
+        $folder = $this->folderRepository->find($id);
+
+        if (!$folder || !$this->hasUserAccessToFolder($account, $folder)) {
+            throw new NotFoundException(self::NOT_FOUND_MESSAGE);
+        }
+
+        return $folder;
+    }
+
+    /**
+     * @param Account $account
+     * @param Folder $folder
+     * @return bool
+     */
+    public function hasUserAccessToFolder(Account $account, Folder $folder): bool
+    {
+        while ($folder) {
+            if ($folder->getOwner() === $account) {
+                return true;
+            }
+
+            // Check if the folder is shared with the user
+            foreach ($folder->getShares() as $share) {
+                if ($share->getAccount() === $account) {
+                    return true;
+                }
+            }
+
+            $folder = $folder->getParent();
+        }
+
+        return false;
+    }
+
+    /**
+     * @param Account $account
      * @param int|null $id
      * @return FolderData
      * @throws NotFoundException
@@ -96,43 +138,7 @@ class FolderService
             return new FolderData(null, true);
         }
 
-        return new FolderData($this->getAccountFolderById($account, $id), false);
-    }
-
-    /**
-     * @param Account $account
-     * @param int|null $id
-     * @return FolderData
-     * @throws NotFoundException
-     */
-    public function getSharedFolderDataById(Account $account, ?int $id): FolderData
-    {
-        if (is_null($id)) {
-            return new FolderData(null, false);
-        }
-
-        if ($id === 0) {
-            return new FolderData(null, true);
-        }
-
-        return new FolderData($this->getSharedFolderById($account, $id), false);
-    }
-
-    /**
-     * @param Account $account
-     * @param int $id
-     * @return Folder
-     * @throws NotFoundException
-     */
-    public function getSharedFolderById(Account $account, int $id): Folder
-    {
-        $folder = $this->folderRepository->find($id);
-
-        if (!$folder || !$this->shareService->hasSharedFolderAccess($account, $folder)) {
-            throw new NotFoundException(self::NOT_FOUND_MESSAGE);
-        }
-
-        return $folder;
+        return new FolderData($this->getAccountAllowedFolderById($account, $id), false);
     }
 
     /**

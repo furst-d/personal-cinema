@@ -10,6 +10,7 @@ use App\Entity\Video\Folder;
 use App\Exception\ApiException;
 use App\Exception\BadRequestException;
 use App\Helper\Jwt\JwtUsage;
+use App\Helper\Video\FolderData;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
 use App\Service\Locator\BaseControllerLocator;
@@ -76,22 +77,14 @@ class ShareFolderController extends BasePersonalController
     #[Route('', name: 'user_shared_folders', methods: ['GET'])]
     public function getSharedFolders(Request $request, FolderQueryRequest $folderQueryRequest): JsonResponse
     {
-        try {
-            $account = $this->getAccount($request);
-            $parentFolderId = $folderQueryRequest->getParentId();
+        $account = $this->getAccount($request);
 
-            $folderData = $this->folderService->getSharedFolderDataById($account, $parentFolderId);
+        $folders = $this->shareService->getSharedFolders(
+            $account,
+            $folderQueryRequest
+        );
 
-            $folders = $this->shareService->getSharedFolders(
-                $account,
-                $folderData,
-                $folderQueryRequest
-            );
-
-            return $this->re->withData($folders, ['folder:read']);
-        } catch (ApiException $e) {
-            return $this->re->withException($e);
-        }
+        return $this->re->withData($folders, ['folder:read']);
     }
 
     #[Route('', name: 'user_share_folder', methods: ['POST'])]

@@ -13,10 +13,12 @@ use App\Exception\ForbiddenException;
 use App\Exception\NotFoundException;
 use App\Helper\Generator\RandomGenerator;
 use App\Repository\Settings\SettingsRepository;
+use App\Repository\Video\FolderRepository;
 use App\Repository\Video\Share\ShareFolderRepository;
 use App\Repository\Video\Share\ShareVideoPublicRepository;
 use App\Repository\Video\Share\ShareVideoPublicViewRepository;
 use App\Repository\Video\Share\ShareVideoRepository;
+use App\Repository\Video\VideoRepository;
 use App\Service\Video\ShareService;
 use PHPUnit\Framework\TestCase;
 
@@ -28,6 +30,8 @@ class ShareServiceTest extends TestCase
     private $mockShareVideoPublicViewRepository;
     private $mockShareVideoRepository;
     private $mockSettingsRepository;
+    private $mockVideoRepository;
+    private $mockFolderRepository;
     private $mockRandomGenerator;
 
     protected function setUp(): void
@@ -37,6 +41,8 @@ class ShareServiceTest extends TestCase
         $this->mockShareVideoPublicViewRepository = $this->createMock(ShareVideoPublicViewRepository::class);
         $this->mockShareVideoRepository = $this->createMock(ShareVideoRepository::class);
         $this->mockSettingsRepository = $this->createMock(SettingsRepository::class);
+        $this->mockVideoRepository = $this->createMock(VideoRepository::class);
+        $this->mockFolderRepository = $this->createMock(FolderRepository::class);
         $this->mockRandomGenerator = $this->createMock(RandomGenerator::class);
 
         $this->shareService = new ShareService(
@@ -45,6 +51,8 @@ class ShareServiceTest extends TestCase
             $this->mockShareVideoPublicViewRepository,
             $this->mockShareVideoRepository,
             $this->mockSettingsRepository,
+            $this->mockVideoRepository,
+            $this->mockFolderRepository,
             $this->mockRandomGenerator
         );
     }

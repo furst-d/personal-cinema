@@ -40,28 +40,6 @@ class ShareFolderRepository extends ServiceEntityRepository
 
     /**
      * @param Account $account
-     * @param FolderData $folderData
-     * @param PaginatorRequest $paginatorRequest
-     * @return PaginatorResult<Folder>
-     */
-    public function findSharedFolders(Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
-    {
-        $qb = $this->createQueryBuilder('sf')
-            ->where('sf.account = :account')->setParameter('account', $account);
-
-        if ($folderData->isDefaultFolder()) {
-            $qb->andWhere('sf.folder.parent IS NULL');
-        } else {
-            if ($folderData->getFolder()) {
-                $qb->andWhere('sf.folder.parent = :folder')->setParameter('folder', $folderData->getFolder());
-            }
-        }
-
-        return $this->getPaginatorResult($qb, $paginatorRequest);
-    }
-
-    /**
-     * @param Account $account
      * @param Folder $folder
      * @return bool
      */

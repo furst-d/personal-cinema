@@ -44,11 +44,11 @@ class FolderRepository extends ServiceEntityRepository
      */
     public function findAccountFolders(Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
     {
-        $qb = $this->createQueryBuilder('f')
-            ->where('f.owner = :account')->setParameter('account', $account);
+        $qb = $this->createQueryBuilder('f');
 
         if ($folderData->isDefaultFolder()) {
-            $qb->andWhere('f.parent IS NULL');
+            $qb->andWhere('f.parent IS NULL')
+                ->andwhere('f.owner = :account')->setParameter('account', $account);
         } else {
             if ($folderData->getFolder()) {
                 $qb->andWhere('f.parent = :folder')->setParameter('folder', $folderData->getFolder());
@@ -64,6 +64,43 @@ class FolderRepository extends ServiceEntityRepository
         }
 
         return $this->getPaginatorResult($qb, $paginatorRequest);
+    }
+
+    /**
+     * @param Account $account
+     * @param PaginatorRequest $paginatorRequest
+     * @return PaginatorResult<Folder>
+     */
+    public function findSharedFolders(Account $account, PaginatorRequest $paginatorRequest): PaginatorResult
+    {
+        $qb = $this->createQueryBuilder('f')
+            ->join('f.shares', 'sf')
+            ->where('sf.account = :account')->setParameter('account', $account);
+
+        return $this->getPaginatorResult($qb, $paginatorRequest);
+    }
+
+    /**
+     * @param Account $account
+     * @param int $id
+     * @return Folder|null
+     */
+    public function findAllowedFolderById(Account $account, int $id): ?Folder
+    {
+        return $this->createQueryBuilder('f')
+            ->where('f.id = :id')
+            ->andWhere('f.owner = :account OR f.id IN (
+                SELECT ff.id
+                FROM App\Entity\Video\Folder ff
+                JOIN ff.shares s
+                WHERE s.account = :account
+                AND f.id = ff.id
+                OR f.parent = ff.id
+            )')
+            ->setParameter('account', $account)
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     /**
