@@ -12,24 +12,24 @@ class CdnVideoRequest extends AbstractRequest
     #[Assert\Uuid]
     public string $id;
 
-    #[Assert\NotBlank]
-    #[Assert\Type('string')]
-    public string $title;
+    #[Assert\NotNull]
+    #[Assert\Type('boolean')]
+    public bool $deleted;
 
-    #[Assert\NotBlank]
     #[Assert\Type('string')]
-    public string $status;
+    public ?string $title;
+
+    #[Assert\Type('string')]
+    public ?string $status;
 
     #[Assert\Type('string')]
     public ?string $codec = null;
 
-    #[Assert\NotBlank]
     #[Assert\Type('string')]
-    public string $extension;
+    public ?string $extension;
 
-    #[Assert\NotBlank]
     #[Assert\Type('integer')]
-    public int $size;
+    public ?int $size;
 
     #[Assert\Type('integer')]
     public ?int $length = null;
@@ -40,17 +40,14 @@ class CdnVideoRequest extends AbstractRequest
     #[Assert\Valid]
     public CdnVideoResolutionRequest $resolution;
 
-    #[Assert\NotBlank]
     public array $parameters;
 
     #[Assert\Type('string')]
     public ?string $md5 = null;
 
-    #[Assert\NotBlank]
     #[Assert\Type(DateTimeImmutable::class)]
     public DateTimeImmutable $createdAt;
 
-    #[Assert\NotBlank]
     #[Assert\Type(DateTimeImmutable::class)]
     public DateTimeImmutable $updatedAt;
 }

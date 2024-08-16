@@ -3,6 +3,8 @@ import { mkdirSync } from 'fs';
 import * as fs from 'fs/promises';
 import ffmpeg from 'fluent-ffmpeg';
 import { PassThrough } from 'stream';
+import {deleteVideo, getVideo} from "../../services/videoService";
+import Video from "../../entities/video";
 
 const tempDir = path.resolve(__dirname, '../../../temp');
 
@@ -44,5 +46,19 @@ export class VideoProcessingUtils {
                     md5Hash += chunk.toString().split('=')[1]?.trim();
                 }));
         });
+    }
+
+    static async checkForDeletion(videoId: string) {
+        const video = await getVideo(videoId);
+
+        if (video.isDeleted && video.codec && video.originalPath && video.hlsPath && video.thumbnailPath) {
+            await deleteVideo(video);
+        }
+    }
+
+    static async markForDeletion(video: Video) {
+        video.isDeleted = true;
+        await video.save();
+        await this.checkForDeletion(video.id);
     }
 }

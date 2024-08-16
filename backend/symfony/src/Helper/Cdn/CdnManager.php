@@ -60,12 +60,8 @@ class CdnManager
                 ],
             ]);
 
-            if ($response->getStatusCode() !== 200) {
-                throw new InternalException('Error retrieving manifest from CDN');
-            }
-
             $body = $response->getBody()->getContents();
-            if ($response->getStatusCode() !== 200 || empty($body)) {
+            if (empty($body)) {
                 throw new InternalException('Invalid response from CDN');
             }
 
@@ -94,12 +90,7 @@ class CdnManager
                 throw new InternalException('Error retrieving thumbnail from CDN');
             }
 
-            $body = $response->getBody()->getContents();
-            if ($response->getStatusCode() !== 200 || empty($body)) {
-                throw new InternalException('Invalid response from CDN');
-            }
-
-            return $body;
+            return $response->getBody()->getContents();
         } catch (RequestException|GuzzleException $e) {
             throw new InternalException('Error communicating with CDN: ' . $e->getMessage());
         }
@@ -120,11 +111,31 @@ class CdnManager
             ]);
 
             $body = $response->getBody()->getContents();
-            if ($response->getStatusCode() !== 200 || empty($body)) {
-                throw new InternalException('Invalid response from CDN');
-            }
 
             return json_decode($body, true);
+        } catch (RequestException|GuzzleException $e) {
+            throw new InternalException('Error communicating with CDN: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * @param Video[] $videos
+     * @return void
+     * @throws InternalException
+     */
+    public function batchDelete(array $videos): void
+    {
+        $cdnIds = array_map(fn(Video $video) => $video->getCdnId(), $videos);
+
+        try {
+            $this->client->delete("{$this->cdnUrl}/videos", [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->cdnSecretKey,
+                ],
+                'json' => [
+                    'videoIds' => $cdnIds,
+                ]
+            ]);
         } catch (RequestException|GuzzleException $e) {
             throw new InternalException('Error communicating with CDN: ' . $e->getMessage());
         }

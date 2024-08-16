@@ -3,6 +3,7 @@
 namespace App\Entity\Storage;
 
 use App\Entity\Account\Account;
+use App\Helper\Storage\ByteSizeConverter;
 use App\Helper\Storage\StoragePaymentType;
 use App\Repository\Storage\StorageUpgradeRepository;
 use DateTimeImmutable;
@@ -113,7 +114,7 @@ class StorageUpgrade
     #[Groups([self::STORAGE_UPGRADE_READ])]
     public function getSizeInGB(): int
     {
-        return (int) ($this->size / 1024 / 1024 / 1024);
+        return (int) (ByteSizeConverter::toGB($this->size));
     }
 
     /**

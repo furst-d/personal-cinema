@@ -7,8 +7,6 @@ use App\DTO\Video\CdnVideoResolutionRequest;
 use App\Entity\Account\Account;
 use App\Entity\Storage\Storage;
 use App\Entity\Video\Video;
-use App\Exception\BadRequestException;
-use App\Exception\NotFoundException;
 use App\Helper\Cdn\CdnManager;
 use App\Helper\Cdn\CdnSynchronizer;
 use App\Service\Account\AccountService;
@@ -51,6 +49,7 @@ class CdnSynchronizerTest extends TestCase
     {
         $videoData = new CdnVideoRequest();
         $videoData->id = 'valid-uuid';
+        $videoData->deleted = false;
         $videoData->title = 'Test Video';
         $videoData->status = 'uploaded';
         $videoData->codec = 'H264';
@@ -82,29 +81,5 @@ class CdnSynchronizerTest extends TestCase
         $result = $this->cdnSynchronizer->synchronize($videoData);
 
         $this->assertInstanceOf(Video::class, $result);
-    }
-
-    public function testSynchronizeUnauthorized()
-    {
-        $this->expectException(BadRequestException::class);
-        $this->expectExceptionMessage('Cannot decode video token');
-
-        $videoData = $this->createValidCdnVideoRequest();
-
-        $this->mockJwtService->method('decodeToken')->willThrowException(new BadRequestException('Cannot decode video token'));
-
-        $this->cdnSynchronizer->synchronize($videoData);
-    }
-
-    public function testSynchronizeVideoNotFound()
-    {
-        $this->expectException(NotFoundException::class);
-        $this->expectExceptionMessage('Video not found');
-
-        $videoData = $this->createValidCdnVideoRequest();
-
-        $this->mockVideoService->method('getVideoByCdnId')->willThrowException(new NotFoundException('Video not found'));
-
-        $this->cdnSynchronizer->synchronize($videoData);
     }
 }

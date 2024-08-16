@@ -11,6 +11,7 @@ use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
 use App\Helper\Authenticator\Authenticator;
 use App\Helper\DTO\PaginatorResult;
+use App\Helper\Storage\ByteSizeConverter;
 use App\Repository\Account\AccountRepository;
 use App\Service\Storage\StorageService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -215,5 +216,24 @@ class AccountService
     public function getAccounts(?int $limit, ?int $offset): PaginatorResult
     {
         return $this->accountRepository->findAccounts($limit, $offset);
+    }
+
+    /**
+     * @param Account $account
+     * @return array
+     */
+    public function getStats(Account $account): array
+    {
+        return [
+            'email' => $account->getEmail(),
+            'storageUsedGB' => ByteSizeConverter::toGB($account->getStorage()->getUsedStorage()),
+            'storageLimitGB' => ByteSizeConverter::toGB($account->getStorage()->getMaxStorage()),
+            'storageUpgradeCount' => count($account->getStorageUpgrades()),
+            'videosCount' => count($account->getVideos()),
+            'foldersCount' => count($account->getFolders()),
+            'sharedVideosCount' => count($account->getSharedVideos()),
+            'sharedFoldersCount' => count($account->getSharedFolders()),
+            'created' => $account->getCreatedAt(),
+        ];
     }
 }

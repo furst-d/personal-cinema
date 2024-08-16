@@ -45,7 +45,6 @@ class CdnManagerTest extends TestCase
     public function testGetManifestContentErrorResponse()
     {
         $this->expectException(InternalException::class);
-        $this->expectExceptionMessage('Error retrieving manifest from CDN');
 
         $video = $this->createMock(Video::class);
         $video->method('getCdnId')->willReturn('videoCdnId');

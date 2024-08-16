@@ -13,6 +13,7 @@ use App\Helper\DTO\PaginatorResult;
 use App\Helper\Video\FolderData;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
+use App\Service\Cdn\CdnDeletionService;
 use App\Service\Video\FolderService;
 use App\Service\Video\ShareService;
 use App\Service\Video\VideoService;
@@ -26,6 +27,7 @@ class VideoServiceTest extends TestCase
     private $mockUrlGenerator;
     private $mockShareService;
     private $mockFolderService;
+    private $mockCdnDeletionService;
 
     protected function setUp(): void
     {
@@ -34,13 +36,15 @@ class VideoServiceTest extends TestCase
         $this->mockUrlGenerator = $this->createMock(UrlGenerator::class);
         $this->mockShareService = $this->createMock(ShareService::class);
         $this->mockFolderService = $this->createMock(FolderService::class);
+        $this->mockCdnDeletionService = $this->createMock(CdnDeletionService::class);
 
         $this->videoService = new VideoService(
             $this->mockVideoRepository,
             $this->mockMd5Repository,
             $this->mockUrlGenerator,
             $this->mockShareService,
-            $this->mockFolderService
+            $this->mockFolderService,
+            $this->mockCdnDeletionService
         );
     }
 
@@ -57,11 +61,11 @@ class VideoServiceTest extends TestCase
 
     public function testGetVideoByCdnIdNotFound()
     {
+        $this->expectException(NotFoundException::class);
+
         $this->mockVideoRepository->method('findOneBy')->willReturn(null);
 
-        $result = $this->videoService->getVideoByCdnId('cdnId');
-
-        $this->assertNull($result);
+        $this->videoService->getVideoByCdnId('cdnId');
     }
 
     public function testGetAccountVideoById()
@@ -171,6 +175,6 @@ class VideoServiceTest extends TestCase
             ->method('delete')
             ->with($video);
 
-        $this->videoService->deleteVideo($video);
+        $this->videoService->deleteVideos([$video]);
     }
 }

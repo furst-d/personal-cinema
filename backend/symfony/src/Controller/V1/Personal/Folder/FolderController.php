@@ -5,6 +5,8 @@ namespace App\Controller\V1\Personal\Folder;
 use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Video\FolderQueryRequest;
 use App\DTO\Video\FolderRequest;
+use App\DTO\Video\SearchQueryRequest;
+use App\Entity\Video\Folder;
 use App\Entity\Video\Share\ShareFolder;
 use App\Exception\ApiException;
 use App\Service\Locator\BaseControllerLocator;
@@ -50,10 +52,24 @@ class FolderController extends BasePersonalController
                 $folderQueryRequest
             );
 
-            return $this->re->withData($folders, ['folder:read']);
+            return $this->re->withData($folders, [Folder::FOLDER_READ]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
+    }
+
+    #[Route('/search', name: 'user_folders_search', methods: ['GET'])]
+    public function searchFolders(Request $request, SearchQueryRequest $searchQueryRequest): JsonResponse
+    {
+        $account = $this->getAccount($request);
+
+        $videos = $this->folderService->searchFolders(
+            $account,
+            $searchQueryRequest->phrase,
+            $searchQueryRequest
+        );
+
+        return $this->re->withData($videos, [Folder::FOLDER_READ]);
     }
 
     #[Route('/{id<\d+>}/share', name: 'user_folder_shares', methods: ['GET'])]
@@ -77,7 +93,7 @@ class FolderController extends BasePersonalController
         try {
             $account = $this->getAccount($request);
             $folder = $this->folderService->createFolder($account, $folderRequest->name, $folderRequest->parentId);
-            return $this->re->withData($folder, ['folder:read']);
+            return $this->re->withData($folder, [Folder::FOLDER_READ]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }

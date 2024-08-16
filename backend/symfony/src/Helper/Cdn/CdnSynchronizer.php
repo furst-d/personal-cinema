@@ -84,6 +84,11 @@ class CdnSynchronizer
     {
         try {
             $video = $this->findOrCreateVideo($videoData);
+
+            if ($videoData->deleted) {
+                return $video;
+            }
+
             $this->updateVideoDetails($video, $videoData);
             return $video;
         } catch (UnauthorizedException) {
@@ -120,9 +125,9 @@ class CdnSynchronizer
     private function findOrCreateVideo(CdnVideoRequest $videoData): Video
     {
         $cdnId = $videoData->id;
-        $video = $this->videoService->getVideoByCdnId($cdnId);
-
-        if (!$video) {
+        try {
+            return $this->videoService->getVideoByCdnId($cdnId);
+        } catch (NotFoundException) {
             $token = $this->getVideoToken($videoData);
             $decodedToken = $this->jwtService->decodeToken($token, JwtUsage::USAGE_UPLOAD);
             $account = $this->accountService->getAccountById($decodedToken['user_id']);
@@ -131,9 +136,8 @@ class CdnSynchronizer
             $video->setCdnId($cdnId);
             $this->updateFolder($video, $decodedToken['folder']);
             $this->em->persist($video);
+            return $video;
         }
-
-        return $video;
     }
 
     /**

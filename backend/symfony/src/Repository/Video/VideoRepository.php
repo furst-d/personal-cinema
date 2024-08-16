@@ -74,6 +74,23 @@ class VideoRepository extends ServiceEntityRepository
 
     /**
      * @param Account $account
+     * @param string $phrase
+     * @param PaginatorRequest $paginatorRequest
+     * @return PaginatorResult<Video>
+     */
+    public function searchVideos(Account $account, string $phrase, PaginatorRequest $paginatorRequest): PaginatorResult
+    {
+        $qb = $this->createQueryBuilder('v')
+            ->where('v.isDeleted = false')
+            ->andWhere('v.account = :account')->setParameter('account', $account)
+            ->andWhere('v.normalizedName LIKE :phrase')->setParameter('phrase', "%$phrase%")
+            ->orderBy('v.createdAt', 'DESC');
+
+        return $this->getPaginatorResult($qb, $paginatorRequest);
+    }
+
+    /**
+     * @param Account $account
      * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult<Video>
      */

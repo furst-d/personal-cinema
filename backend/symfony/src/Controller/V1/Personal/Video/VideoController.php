@@ -3,13 +3,17 @@
 namespace App\Controller\V1\Personal\Video;
 
 use App\Controller\V1\Personal\BasePersonalController;
+use App\DTO\Video\SearchQueryRequest;
 use App\DTO\Video\UploadRequest;
 use App\DTO\Video\VideoQueryRequest;
 use App\DTO\Video\VideoRequest;
 use App\Entity\Video\Share\ShareVideo;
 use App\Entity\Video\Share\ShareVideoPublic;
+use App\Entity\Video\Video;
 use App\Exception\ApiException;
+use App\Exception\InternalException;
 use App\Helper\Jwt\JwtUsage;
+use App\Helper\Video\ThirdParty;
 use App\Service\Cdn\CdnService;
 use App\Service\Jwt\JwtService;
 use App\Service\Locator\BaseControllerLocator;
@@ -126,8 +130,28 @@ class VideoController extends BasePersonalController
 
             $this->videoService->addThumbnailToVideos($videos->getData(), $account);
 
-            return $this->re->withData($videos, ['videos:read']);
+            return $this->re->withData($videos, [Video::VIDEOS_READ]);
         } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('/search', name: 'user_videos_search', methods: ['GET'])]
+    public function searchVideos(Request $request, SearchQueryRequest $searchQueryRequest): JsonResponse
+    {
+        try {
+            $account = $this->getAccount($request);
+
+            $videos = $this->videoService->searchVideos(
+                $account,
+                $searchQueryRequest->phrase,
+                $searchQueryRequest
+            );
+
+            $this->videoService->addThumbnailToVideos($videos->getData(), $account);
+
+            return $this->re->withData($videos, [Video::VIDEOS_READ]);
+        } catch (InternalException $e) {
             return $this->re->withException($e);
         }
     }
@@ -141,7 +165,7 @@ class VideoController extends BasePersonalController
 
             $this->videoService->addVideoUrlToVideo($video, $account);
 
-            return $this->re->withData($video, ['video:read']);
+            return $this->re->withData($video, [Video::VIDEO_READ]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
@@ -161,7 +185,7 @@ class VideoController extends BasePersonalController
 
             $this->videoService->addThumbnailToVideos($videos->getData(), $account);
 
-            return $this->re->withData($videos, ['videos:read']);
+            return $this->re->withData($videos, [Video::VIDEOS_READ]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
@@ -239,7 +263,7 @@ class VideoController extends BasePersonalController
         try {
             $account = $this->getAccount($request);
             $video = $this->videoService->getAccountVideoById($account, $id);
-            $this->videoService->deleteVideo($video);
+            $this->videoService->deleteVideos([$video], [ThirdParty::CDN]);
             return $this->re->withMessage('Video deleted.');
         } catch (ApiException $e) {
             return $this->re->withException($e);

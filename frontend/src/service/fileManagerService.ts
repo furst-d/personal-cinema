@@ -50,6 +50,17 @@ export const fetchFolders = async (limit: number, offset: number, sortBy: string
     return response.data.payload;
 };
 
+export const searchFolders = async (phrase: string, limit: number, offset: number): Promise<FolderPayload> => {
+    const response = await axiosPrivate.get('/v1/personal/folders/search', {
+        params: {
+            limit: limit,
+            offset: offset,
+            phrase: phrase
+        }
+    });
+    return response.data.payload;
+};
+
 export const fetchSharedFolders = async (limit: number, offset: number, sortBy: string): Promise<FolderPayload> => {
     const response = await axiosPrivate.get('/v1/personal/folders/share', {
         params: {
@@ -68,6 +79,17 @@ export const fetchVideos = async (limit: number, offset: number, sortBy: string,
             offset: offset,
             sortBy: sortBy,
             folderId: currentFolderId || 0
+        }
+    });
+    return response.data.payload;
+};
+
+export const searchVideos = async (phrase: string, limit: number, offset: number): Promise<VideoPayload> => {
+    const response = await axiosPrivate.get('/v1/personal/videos/search', {
+        params: {
+            limit: limit,
+            offset: offset,
+            phrase: phrase
         }
     });
     return response.data.payload;

@@ -84,6 +84,13 @@ class Video extends Model {
     })
     parameters!: object;
 
+    @Column({
+        type: DataType.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    })
+    isDeleted!: boolean;
+
     @ForeignKey(() => Md5)
     @Column({
         type: DataType.UUID,

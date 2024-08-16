@@ -1,5 +1,6 @@
 import React from "react";
 import {Helmet, HelmetProvider} from "react-helmet-async";
+import ProfileInfo from "../profile/ProfileInfo";
 
 const ProfilePage: React.FC = () => {
     return (
@@ -7,7 +8,7 @@ const ProfilePage: React.FC = () => {
             <Helmet>
                 <title>Profil</title>
             </Helmet>
-            <h1>Profil</h1>
+            <ProfileInfo />
         </HelmetProvider>
     );
 }

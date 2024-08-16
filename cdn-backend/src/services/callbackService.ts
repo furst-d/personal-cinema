@@ -50,6 +50,10 @@ const getCallback = async (projectId: string): Promise<Callback | null> => {
 export const sendNotificationCallback = async (videoId: string): Promise<void> => {
     const video = await getVideo(videoId);
 
+    if (video.isDeleted) {
+        return;
+    }
+
     const callback = await getCallback(video.projectId);
 
     if (!callback) {
@@ -66,11 +70,40 @@ export const sendNotificationCallback = async (videoId: string): Promise<void> =
 }
 
 /**
+ * Send a delete notification callback for a given video
+ * @param videoId
+ */
+export const sendDeleteNotificationCallback = async (videoId: string): Promise<void> => {
+    const video = await getVideo(videoId);
+
+    const callback = await getCallback(video.projectId);
+
+    if (!callback) {
+        callbackLogger.error(`No callback found for project ${video.projectId}`);
+        return;
+    }
+
+    const data = {
+        id: video.id,
+        deleted: true
+    }
+
+    try {
+        const response = await sendCallback(callback.notificationUrl, { video: data });
+        callbackLogger.info(`Sent delete notification callback for video ${video.id}, response: ${response.status}, ${JSON.stringify(response.data)}`);
+    } catch (error) {}
+}
+
+/**
  * Send a thumbnail callback for a given video
  * @param videoId
  */
 export const sendThumbnailCallback = async (videoId: string): Promise<void> => {
     const video = await getVideo(videoId);
+
+    if (video.isDeleted) {
+        return;
+    }
 
     const callback = await getCallback(video.projectId);
 

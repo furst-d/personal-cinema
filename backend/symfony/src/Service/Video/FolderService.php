@@ -9,6 +9,7 @@ use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
 use App\Helper\DTO\PaginatorResult;
 use App\Helper\Video\FolderData;
+use App\Helper\Video\NameNormalizer;
 use App\Repository\Video\FolderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -194,27 +195,19 @@ class FolderService
      */
     public function getFolders(Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
     {
-        return $this->folderRepository->findAccountFolders($account, $folderData, $paginatorRequest);
+        return $this->folderRepository->findFolders($account, $folderData, $paginatorRequest);
     }
 
     /**
-     * @param Folder $folder
-     * @return void
+     * @param Account $account
+     * @param string $phrase
+     * @param PaginatorRequest $paginatorRequest
+     * @return PaginatorResult<Folder>
      */
-    private function deleteRecursive(Folder $folder): void
+    public function searchFolders(Account $account, string $phrase, PaginatorRequest $paginatorRequest): PaginatorResult
     {
-        // Recursively delete subfolders
-        foreach ($folder->getSubFolders() as $subFolder) {
-            $this->deleteRecursive($subFolder);
-        }
-
-        // Delete or nullify all videos in the folder
-        foreach ($folder->getVideos() as $video) {
-            $this->em->remove($video);
-        }
-
-        // Finally, remove the folder itself
-        $this->em->remove($folder);
+        $phrase = NameNormalizer::normalize($phrase);
+        return $this->folderRepository->searchFolders($account, $phrase, $paginatorRequest);
     }
 
     /**

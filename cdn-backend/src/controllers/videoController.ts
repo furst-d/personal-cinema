@@ -4,6 +4,8 @@ import Video from "../entities/video";
 import minioClient, { bucketName } from "../config/minio";
 import path from "path";
 import {StreamUtils} from "../helpers/video/StreamUtils";
+import {isUUID} from "validator";
+import {VideoProcessingUtils} from "../helpers/video/VideoProcessingUtils";
 
 export const getVideoRoute = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -125,3 +127,26 @@ export const getVideoDownloadLinkRoute = async (req: Request, res: Response): Pr
         res.status(500).send('Internal Server Error');
     }
 };
+
+export const batchDeleteVideos = async (req: Request, res: Response): Promise<void> => {
+    const { videoIds } = req.body;
+
+    if (!videoIds || !Array.isArray(videoIds)) {
+        res.status(400).json({ error: "Invalid video IDs" });
+        return;
+    }
+
+    const validVideoIds = videoIds.filter((id: string) => isUUID(id));
+
+    const videos = await Video.findAll({
+        where: {
+            id: validVideoIds
+        }
+    });
+
+    for (const video of videos) {
+        await VideoProcessingUtils.markForDeletion(video);
+    }
+
+    res.status(200).json({ message: "Videos were marked for deletion" });
+}
