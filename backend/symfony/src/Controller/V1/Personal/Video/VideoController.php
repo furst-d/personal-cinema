@@ -13,6 +13,7 @@ use App\Entity\Video\Video;
 use App\Exception\ApiException;
 use App\Exception\InternalException;
 use App\Helper\Jwt\JwtUsage;
+use App\Helper\Video\ThirdParty;
 use App\Service\Cdn\CdnService;
 use App\Service\Jwt\JwtService;
 use App\Service\Locator\BaseControllerLocator;
@@ -262,7 +263,7 @@ class VideoController extends BasePersonalController
         try {
             $account = $this->getAccount($request);
             $video = $this->videoService->getAccountVideoById($account, $id);
-            $this->videoService->deleteVideo($video);
+            $this->videoService->deleteVideos([$video], [ThirdParty::CDN]);
             return $this->re->withMessage('Video deleted.');
         } catch (ApiException $e) {
             return $this->re->withException($e);

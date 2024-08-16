@@ -6,6 +6,8 @@ import Md5 from '../entities/md5';
 import minioClient, {bucketName} from '../config/minio';
 import { videoUploadQueue } from "../config/bull";
 import fs from 'fs';
+import {VideoProcessingUtils} from "../helpers/video/VideoProcessingUtils";
+import {sendDeleteNotificationCallback} from "./callbackService";
 
 /**
  * Upload a video
@@ -74,7 +76,7 @@ export const getVideoUrl = async (path: string) => {
  * Get a video by ID
  * @param id
  */
-export const getVideo = async (id: string) => {
+export const getVideo = async (id: string): Promise<Video> => {
     const video = await Video.findByPk(id, { include: Md5 }) as any;
     if (!video) {
         throw new Error('Video not found');
@@ -89,6 +91,7 @@ export const getVideo = async (id: string) => {
 export const prepareVideoData = async (video: Video) => {
     return {
         id: video.id,
+        deleted: video.isDeleted,
         title: video.title,
         status: video.status,
         codec: video.codec,
@@ -144,3 +147,37 @@ export const getSignedThumbnails = async (videoId: string) => {
 
     return thumbnailUrls;
 };
+
+export const deleteVideo = async (video: Video) => {
+    console.log("Deleting video: ", video.title);
+
+    try {
+        await deleteFromStorage(video);
+        await sendDeleteNotificationCallback(video.id);
+        await video.destroy();
+    } catch (err) {
+        console.error("Failed to delete video:", err);
+        throw err;
+    }
+};
+
+const deleteFromStorage = async (video: Video) => {
+    const folderPath = `${video.id}/`;
+
+    const objectsList = [];
+    const stream = minioClient.listObjectsV2(bucketName, folderPath, true);
+
+    for await (const obj of stream) {
+        objectsList.push(obj.name);
+    }
+
+    if (objectsList.length > 0) {
+        await minioClient.removeObjects(bucketName, objectsList);
+        console.log("Successfully deleted all objects in the folder:", folderPath);
+    } else {
+        console.log("No objects found in the folder:", folderPath);
+    }
+
+    await VideoProcessingUtils.cleanUpTempSubDir(video.id, '');
+}
+

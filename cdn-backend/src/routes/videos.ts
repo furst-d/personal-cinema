@@ -4,7 +4,7 @@ import {
     getThumbnailRoute,
     getThumbsRoute,
     getVideoRoute,
-    getVideoUrlRoute
+    getVideoUrlRoute, batchDeleteVideos,
 } from '../controllers/videoController';
 import authMiddleware from '../middleware/auth';
 
@@ -15,5 +15,6 @@ router.get('/:id/file.m3u8', authMiddleware, getVideoUrlRoute);
 router.get('/:id/thumbs', authMiddleware, getThumbsRoute);
 router.get('/:id/thumbs/:thumbNumber', getThumbnailRoute);
 router.get('/:id/download', getVideoDownloadLinkRoute);
+router.delete('/', authMiddleware, batchDeleteVideos);
 
 export default router;

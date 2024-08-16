@@ -11,6 +11,7 @@ use App\Helper\Cdn\CdnHasher;
 use App\Helper\Cdn\CdnManager;
 use App\Helper\Cdn\CdnSynchronizer;
 use App\Helper\Generator\RandomGenerator;
+use App\Service\Video\VideoService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -62,6 +63,11 @@ class CdnService
     private RandomGenerator $generator;
 
     /**
+     * @var VideoService $videoService
+     */
+    private VideoService $videoService;
+
+    /**
      * @param string $cdnProjectId
      * @param string $cdnSecretKey
      * @param string $cdnCallbackKey
@@ -71,6 +77,7 @@ class CdnService
      * @param CdnManager $cdnManager
      * @param EntityManagerInterface $em
      * @param RandomGenerator $generator
+     * @param VideoService $videoService
      */
     public function __construct(
         string $cdnProjectId,
@@ -81,7 +88,8 @@ class CdnService
         CdnSynchronizer $cdnSynchronizer,
         CdnManager $cdnManager,
         EntityManagerInterface $em,
-        RandomGenerator $generator
+        RandomGenerator $generator,
+        VideoService $videoService
     )
     {
         $this->cdnProjectId = $cdnProjectId;
@@ -93,6 +101,7 @@ class CdnService
         $this->cdnManager = $cdnManager;
         $this->em = $em;
         $this->generator = $generator;
+        $this->videoService = $videoService;
     }
 
     /**
@@ -152,6 +161,15 @@ class CdnService
     public function synchronizeVideo(CdnVideoRequest $videoData): void
     {
         try {
+            if ($videoData->deleted) {
+                $video = $this->videoService->getVideoByCdnId($videoData->id);
+                $this->videoService->deleteVideos([$video]);
+                $this->logger->info("Deleted video.", [
+                    "cdnId" => $videoData->id
+                ]);
+                return;
+            }
+
             $this->cdnSynchronizer->synchronize($videoData);
             $this->logger->info("Synchronized video.", [
                 "cdnId" => $videoData->id

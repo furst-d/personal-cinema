@@ -1,9 +1,14 @@
-import { videoConversionQueue, videoProcessQueue, videoThumbnailQueue, videoUploadQueue } from '../../config/bull';
+import {
+    videoConversionQueue,
+    videoProcessQueue,
+    videoThumbnailQueue,
+    videoUploadQueue
+} from '../../config/bull';
 import minioClient, { bucketName } from '../../config/minio';
 import Video from '../../entities/video';
 import { Job } from 'bull';
 import ffmpeg from 'fluent-ffmpeg';
-import { getOrCreateMd5, getVideoUrl } from '../../services/videoService';
+import {getOrCreateMd5, getVideo, getVideoUrl} from '../../services/videoService';
 import {sendNotificationCallback, sendThumbnailCallback} from "../../services/callbackService";
 import path from "path";
 import { promises as fs } from 'fs';
@@ -13,6 +18,8 @@ import {VideoProcessingUtils} from "./VideoProcessingUtils";
 
 const processVideoUpload = async (job: Job) => {
     const { videoId, tempFilePath, urlPath, mimetype, size } = job.data;
+
+    const video = await getVideo(videoId);
     VideoProcessingUtils.ensureTempDir(videoId);
 
     try {
@@ -22,33 +29,24 @@ const processVideoUpload = async (job: Job) => {
             'Content-Type': mimetype,
         });
 
-        const video = await Video.findByPk(videoId);
-        if (video) {
-            video.status = 'uploaded-original';
-            await video.save();
+        video.status = 'uploaded-original';
+        await video.save();
 
-            await videoProcessQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
-            await videoConversionQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
-            await videoThumbnailQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
-        }
+        await videoProcessQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
+        await videoConversionQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
+        await videoThumbnailQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
     } catch (error) {
         console.error('Error uploading to Minio:', error);
-        const video = await Video.findByPk(videoId);
-        if (video) {
-            video.status = 'upload-error';
-            await video.save();
-        }
+        await VideoProcessingUtils.markForDeletion(video);
         throw error;
     }
+
+    await VideoProcessingUtils.checkForDeletion(videoId);
 };
 
 const processVideoInfo = async (job: Job) => {
     const { videoId } = job.data;
-    const video = await Video.findByPk(videoId);
-
-    if (!video) {
-        throw new Error('Video not found');
-    }
+    const video = await getVideo(videoId);
 
     const videoPath = video.originalPath;
 
@@ -67,6 +65,8 @@ const processVideoInfo = async (job: Job) => {
                     if (metadata.format.duration && videoStream.width && videoStream.height && videoStream.codec_name) {
                         const md5Hash = await VideoProcessingUtils.calculateMd5(videoUrl);
                         const md5 = await getOrCreateMd5(md5Hash);
+
+                        const video = await getVideo(videoId);
                         video.md5Id = md5.id;
 
                         video.length = Math.round(metadata.format.duration);
@@ -86,18 +86,17 @@ const processVideoInfo = async (job: Job) => {
             });
     } catch (error) {
         console.error('Error processing video info:', error);
+        await VideoProcessingUtils.markForDeletion(video);
         throw error;
     }
+
+    await VideoProcessingUtils.checkForDeletion(videoId);
 };
 
 const processVideoConversion = async (job: Job) => {
     const { videoId } = job.data;
-    const video = await Video.findByPk(videoId);
+    const video = await getVideo(videoId);
     const videoTempDir = VideoProcessingUtils.ensureTempDir(videoId);
-
-    if (!video) {
-        throw new Error('Video not found');
-    }
 
     const videoPath = video.originalPath;
     const videoUrl = await getVideoUrl(videoPath);
@@ -158,16 +157,17 @@ const processVideoConversion = async (job: Job) => {
         // Clean up HLS temp directory
         await VideoProcessingUtils.cleanUpTempSubDir(videoId, 'hls');
 
+        const video = await getVideo(videoId);
         video.hlsPath = `${path.dirname(videoPath)}/hls/${hlsHash}.m3u8`;
         video.status = 'converted';
         await video.save();
         await sendNotificationCallback(video.id);
     } catch (error) {
-        console.error('Error converting video to HLS:', error);
-        video.status = 'conversion-error';
-        await video.save();
+        await VideoProcessingUtils.markForDeletion(video);
         throw error;
     }
+
+    await VideoProcessingUtils.checkForDeletion(videoId);
 };
 
 const processVideoThumbnail = async (job: Job) => {
@@ -228,16 +228,18 @@ const processVideoThumbnail = async (job: Job) => {
         // Clean up thumbnails temp directory
         await VideoProcessingUtils.cleanUpTempSubDir(videoId, 'thumbs');
 
+        const video = await getVideo(videoId);
         video.thumbnailPath = `${videoId}/thumbs`;
         video.status = 'thumbnails-generated';
         await video.save();
         await sendThumbnailCallback(video.id);
     } catch (error) {
         console.error('Error generating thumbnails:', error);
-        video.status = 'thumbnail-error';
-        await video.save();
+        await VideoProcessingUtils.markForDeletion(video);
         throw error;
     }
+
+    await VideoProcessingUtils.checkForDeletion(videoId);
 };
 
 videoUploadQueue.process(processVideoUpload);

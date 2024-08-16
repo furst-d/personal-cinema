@@ -14,8 +14,11 @@ use App\Helper\Generator\UrlGenerator;
 use App\Helper\DTO\PaginatorResult;
 use App\Helper\Video\FolderData;
 use App\Helper\Video\NameNormalizer;
+use App\Helper\Video\ThirdParty;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
+use App\Service\Cdn\CdnDeletionService;
+use App\Service\Cdn\CdnService;
 
 class VideoService
 {
@@ -44,6 +47,11 @@ class VideoService
      */
     private FolderService $folderService;
 
+    /**
+     * @var CdnDeletionService $cdnService
+     */
+    private CdnDeletionService $cdnDeletionService;
+
     private const NOT_FOUND_MESSAGE = 'Video not found';
 
     /**
@@ -52,13 +60,15 @@ class VideoService
      * @param UrlGenerator $urlGenerator
      * @param ShareService $shareService
      * @param FolderService $folderService
+     * @param CdnDeletionService $cdnDeletionService
      */
     public function __construct(
         VideoRepository $videoRepository,
         MD5Repository $md5Repository,
         UrlGenerator $urlGenerator,
         ShareService $shareService,
-        FolderService $folderService
+        FolderService $folderService,
+        CdnDeletionService $cdnDeletionService
     )
     {
         $this->videoRepository = $videoRepository;
@@ -66,15 +76,23 @@ class VideoService
         $this->urlGenerator = $urlGenerator;
         $this->shareService = $shareService;
         $this->folderService = $folderService;
+        $this->cdnDeletionService = $cdnDeletionService;
     }
 
     /**
      * @param string $cdnId
      * @return Video|null
+     * @throws NotFoundException
      */
     public function getVideoByCdnId(string $cdnId): ?Video
     {
-        return $this->videoRepository->findOneBy(['cdnId' => $cdnId]);
+        $video = $this->videoRepository->findOneBy(['cdnId' => $cdnId]);
+
+        if (!$video) {
+            throw new NotFoundException(self::NOT_FOUND_MESSAGE);
+        }
+
+        return $video;
     }
 
     /**
@@ -185,6 +203,20 @@ class VideoService
     }
 
     /**
+     * @param Video[] $videos
+     * @param array $thirdParties
+     * @return void
+     */
+    public function deleteVideos(array $videos, array $thirdParties = []): void
+    {
+        $this->deleteThirdParties($videos, $thirdParties);
+
+        foreach ($videos as $video) {
+            $this->deleteVideo($video);
+        }
+    }
+
+    /**
      * @param Video $video
      * @return void
      */
@@ -196,6 +228,18 @@ class VideoService
         }
 
         $this->videoRepository->delete($video);
+    }
+
+    /**
+     * @param Video[] $videos
+     * @param ThirdParty[] $thirdParties
+     * @return void
+     */
+    private function deleteThirdParties(array $videos, array $thirdParties): void
+    {
+        if (in_array(ThirdParty::CDN, $thirdParties)) {
+            $this->cdnDeletionService->batchDelete($videos);
+        }
     }
 
     /**

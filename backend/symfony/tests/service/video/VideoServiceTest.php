@@ -171,6 +171,6 @@ class VideoServiceTest extends TestCase
             ->method('delete')
             ->with($video);
 
-        $this->videoService->deleteVideo($video);
+        $this->videoService->deleteVideos($video);
     }
 }
