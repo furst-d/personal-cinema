@@ -26,7 +26,7 @@ doctrine:
             auto_mapping: true
         dql:
             numeric_functions:
-                rand: App\DQL\RandomFunction
+                rand: App\ORM\RandomFunction
 
 when@test:
     doctrine:
