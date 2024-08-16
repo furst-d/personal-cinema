@@ -27,12 +27,16 @@ const ProfileStats: React.FC = () => {
     return (
         <>
             <Typography variant="h5" gutterBottom>
-                Uživatelské statistiky
+                Informace o účtu
             </Typography>
             {stats && (
                 <TableContainerStyle>
                     <Table>
                         <TableBody>
+                            <TableRow>
+                                <TableHeadCellStyle sx={{ width: '30%' }}>E-mail</TableHeadCellStyle>
+                                <TableCellStyle sx={{ textAlign: 'right' }}>{stats.email}</TableCellStyle>
+                            </TableRow>
                             <TableRow>
                                 <TableHeadCellStyle sx={{ width: '30%' }}>Účet vytvořen</TableHeadCellStyle>
                                 <TableCellStyle sx={{ textAlign: 'right' }}>{formatDate(stats.created)}</TableCellStyle>

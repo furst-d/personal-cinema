@@ -1,7 +1,8 @@
 import axiosPrivate from "../api/axiosPrivate";
 
 export interface AccountStats {
-    created: string
+    email: string;
+    created: string;
     storageUsedGB: number;
     storageLimitGB: number;
     storageUpgradeCount: number;

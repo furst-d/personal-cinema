@@ -225,6 +225,7 @@ class AccountService
     public function getStats(Account $account): array
     {
         return [
+            'email' => $account->getEmail(),
             'storageUsedGB' => ByteSizeConverter::toGB($account->getStorage()->getUsedStorage()),
             'storageLimitGB' => ByteSizeConverter::toGB($account->getStorage()->getMaxStorage()),
             'storageUpgradeCount' => count($account->getStorageUpgrades()),
