@@ -81,10 +81,10 @@ class VideoService
 
     /**
      * @param string $cdnId
-     * @return Video|null
+     * @return Video
      * @throws NotFoundException
      */
-    public function getVideoByCdnId(string $cdnId): ?Video
+    public function getVideoByCdnId(string $cdnId): Video
     {
         $video = $this->videoRepository->findOneBy(['cdnId' => $cdnId]);
 

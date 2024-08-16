@@ -12,13 +12,10 @@ use App\Helper\Cdn\CdnManager;
 use App\Helper\Cdn\CdnSynchronizer;
 use App\Helper\Generator\RandomGenerator;
 use App\Service\Cdn\CdnService;
+use App\Service\Video\VideoService;
 use Doctrine\ORM\EntityManagerInterface;
-use GuzzleHttp\Exception\GuzzleException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
-use Exception;
 
 class CdnServiceTest extends TestCase
 {
@@ -29,6 +26,7 @@ class CdnServiceTest extends TestCase
     private $mockCdnManager;
     private $mockEntityManager;
     private $mockRandomGenerator;
+    private $mockVideoService;
 
     protected function setUp(): void
     {
@@ -38,6 +36,7 @@ class CdnServiceTest extends TestCase
         $this->mockCdnManager = $this->createMock(CdnManager::class);
         $this->mockEntityManager = $this->createMock(EntityManagerInterface::class);
         $this->mockRandomGenerator = $this->createMock(RandomGenerator::class);
+        $this->mockVideoService = $this->createMock(VideoService::class);
 
         $this->cdnService = new CdnService(
             'project_id',
@@ -48,7 +47,8 @@ class CdnServiceTest extends TestCase
             $this->mockCdnSynchronizer,
             $this->mockCdnManager,
             $this->mockEntityManager,
-            $this->mockRandomGenerator
+            $this->mockRandomGenerator,
+            $this->mockVideoService
         );
     }
 
@@ -104,6 +104,7 @@ class CdnServiceTest extends TestCase
     {
         $videoData = new CdnVideoRequest();
         $videoData->id = 'video_id';
+        $videoData->deleted = false;
 
         $this->mockCdnSynchronizer->expects($this->once())
             ->method('synchronize')
@@ -123,6 +124,7 @@ class CdnServiceTest extends TestCase
 
         $videoData = new CdnVideoRequest();
         $videoData->id = 'video_id';
+        $videoData->deleted = false;
 
         $this->mockCdnSynchronizer->expects($this->once())
             ->method('synchronize')
@@ -138,6 +140,7 @@ class CdnServiceTest extends TestCase
 
         $videoData = new CdnVideoRequest();
         $videoData->id = 'video_id';
+        $videoData->deleted = false;
 
         $this->mockCdnSynchronizer->expects($this->once())
             ->method('synchronize')

@@ -136,9 +136,8 @@ class CdnSynchronizer
             $video->setCdnId($cdnId);
             $this->updateFolder($video, $decodedToken['folder']);
             $this->em->persist($video);
+            return $video;
         }
-
-        return $video;
     }
 
     /**
