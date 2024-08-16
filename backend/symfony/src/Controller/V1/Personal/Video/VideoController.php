@@ -11,6 +11,7 @@ use App\Entity\Video\Share\ShareVideo;
 use App\Entity\Video\Share\ShareVideoPublic;
 use App\Entity\Video\Video;
 use App\Exception\ApiException;
+use App\Exception\InternalException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Cdn\CdnService;
 use App\Service\Jwt\JwtService;
@@ -137,15 +138,21 @@ class VideoController extends BasePersonalController
     #[Route('/search', name: 'user_videos_search', methods: ['GET'])]
     public function searchVideos(Request $request, SearchQueryRequest $searchQueryRequest): JsonResponse
     {
-        $account = $this->getAccount($request);
+        try {
+            $account = $this->getAccount($request);
 
-        $videos = $this->videoService->searchVideos(
-            $account,
-            $searchQueryRequest->phrase,
-            $searchQueryRequest
-        );
+            $videos = $this->videoService->searchVideos(
+                $account,
+                $searchQueryRequest->phrase,
+                $searchQueryRequest
+            );
 
-        return $this->re->withData($videos, [Video::VIDEOS_READ]);
+            $this->videoService->addThumbnailToVideos($videos->getData(), $account);
+
+            return $this->re->withData($videos, [Video::VIDEOS_READ]);
+        } catch (InternalException $e) {
+            return $this->re->withException($e);
+        }
     }
 
     #[Route('/{hash}', name: 'user_video_detail', methods: ['GET'])]
