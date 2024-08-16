@@ -42,7 +42,7 @@ class FolderRepository extends ServiceEntityRepository
      * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult<Folder>
      */
-    public function findAccountFolders(Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
+    public function findFolders(Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
     {
         $qb = $this->createQueryBuilder('f');
 
@@ -68,6 +68,22 @@ class FolderRepository extends ServiceEntityRepository
 
     /**
      * @param Account $account
+     * @param string $phrase
+     * @param PaginatorRequest $paginatorRequest
+     * @return PaginatorResult<Folder>
+     */
+    public function searchFolders(Account $account, string $phrase, PaginatorRequest $paginatorRequest)
+    {
+        $qb = $this->createQueryBuilder('f')
+            ->where('f.owner = :account')->setParameter('account', $account)
+            ->andWhere('f.normalizedName LIKE :phrase')->setParameter('phrase', "%$phrase%")
+            ->orderBy('f.updatedAt', 'DESC');
+
+        return $this->getPaginatorResult($qb, $paginatorRequest);
+    }
+
+    /**
+     * @param Account $account
      * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult<Folder>
      */
@@ -78,29 +94,6 @@ class FolderRepository extends ServiceEntityRepository
             ->where('sf.account = :account')->setParameter('account', $account);
 
         return $this->getPaginatorResult($qb, $paginatorRequest);
-    }
-
-    /**
-     * @param Account $account
-     * @param int $id
-     * @return Folder|null
-     */
-    public function findAllowedFolderById(Account $account, int $id): ?Folder
-    {
-        return $this->createQueryBuilder('f')
-            ->where('f.id = :id')
-            ->andWhere('f.owner = :account OR f.id IN (
-                SELECT ff.id
-                FROM App\Entity\Video\Folder ff
-                JOIN ff.shares s
-                WHERE s.account = :account
-                AND f.id = ff.id
-                OR f.parent = ff.id
-            )')
-            ->setParameter('account', $account)
-            ->setParameter('id', $id)
-            ->getQuery()
-            ->getOneOrNullResult();
     }
 
     /**

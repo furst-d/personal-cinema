@@ -13,6 +13,7 @@ use App\Exception\NotFoundException;
 use App\Helper\Generator\UrlGenerator;
 use App\Helper\DTO\PaginatorResult;
 use App\Helper\Video\FolderData;
+use App\Helper\Video\NameNormalizer;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 
@@ -146,6 +147,18 @@ class VideoService
     public function getVideos(?Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
     {
         return $this->videoRepository->findVideos($account, $folderData, $paginatorRequest);
+    }
+
+    /**
+     * @param Account $account
+     * @param string $phrase
+     * @param PaginatorRequest $paginatorRequest
+     * @return PaginatorResult<Video>
+     */
+    public function searchVideos(Account $account, string $phrase, PaginatorRequest $paginatorRequest): PaginatorResult
+    {
+        $phrase = NameNormalizer::normalize($phrase);
+        return $this->videoRepository->searchVideos($account, $phrase, $paginatorRequest);
     }
 
     /**

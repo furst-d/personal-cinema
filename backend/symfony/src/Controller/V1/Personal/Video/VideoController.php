@@ -3,11 +3,13 @@
 namespace App\Controller\V1\Personal\Video;
 
 use App\Controller\V1\Personal\BasePersonalController;
+use App\DTO\Video\SearchQueryRequest;
 use App\DTO\Video\UploadRequest;
 use App\DTO\Video\VideoQueryRequest;
 use App\DTO\Video\VideoRequest;
 use App\Entity\Video\Share\ShareVideo;
 use App\Entity\Video\Share\ShareVideoPublic;
+use App\Entity\Video\Video;
 use App\Exception\ApiException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Cdn\CdnService;
@@ -126,10 +128,24 @@ class VideoController extends BasePersonalController
 
             $this->videoService->addThumbnailToVideos($videos->getData(), $account);
 
-            return $this->re->withData($videos, ['videos:read']);
+            return $this->re->withData($videos, [Video::VIDEOS_READ]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
+    }
+
+    #[Route('/search', name: 'user_videos_search', methods: ['GET'])]
+    public function searchVideos(Request $request, SearchQueryRequest $searchQueryRequest): JsonResponse
+    {
+        $account = $this->getAccount($request);
+
+        $videos = $this->videoService->searchVideos(
+            $account,
+            $searchQueryRequest->phrase,
+            $searchQueryRequest
+        );
+
+        return $this->re->withData($videos, [Video::VIDEOS_READ]);
     }
 
     #[Route('/{hash}', name: 'user_video_detail', methods: ['GET'])]
@@ -141,7 +157,7 @@ class VideoController extends BasePersonalController
 
             $this->videoService->addVideoUrlToVideo($video, $account);
 
-            return $this->re->withData($video, ['video:read']);
+            return $this->re->withData($video, [Video::VIDEO_READ]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
@@ -161,7 +177,7 @@ class VideoController extends BasePersonalController
 
             $this->videoService->addThumbnailToVideos($videos->getData(), $account);
 
-            return $this->re->withData($videos, ['videos:read']);
+            return $this->re->withData($videos, [Video::VIDEOS_READ]);
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
