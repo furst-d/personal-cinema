@@ -42,6 +42,13 @@ class AccountController extends BasePersonalController
         $this->accountService = $accountService;
     }
 
+    #[Route('/stats', name: 'account_stats', methods: ['GET'])]
+    public function getStats(Request $request): JsonResponse
+    {
+        $account = $this->getAccount($request);
+        return $this->re->withData($this->accountService->getStats($account));
+    }
+
     #[Route('/change-password', name: 'account_change_password', methods: ['POST'])]
     public function changePassword(Request $request, PasswordChangeRequest $passwordChangeRequest): JsonResponse
     {

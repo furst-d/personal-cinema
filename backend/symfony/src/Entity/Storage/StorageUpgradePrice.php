@@ -2,6 +2,7 @@
 
 namespace App\Entity\Storage;
 
+use App\Helper\Storage\ByteSizeConverter;
 use App\Repository\Storage\StorageUpgradePriceRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
@@ -156,6 +157,6 @@ class StorageUpgradePrice
     #[Groups([self::STORAGE_UPGRADE_PRICE_READ])]
     public function getSizeInGB(): int
     {
-        return (int) ($this->size / 1024 / 1024 / 1024);
+        return (int) (ByteSizeConverter::toGB($this->size));
     }
 }
