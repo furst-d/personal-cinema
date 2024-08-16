@@ -34,39 +34,39 @@ const ProfileStats: React.FC = () => {
                     <Table>
                         <TableBody>
                             <TableRow>
-                                <TableHeadCellStyle sx={{ width: '25%' }}>E-mail</TableHeadCellStyle>
+                                <TableHeadCellStyle sx={{ width: '200px' }}>E-mail</TableHeadCellStyle>
                                 <TableCellStyle sx={{ textAlign: 'right' }}>{stats.email}</TableCellStyle>
                             </TableRow>
                             <TableRow>
-                                <TableHeadCellStyle sx={{ width: '25%' }}>Účet vytvořen</TableHeadCellStyle>
+                                <TableHeadCellStyle sx={{ width: '200px' }}>Účet vytvořen</TableHeadCellStyle>
                                 <TableCellStyle sx={{ textAlign: 'right' }}>{formatDate(stats.created)}</TableCellStyle>
                             </TableRow>
                             <TableRow>
-                                <TableHeadCellStyle sx={{ width: '25%' }}>Využité úložiště</TableHeadCellStyle>
+                                <TableHeadCellStyle sx={{ width: '200px' }}>Využité úložiště</TableHeadCellStyle>
                                 <TableCellStyle sx={{ textAlign: 'right' }}>{stats.storageUsedGB} GB</TableCellStyle>
                             </TableRow>
                             <TableRow>
-                                <TableHeadCellStyle sx={{ width: '25%' }}>Limit úložiště</TableHeadCellStyle>
+                                <TableHeadCellStyle sx={{ width: '200px' }}>Limit úložiště</TableHeadCellStyle>
                                 <TableCellStyle sx={{ textAlign: 'right' }}>{stats.storageLimitGB} GB</TableCellStyle>
                             </TableRow>
                             <TableRow>
-                                <TableHeadCellStyle sx={{ width: '25%' }}>Počet navýšení úložiště</TableHeadCellStyle>
+                                <TableHeadCellStyle sx={{ width: '200px' }}>Počet navýšení úložiště</TableHeadCellStyle>
                                 <TableCellStyle sx={{ textAlign: 'right' }}>{stats.storageUpgradeCount}</TableCellStyle>
                             </TableRow>
                             <TableRow>
-                                <TableHeadCellStyle sx={{ width: '25%' }}>Počet videí</TableHeadCellStyle>
+                                <TableHeadCellStyle sx={{ width: '200px' }}>Počet videí</TableHeadCellStyle>
                                 <TableCellStyle sx={{ textAlign: 'right' }}>{stats.videosCount}</TableCellStyle>
                             </TableRow>
                             <TableRow>
-                                <TableHeadCellStyle sx={{ width: '25%' }}>Počet složek</TableHeadCellStyle>
+                                <TableHeadCellStyle sx={{ width: '200px' }}>Počet složek</TableHeadCellStyle>
                                 <TableCellStyle sx={{ textAlign: 'right' }}>{stats.foldersCount}</TableCellStyle>
                             </TableRow>
                             <TableRow>
-                                <TableHeadCellStyle sx={{ width: '25%' }}>Počet sdílených videí</TableHeadCellStyle>
+                                <TableHeadCellStyle sx={{ width: '200px' }}>Počet sdílených videí</TableHeadCellStyle>
                                 <TableCellStyle sx={{ textAlign: 'right' }}>{stats.sharedVideosCount}</TableCellStyle>
                             </TableRow>
                             <TableRow>
-                                <TableHeadCellStyle sx={{ width: '25%' }}>Počet sdílených složek</TableHeadCellStyle>
+                                <TableHeadCellStyle sx={{ width: '200px' }}>Počet sdílených složek</TableHeadCellStyle>
                                 <TableCellStyle sx={{ textAlign: 'right' }}>{stats.sharedFoldersCount}</TableCellStyle>
                             </TableRow>
                         </TableBody>
