@@ -1,6 +1,9 @@
 import React from 'react';
 import 'video.js/dist/video-js.css';
 import videojs from "video.js";
+import 'videojs-hotkeys';
+
+import {VideoPlayerContainerStyle} from "../../styles/player/VideoPlayer";
 
 interface IVideoPlayerProps {
     src: string;
@@ -14,9 +17,24 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
         fluid: true,
         sources: [{ src, type: "application/vnd.apple.mpegurl" }],
         controlBar: {
-            volumePanel: {
-                inline: false
-            }
+            children: [
+                "playToggle",
+                "volumePanel",
+                "currentTimeDisplay",
+                "timeDivider",
+                "durationDisplay",
+                "progressControl",
+                "remainingTimeDisplay",
+                "pictureInPictureToggle",
+                "captionsButton",
+                "fullscreenToggle",
+            ]
+        },
+        plugins: {
+            hotkeys: {
+                volumeStep: 0.1,
+                seekStep: 5
+            },
         }
     };
 
@@ -53,9 +71,9 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
     }, []);
 
     return (
-        <div data-vjs-player={true}>
+        <VideoPlayerContainerStyle data-vjs-player={true}>
             <div ref={videoRef} />
-        </div>
+        </VideoPlayerContainerStyle>
     );
 }
 
