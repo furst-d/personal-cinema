@@ -1,6 +1,6 @@
 import React, {useEffect} from "react";
 import {toast} from "react-toastify";
-import {ProviderProps} from "../../types/Layout";
+import {ProviderProps} from "../../types/layout";
 
 export const ToastProvider: React.FC<ProviderProps> = ({ children }) => {
     useEffect(() => {

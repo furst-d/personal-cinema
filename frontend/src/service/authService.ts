@@ -122,3 +122,20 @@ export const changePassword = async (oldPassword: string, newPassword: string) =
         return { success: false };
     }
 };
+
+export const deleteAccount = async (password: string) => {
+    try {
+        const response = await axiosPrivate.delete('/v1/personal/account', {
+            data: { password }
+        });
+        if (response.status === 200) {
+            return { success: true, message: "Účet byl úspěšně odstraněn." };
+        }
+    } catch (error: any) {
+        if (error.response && error.response.status === 403) {
+            return { success: false, message: "Zadané heslo je nesprávné" };
+        } else {
+            return { success: false, message: "Při zpracování došlo k chybě" };
+        }
+    }
+};

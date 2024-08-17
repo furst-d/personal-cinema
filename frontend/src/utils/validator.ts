@@ -122,3 +122,17 @@ export const validateShareForm = (email: string) => {
 
     return errors;
 };
+
+export const validateDeleteAccountForm = (password: string) => {
+    const errors: { missing?: boolean, password?: string } = {};
+
+    if (!password) {
+        errors.missing = true;
+    }
+
+    if (!validatePassword(password)) {
+        errors.password = "Heslo musí mít alespoň 6 znaků";
+    }
+
+    return errors;
+}

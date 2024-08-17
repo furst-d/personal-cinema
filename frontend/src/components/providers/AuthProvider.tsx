@@ -3,7 +3,7 @@ import { AuthContextType, User } from "../../types/auth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Loading from "../loading/Loading";
-import {ProviderProps} from "../../types/Layout";
+import {ProviderProps} from "../../types/layout";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
