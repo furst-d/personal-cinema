@@ -27,33 +27,40 @@ export const getThumbsRoute = async (req: Request, res: Response): Promise<void>
 
 export const getVideoUrlRoute = async (req: Request, res: Response): Promise<void> => {
     const videoId = req.params.id;
+    const quality = req.query.quality as string;
 
-    const video = await Video.findByPk(videoId) as any;
-    if (!video) {
-        res.status(404).json({ error: "Video not found" });
+    if (!quality) {
+        res.status(400).json({ error: "Quality parameter is required" });
         return;
     }
+
+    const video = await getVideo(videoId);
 
     if (!video.hlsPath) {
         res.status(404).json({ error: "Video not processed" });
         return;
     }
 
+    const manifestPath = `${path.dirname(video.hlsPath)}/${quality}.m3u8`;
+    console.log("manifestPath", manifestPath);
+
     try {
         // Load manifest file from Minio
-        const manifestStream = await minioClient.getObject(bucketName, video.hlsPath);
+        const manifestStream = await minioClient.getObject(bucketName, manifestPath);
         const manifestBuffer = await StreamUtils.streamToBuffer(manifestStream);
         const manifestContent = manifestBuffer.toString('utf-8');
 
         // Load segment files from manifest
         const segmentFiles = manifestContent.match(/(\d+\.ts)/g) || [];
+        console.log("segmentFiles", segmentFiles);
 
         // Generate signed URLs for segment files
         const signedUrls: Record<string, string> = {};
         for (const segment of segmentFiles) {
-            const segmentPath = `${path.dirname(video.hlsPath)}/segments/${segment}`;
+            const segmentPath = `${path.dirname(video.hlsPath)}/segments/${quality}/${segment}`;
             signedUrls[segment] =  await minioClient.presignedUrl('GET', bucketName, segmentPath, 24 * 60 * 60);
         }
+        console.log("signedUrls", signedUrls);
 
         // Update manifest file with signed URLs
         let updatedContent = manifestContent;
@@ -63,11 +70,19 @@ export const getVideoUrlRoute = async (req: Request, res: Response): Promise<voi
 
         res.set('Content-Type', 'application/vnd.apple.mpegurl');
         res.send(updatedContent);
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === 'NoSuchKey') {
+            res.status(404).json({ error: "Quality not found" });
+            return;
+        }
+
         console.error('Error generating HLS manifest:', error);
         res.status(500).send('Internal Server Error');
     }
 };
+
+
+
 
 export const getThumbnailRoute = async (req: Request, res: Response): Promise<void> => {
     const videoId = req.params.id;

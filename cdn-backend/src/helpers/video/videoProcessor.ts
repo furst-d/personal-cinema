@@ -35,7 +35,6 @@ const processVideoUpload = async (job: Job) => {
         await video.save();
 
         await videoProcessQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
-        await videoConversionQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
         await videoThumbnailQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
     } catch (error) {
         console.error('Error uploading to Minio:', error);
@@ -78,6 +77,7 @@ const processVideoInfo = async (job: Job) => {
 
                         video.status = 'processed-info';
                         await video.save();
+                        await videoConversionQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
                         await sendNotificationCallback(video.id);
                     } else {
                         throw new Error('Cannot get video info');
@@ -105,62 +105,101 @@ const processVideoConversion = async (job: Job) => {
 
     const hlsHash = crypto.createHash('md5').update(videoUrl).digest('hex');
     const hlsDir = `${videoTempDir}/hls/segments`;
-    const hlsManifest = `${videoTempDir}/hls/${hlsHash}.m3u8`;
+    const hlsManifestDir = `${videoTempDir}/hls/manifests`;
 
     // Create the directory if it doesn't exist
     mkdirSync(hlsDir, { recursive: true });
+    mkdirSync(hlsManifestDir, { recursive: true });
+
+    const resolutions = [
+        { width: 256, height: 144, label: "144p" },
+        { width: 426, height: 240, label: "240p" },
+        { width: 640, height: 360, label: "360p" },
+        { width: 854, height: 480, label: "480p" },
+        { width: 1280, height: 720, label: "720p" },
+        { width: 1920, height: 1080, label: "1080p" },
+    ];
 
     try {
-        await new Promise((resolve, reject) => {
-            ffmpeg(videoUrl)
-                .outputOptions([
-                    '-profile:v baseline', // HLS requires baseline profile
-                    '-level 3.0',
-                    '-start_number 0',
-                    '-hls_time 10', // Segment length in seconds
-                    '-hls_list_size 0',
-                    '-hls_segment_filename', `${hlsDir}/%03d.ts`,
-                    '-f hls'
-                ])
-                .output(hlsManifest)
-                .on('end', resolve)
-                .on('error', (err, stdout, stderr) => {
-                    console.error('Error: ' + err.message);
-                    console.error('ffmpeg stdout: ' + stdout);
-                    console.error('ffmpeg stderr: ' + stderr);
-                    reject(err);
-                })
-                .run();
-        });
+        const originalWidth = video.originalWidth;
+        const originalHeight = video.originalHeight;
 
-        // Read the manifest file and all segment files
-        const hlsBuffer = await fs.readFile(hlsManifest);
-        const segmentFiles = await fs.readdir(hlsDir);
+        // Filter the resolutions based on the original video resolution
+        const validResolutions = resolutions.filter(resolution =>
+            resolution.width <= originalWidth && resolution.height <= originalHeight
+        );
 
-        // Upload manifest file
-        await minioClient.putObject(bucketName, `${path.dirname(videoPath)}/hls/${hlsHash}.m3u8`, hlsBuffer);
+        // Generate HLS streams for each valid resolution
+        for (const { width, height, label } of validResolutions) {
+            const resolutionDir = `${hlsDir}/${label}`;
+            const hlsManifest = `${hlsManifestDir}/${label}.m3u8`;
 
-        // Upload segment files
-        for (const segment of segmentFiles) {
-            if (segment.endsWith('.ts')) {
-                const segmentBuffer = await fs.readFile(path.join(hlsDir, segment));
-                await minioClient.putObject(bucketName, `${path.dirname(videoPath)}/hls/segments/${segment}`, segmentBuffer);
+            mkdirSync(resolutionDir, { recursive: true });
+
+            await new Promise((resolve, reject) => {
+                ffmpeg(videoUrl)
+                    .outputOptions([
+                        `-vf scale=w=${width}:h=-2:force_original_aspect_ratio=decrease`,
+                        '-c:a aac',
+                        '-ar 48000',
+                        '-c:v h264',
+                        '-profile:v baseline',
+                        '-crf 20',
+                        '-sc_threshold 0',
+                        '-g 48',
+                        '-keyint_min 48',
+                        '-hls_time 10',
+                        '-hls_playlist_type vod',
+                        '-b:v 800k',
+                        '-maxrate 856k',
+                        '-bufsize 1200k',
+                        '-b:a 96k',
+                        `-hls_segment_filename ${hlsDir}/${label}/%03d.ts`,
+                        '-f hls',
+                    ])
+                    .output(hlsManifest)
+                    .on('end', resolve)
+                    .on('error', (err, stdout, stderr) => {
+                        console.error('Error: ' + err.message);
+                        console.error('ffmpeg stdout: ' + stdout);
+                        console.error('ffmpeg stderr: ' + stderr);
+                        reject(err);
+                    })
+                    .run();
+            });
+        }
+
+        // Upload individual manifests and segments
+        for (const { label } of validResolutions) {
+            const hlsManifest = `${hlsManifestDir}/${label}.m3u8`;
+            const hlsBuffer = await fs.readFile(hlsManifest);
+            await minioClient.putObject(bucketName, `${path.dirname(videoPath)}/hls/${label}.m3u8`, hlsBuffer);
+
+            const resolutionDir = `${hlsDir}/${label}`;
+            const segmentFiles = await fs.readdir(resolutionDir);
+            for (const segment of segmentFiles) {
+                if (segment.endsWith('.ts')) {
+                    const segmentBuffer = await fs.readFile(path.join(resolutionDir, segment));
+                    await minioClient.putObject(bucketName, `${path.dirname(videoPath)}/hls/segments/${label}/${segment}`, segmentBuffer);
+                }
             }
         }
 
-        // Delete the local HLS files after upload
-        await fs.unlink(hlsManifest);
-        for (const segment of segmentFiles) {
-            if (segment.endsWith('.ts')) {
-                await fs.unlink(path.join(hlsDir, segment));
+        for (const { label } of validResolutions) {
+            const resolutionDir = `${hlsDir}/${label}`;
+            const segmentFiles = await fs.readdir(resolutionDir);
+            for (const segment of segmentFiles) {
+                if (segment.endsWith('.ts')) {
+                    await fs.unlink(path.join(resolutionDir, segment));
+                }
             }
         }
 
         // Clean up HLS temp directory
         await VideoProcessingUtils.cleanUpTempSubDir(videoId, 'hls');
 
-        const video = await getVideo(videoId);
-        video.hlsPath = `${path.dirname(videoPath)}/hls/${hlsHash}.m3u8`;
+        // Update video with HLS path
+        video.hlsPath = `${path.dirname(videoPath)}/hls/master.m3u8`;
         video.status = 'converted';
         await video.save();
         await sendNotificationCallback(video.id);
@@ -171,6 +210,10 @@ const processVideoConversion = async (job: Job) => {
 
     await VideoProcessingUtils.checkForDeletion(videoId);
 };
+
+
+
+
 
 const processVideoThumbnail = async (job: Job) => {
     const { videoId } = job.data;
