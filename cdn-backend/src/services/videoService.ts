@@ -29,6 +29,17 @@ export const uploadVideo = async (file: Express.Multer.File, params: string, pro
     try {
         await fs.promises.writeFile(tempFilePath, buffer);
 
+        const video = await Video.create({
+            id: videoId,
+            title: originalname,
+            status: 'uploading',
+            originalPath: urlPath,
+            extension: extension,
+            size: size,
+            projectId: project_id,
+            parameters: JSON.parse(params),
+        });
+
         await videoUploadQueue.add(
             {
                 videoId,
@@ -47,21 +58,11 @@ export const uploadVideo = async (file: Express.Multer.File, params: string, pro
             console.error("Failed to add to queue", err);
         });
 
+        return video;
     } catch (err) {
         console.error("Failed to save file locally", err);
         throw err;
     }
-
-    return await Video.create({
-        id: videoId,
-        title: originalname,
-        status: 'uploading',
-        originalPath: urlPath,
-        extension: extension,
-        size: size,
-        projectId: project_id,
-        parameters: JSON.parse(params),
-    });
 };
 
 /**

@@ -25,10 +25,12 @@ const processVideoUpload = async (job: Job) => {
     try {
         const fileBuffer = await fs.readFile(tempFilePath);
 
+        console.log("Starting upload video of id:" + videoId + " to Minio");
         await minioClient.putObject(bucketName, urlPath, fileBuffer, size, {
             'Content-Type': mimetype,
         });
 
+        const video = await getVideo(videoId);
         video.status = 'uploaded-original';
         await video.save();
 
