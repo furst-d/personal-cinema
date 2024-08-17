@@ -33,7 +33,7 @@ class UserController extends BasePersonalController
     #[Route('', name: 'admin_users', methods: ['GET'])]
     public function getUsers(PaginatorRequest $paginatorRequest): JsonResponse
     {
-        $accounts = $this->accountService->getAccounts($paginatorRequest->getLimit(), $paginatorRequest->getOffset());
+        $accounts = $this->accountService->getAccounts($paginatorRequest);
         return $this->re->withData($accounts, ['account:read']);
     }
 }

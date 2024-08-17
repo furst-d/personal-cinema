@@ -2,6 +2,7 @@
 
 namespace App\Repository\Account;
 
+use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
 use App\Helper\DTO\PaginatorResult;
 use App\Repository\PaginatorHelper;
@@ -36,15 +37,24 @@ class AccountRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param int|null $limit
-     * @param int|null $offset
+     * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult<Account>
      */
-    public function findAccounts(?int $limit, ?int $offset): PaginatorResult
+    public function findAccounts(PaginatorRequest $paginatorRequest): PaginatorResult
     {
-        $qb = $this->createQueryBuilder('a')
-            ->where('a.isDeleted = false');
+        $qb = $this->createQueryBuilder('a');
 
-        return $this->getPaginatorResult($qb, $limit, $offset);
+        return $this->getPaginatorResult($qb, $paginatorRequest);
+    }
+
+    /**
+     * @param Account $account
+     * @return void
+     */
+    public function delete(Account $account): void
+    {
+        $em = $this->getEntityManager();
+        $em->remove($account);
+        $em->flush();
     }
 }

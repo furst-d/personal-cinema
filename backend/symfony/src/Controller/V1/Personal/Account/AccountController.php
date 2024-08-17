@@ -3,12 +3,14 @@
 namespace App\Controller\V1\Personal\Account;
 
 use App\Controller\V1\Personal\BasePersonalController;
+use App\DTO\Account\DeleteAccountRequest;
 use App\DTO\Account\PasswordChangeRequest;
 use App\DTO\Video\UploadRequest;
 use App\DTO\Video\VideoQueryRequest;
 use App\DTO\Video\VideoRequest;
 use App\Entity\Video\Video;
 use App\Exception\ApiException;
+use App\Exception\ForbiddenException;
 use App\Helper\Generator\UrlGenerator;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\AccountService;
@@ -58,6 +60,18 @@ class AccountController extends BasePersonalController
             $this->accountService->checkAndChangePassword($account, $passwordChangeRequest->oldPassword, $passwordChangeRequest->newPassword);
 
             return $this->re->withMessage("Password changed successfully.");
+        } catch (ApiException $e) {
+            return $this->re->withException($e);
+        }
+    }
+
+    #[Route('', name: 'account_delete', methods: ['DELETE'])]
+    public function deleteAccount(Request $request, DeleteAccountRequest $deleteAccountRequest): JsonResponse
+    {
+        try {
+            $account = $this->getAccount($request);
+            $this->accountService->checkPasswordAndDeleteAccount($account, $deleteAccountRequest->password);
+            return $this->re->withMessage("Account deleted successfully.");
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }

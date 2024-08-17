@@ -89,14 +89,8 @@ class Video
     private ?string $thumbnail = null;
 
     #[ORM\Column]
-    private bool $isDeleted;
-
-    #[ORM\Column]
     #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private DateTimeImmutable $createdAt;
-
-    #[ORM\Column(nullable: true)]
-    private ?DateTimeImmutable $deletedAt = null;
 
     #[Groups([self::VIDEO_READ, self::VIDEO_PUBLIC_READ])]
     private ?string $videoUrl = null;
@@ -125,7 +119,6 @@ class Video
         $this->setName($name);
         $this->account = $account;
         $this->hash = uniqid();
-        $this->isDeleted = false;
         $this->createdAt = new DateTimeImmutable();
         $this->shares = new ArrayCollection();
         $this->sharesPublic = new ArrayCollection();
@@ -369,45 +362,11 @@ class Video
     }
 
     /**
-     * @return bool
-     */
-    public function isDeleted(): bool
-    {
-        return $this->isDeleted;
-    }
-
-    /**
-     * @param bool $isDeleted
-     * @return void
-     */
-    public function setIsDeleted(bool $isDeleted): void
-    {
-        $this->isDeleted = $isDeleted;
-    }
-
-    /**
      * @return DateTimeImmutable
      */
     public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
-    }
-
-    /**
-     * @return DateTimeImmutable|null
-     */
-    public function getDeletedAt(): ?DateTimeImmutable
-    {
-        return $this->deletedAt;
-    }
-
-    /**
-     * @return void
-     */
-    public function setDeleted(): void
-    {
-        $this->isDeleted = true;
-        $this->deletedAt = new DateTimeImmutable();
     }
 
     /**
