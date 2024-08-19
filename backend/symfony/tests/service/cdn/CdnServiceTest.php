@@ -82,7 +82,7 @@ class CdnServiceTest extends TestCase
             ->with($video)
             ->willReturn('manifest content');
 
-        $result = $this->cdnService->getManifest($video);
+        $result = $this->cdnService->getManifest($video, 1080);
 
         $this->assertEquals('manifest content', $result);
     }
@@ -97,7 +97,7 @@ class CdnServiceTest extends TestCase
             ->with($video)
             ->willThrowException(new InternalException('Error retrieving manifest'));
 
-        $this->cdnService->getManifest($video);
+        $this->cdnService->getManifest($video, 1080);
     }
 
     public function testSynchronizeVideoSuccess()
