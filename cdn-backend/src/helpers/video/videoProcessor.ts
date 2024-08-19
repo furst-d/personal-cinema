@@ -125,9 +125,26 @@ const processVideoConversion = async (job: Job) => {
             resolution.width <= originalWidth && resolution.height <= originalHeight
         );
 
+        // If the original resolution is closer to the next resolution, convert it as next resolution
+        if (validResolutions.length < resolutions.length) {
+            const lastValidResolution = validResolutions[validResolutions.length - 1];
+            const nextResolution = resolutions[validResolutions.length];
+
+            const lastDifference = Math.abs(originalWidth - lastValidResolution.width) + Math.abs(originalHeight - lastValidResolution.height);
+            const nextDifference = Math.abs(originalWidth - nextResolution.width) + Math.abs(originalHeight - nextResolution.height);
+
+            if (nextDifference < lastDifference) {
+                validResolutions.push({
+                    width: originalWidth,
+                    height: originalHeight,
+                    label: nextResolution.label
+                });
+            }
+        }
+
         let conversions = Array.isArray(video.conversions) ? [...video.conversions] : [];
 
-        for (const { width, label } of validResolutions) {
+        for (const { width, height, label } of validResolutions) {
             const resolutionDir = `${hlsDir}/${label}`;
             const hlsManifest = `${hlsManifestDir}/${label}.m3u8`;
 
@@ -136,7 +153,7 @@ const processVideoConversion = async (job: Job) => {
             await new Promise((resolve, reject) => {
                 ffmpeg(videoUrl)
                     .outputOptions([
-                        `-vf scale=w=${width}:h=-2:force_original_aspect_ratio=decrease`,
+                        `-vf scale=w=${Math.floor(width / 2) * 2}:h=${Math.floor(height / 2) * 2}`,
                         '-c:a aac',
                         '-ar 48000',
                         '-c:v h264',
@@ -191,6 +208,9 @@ const processVideoConversion = async (job: Job) => {
 
         await VideoProcessingUtils.cleanUpTempSubDir(videoId, 'hls');
     } catch (error) {
+        await video.reload();
+        video.hlsPath = `${videoId}/hls`;
+        await video.save();
         await VideoProcessingUtils.markForDeletion(video);
         throw error;
     }
@@ -264,6 +284,9 @@ const processVideoThumbnail = async (job: Job) => {
         await sendThumbnailCallback(video.id);
     } catch (error) {
         console.error('Error generating thumbnails:', error);
+        await video.reload();
+        video.thumbnailPath = `${videoId}/thumbs`;
+        await video.save();
         await VideoProcessingUtils.markForDeletion(video);
         throw error;
     }

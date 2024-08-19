@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import {getSignedThumbnails, getVideo, prepareVideoData} from "../services/videoService";
 import Video from "../entities/video";
 import minioClient, { bucketName } from "../config/minio";
-import path from "path";
 import {StreamUtils} from "../helpers/video/StreamUtils";
 import {isUUID} from "validator";
 import {VideoProcessingUtils} from "../helpers/video/VideoProcessingUtils";
@@ -42,7 +41,6 @@ export const getVideoUrlRoute = async (req: Request, res: Response): Promise<voi
     }
 
     const manifestPath = `${video.hlsPath}/${quality}.m3u8`;
-    console.log("manifestPath", manifestPath);
 
     try {
         // Load manifest file from Minio
@@ -52,7 +50,6 @@ export const getVideoUrlRoute = async (req: Request, res: Response): Promise<voi
 
         // Load segment files from manifest
         const segmentFiles = manifestContent.match(/(\d+\.ts)/g) || [];
-        console.log("segmentFiles", segmentFiles);
 
         // Generate signed URLs for segment files
         const signedUrls: Record<string, string> = {};
@@ -60,7 +57,6 @@ export const getVideoUrlRoute = async (req: Request, res: Response): Promise<voi
             const segmentPath = `${video.hlsPath}/segments/${quality}/${segment}`;
             signedUrls[segment] =  await minioClient.presignedUrl('GET', bucketName, segmentPath, 24 * 60 * 60);
         }
-        console.log("signedUrls", signedUrls);
 
         // Update manifest file with signed URLs
         let updatedContent = manifestContent;
