@@ -1,9 +1,16 @@
 import React from 'react';
+
+import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
+import 'videojs-hotkeys';
+
+import "videojs-contrib-quality-levels";
+// @ts-ignore
+import qualitySelectorHls from "videojs-quality-selector-hls";
+
+videojs.registerPlugin('qualitySelectorHls',qualitySelectorHls);
 
 import {VideoPlayerContainerStyle} from "../../styles/player/VideoPlayer";
-
-declare const videojs: any;
 
 interface IVideoPlayerProps {
     src: string;
@@ -36,8 +43,8 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
                 volumeStep: 0.1,
                 seekStep: 5
             },
-            hlsQualitySelector: {
-                vjsIconClass: 'vjs-icon-cog',
+            qualitySelectorHls: {
+                vjsIconClass: 'vjs-icon-cog'
             }
         }
     };
