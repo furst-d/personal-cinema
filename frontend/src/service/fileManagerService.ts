@@ -12,13 +12,21 @@ interface FolderPayload {
     totalCount?: number;
 }
 
-interface Video {
+interface VideoConversion {
+    quality: number;
+}
+
+export interface Video {
     id: string;
     name: string;
     hash: string;
     thumbnailUrl?: string;
-    path?: string;
+    conversions: VideoConversion[];
     createdAt: string;
+    originalWidth: number;
+    originalHeight: number;
+    length: number;
+    size: number;
 }
 
 interface VideoPayload {

@@ -134,12 +134,13 @@ class CdnService
 
     /**
      * @param Video $video
+     * @param int $quality
      * @return string
      * @throws InternalException
      */
-    public function getManifest(Video $video): string
+    public function getManifest(Video $video, int $quality): string
     {
-        return $this->cdnManager->getManifestContent($video);
+        return $this->cdnManager->getManifestContent($video, $quality);
     }
 
     /**

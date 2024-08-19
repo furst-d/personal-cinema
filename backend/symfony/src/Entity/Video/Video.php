@@ -108,7 +108,9 @@ class Video
     /**
      * @var Collection<int, Conversion>
      */
-    #[ORM\OneToMany(targetEntity: Conversion::class, mappedBy: 'video', orphanRemoval: true)]
+    #[ORM\ManyToMany(targetEntity: Conversion::class, inversedBy: 'videos')]
+    #[ORM\JoinTable(name: 'video_conversion')]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private Collection $conversions;
 
     /**
@@ -419,5 +421,17 @@ class Video
     public function getConversions(): Collection
     {
         return $this->conversions;
+    }
+
+    /**
+     * @param Conversion $conversion
+     * @return void
+     */
+    public function addConversion(Conversion $conversion): void
+    {
+        if (!$this->conversions->contains($conversion)) {
+            $this->conversions->add($conversion);
+            $conversion->addVideo($this);
+        }
     }
 }

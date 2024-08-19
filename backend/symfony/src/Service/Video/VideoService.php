@@ -3,7 +3,6 @@
 namespace App\Service\Video;
 
 use App\DTO\PaginatorRequest;
-use App\DTO\Video\VideoQueryRequest;
 use App\Entity\Account\Account;
 use App\Entity\Video\Conversion;
 use App\Entity\Video\Folder;
@@ -11,8 +10,8 @@ use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
-use App\Helper\Generator\UrlGenerator;
 use App\Helper\DTO\PaginatorResult;
+use App\Helper\Generator\UrlGenerator;
 use App\Helper\Video\FolderData;
 use App\Helper\Video\NameNormalizer;
 use App\Helper\Video\ThirdParty;
@@ -20,8 +19,6 @@ use App\Repository\Video\ConversionRepository;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 use App\Service\Cdn\CdnDeletionService;
-use App\Service\Cdn\CdnService;
-use Doctrine\DBAL\Exception;
 
 class VideoService
 {
@@ -36,9 +33,9 @@ class VideoService
     private MD5Repository $md5Repository;
 
     /**
-     * @var ConversionRepository $conversionRepository
+     * @var ConversionRepository $conversionDataRepository
      */
-    private ConversionRepository $conversionRepository;
+    private ConversionRepository $conversionDataRepository;
 
     /**
      * @var UrlGenerator $urlGenerator
@@ -65,25 +62,25 @@ class VideoService
     /**
      * @param VideoRepository $videoRepository
      * @param MD5Repository $md5Repository
-     * @param ConversionRepository $conversionRepository
+     * @param ConversionRepository $conversionDataRepository
      * @param UrlGenerator $urlGenerator
      * @param ShareService $shareService
      * @param FolderService $folderService
      * @param CdnDeletionService $cdnDeletionService
      */
     public function __construct(
-        VideoRepository $videoRepository,
-        MD5Repository $md5Repository,
-        ConversionRepository $conversionRepository,
-        UrlGenerator $urlGenerator,
-        ShareService $shareService,
-        FolderService $folderService,
-        CdnDeletionService $cdnDeletionService
+        VideoRepository      $videoRepository,
+        MD5Repository        $md5Repository,
+        ConversionRepository $conversionDataRepository,
+        UrlGenerator         $urlGenerator,
+        ShareService         $shareService,
+        FolderService        $folderService,
+        CdnDeletionService   $cdnDeletionService
     )
     {
         $this->videoRepository = $videoRepository;
         $this->md5Repository = $md5Repository;
-        $this->conversionRepository = $conversionRepository;
+        $this->conversionDataRepository = $conversionDataRepository;
         $this->urlGenerator = $urlGenerator;
         $this->shareService = $shareService;
         $this->folderService = $folderService;
@@ -306,19 +303,11 @@ class VideoService
 
     /**
      * @param Video $video
-     * @param array $conversions
-     * @return array
+     * @param array $heights
+     * @return Conversion[]
      */
-    public function getUnusedConversions(Video $video, array $conversions): array
+    public function getUnusedConversionData(Video $video, array $heights): array
     {
-        $videoConversions = $video->getConversions();
-
-        $existingQualities = array_map(function($conversion) {
-            return $conversion->getQuality();
-        }, $videoConversions->toArray());
-
-        return array_filter($conversions, function ($conversion) use ($existingQualities) {
-            return !in_array($conversion, $existingQualities);
-        });
+        return $this->conversionDataRepository->findUnusedConversions($video, $heights);
     }
 }

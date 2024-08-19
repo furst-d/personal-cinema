@@ -109,9 +109,9 @@ class VideoRepository extends ServiceEntityRepository
     public function findRecommendations(Video $video, PaginatorRequest $paginatorRequest): PaginatorResult
     {
         $qb = $this->createQueryBuilder('v')
+            ->join('v.conversions', 'c')
             ->andWhere('v.id != :id')->setParameter('id', $video->getId())
             ->andWhere('v.account = :account')->setParameter('account', $video->getAccount())
-            ->andWhere('v.path IS NOT NULL')
             ->andWhere('v.thumbnail IS NOT NULL')
             ->orderBy('RAND()');
 

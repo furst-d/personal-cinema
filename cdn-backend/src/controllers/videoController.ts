@@ -41,7 +41,7 @@ export const getVideoUrlRoute = async (req: Request, res: Response): Promise<voi
         return;
     }
 
-    const manifestPath = `${path.dirname(video.hlsPath)}/${quality}.m3u8`;
+    const manifestPath = `${video.hlsPath}/${quality}.m3u8`;
     console.log("manifestPath", manifestPath);
 
     try {
@@ -57,7 +57,7 @@ export const getVideoUrlRoute = async (req: Request, res: Response): Promise<voi
         // Generate signed URLs for segment files
         const signedUrls: Record<string, string> = {};
         for (const segment of segmentFiles) {
-            const segmentPath = `${path.dirname(video.hlsPath)}/segments/${quality}/${segment}`;
+            const segmentPath = `${video.hlsPath}/segments/${quality}/${segment}`;
             signedUrls[segment] =  await minioClient.presignedUrl('GET', bucketName, segmentPath, 24 * 60 * 60);
         }
         console.log("signedUrls", signedUrls);
@@ -80,9 +80,6 @@ export const getVideoUrlRoute = async (req: Request, res: Response): Promise<voi
         res.status(500).send('Internal Server Error');
     }
 };
-
-
-
 
 export const getThumbnailRoute = async (req: Request, res: Response): Promise<void> => {
     const videoId = req.params.id;

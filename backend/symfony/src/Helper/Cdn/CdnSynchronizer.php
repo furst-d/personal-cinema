@@ -201,8 +201,8 @@ class CdnSynchronizer
         $conversions = $videoData->conversions;
 
         if (!empty($conversions)) {
-            foreach ($this->videoService->getUnusedConversions($video, $conversions) as $quality) {
-                $conversion = new Conversion($video, $quality);
+            foreach ($this->videoService->getUnusedConversionData($video, $conversions) as $conversion) {
+                $conversion->addVideo($video);
                 $this->em->persist($conversion);
             }
         }

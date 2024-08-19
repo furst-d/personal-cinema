@@ -3,6 +3,7 @@
 namespace App\Controller\V1\Private\Video;
 
 use App\Controller\V1\Private\BasePrivateController;
+use App\DTO\Video\QualityRequest;
 use App\Exception\ApiException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
@@ -10,6 +11,7 @@ use App\Helper\Jwt\JwtUsage;
 use App\Service\Auth\AuthService;
 use App\Service\Cdn\CdnService;
 use App\Service\Locator\BaseControllerLocator;
+use App\Service\Video\ManifestService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,31 +20,31 @@ use Symfony\Component\Routing\Attribute\Route;
 class VideoController extends BasePrivateController
 {
     /**
-     * @var CdnService $cdnService
+     * @var ManifestService $manifestService
      */
-    private CdnService $cdnService;
+    private ManifestService $manifestService;
 
     /**
      * @param BaseControllerLocator $locator
      * @param AuthService $authService
-     * @param CdnService $cdnService
+     * @param ManifestService $manifestService
      */
     public function __construct(
         BaseControllerLocator $locator,
         AuthService $authService,
-        CdnService $cdnService
+        ManifestService $manifestService
     )
     {
         parent::__construct($locator, $authService);
-        $this->cdnService = $cdnService;
+        $this->manifestService = $manifestService;
     }
 
     #[Route('/url', name: 'video_manifest', methods: ['GET'])]
-    public function getManifest(Request $request): Response
+    public function getManifest(Request $request, QualityRequest $qualityRequest): Response
     {
         try {
             $video = $this->authService->authVideo($request, JwtUsage::USAGE_VIDEO_ACCESS);
-            $manifestContent = $this->cdnService->getManifest($video);
+            $manifestContent = $this->manifestService->getManifest($video, $qualityRequest);
 
             return new Response($manifestContent, 200, ['Content-Type' => 'application/vnd.apple.mpegurl']);
         } catch (ApiException $e) {

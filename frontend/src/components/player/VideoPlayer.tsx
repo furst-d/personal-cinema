@@ -2,6 +2,8 @@ import React from 'react';
 import 'video.js/dist/video-js.css';
 import videojs from "video.js";
 import 'videojs-hotkeys';
+import 'videojs-hls-quality-selector/dist/videojs-hls-quality-selector.js';
+
 
 import {VideoPlayerContainerStyle} from "../../styles/player/VideoPlayer";
 
@@ -28,6 +30,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
                 "pictureInPictureToggle",
                 "captionsButton",
                 "fullscreenToggle",
+                "qualitySelector"
             ]
         },
         plugins: {
@@ -35,6 +38,9 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
                 volumeStep: 0.1,
                 seekStep: 5
             },
+            hlsQualitySelector: {
+                vjsIconClass: 'vjs-icon-cog',
+            }
         }
     };
 

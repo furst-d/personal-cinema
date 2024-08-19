@@ -17,14 +17,15 @@ import {
     NotAvailableIconStyled,
 } from "../../styles/video/VideoPreview";
 import {formatDuration, formatSize} from "../../utils/formatter";
+import {Video} from "../../service/fileManagerService";
 
-const VideoPreview = ({ video }: { video: any }) => {
+const VideoPreview = ({ video }: { video: Video }) => {
     const theme = useTheme() as Theme;
     const isHd = video.originalWidth >= 1280 && video.originalHeight >= 720;
     const duration = video.length !== null ? formatDuration(video.length) : null;
     const size = video.size !== null ? formatSize(video.size) : null;
 
-    const isProcessing = !video.thumbnailUrl || !video.path;
+    const isProcessing = !video.thumbnailUrl || video.conversions.length === 0;
 
     return (
         <VideoLink to={`/videos/${video.hash}`} theme={theme} disabled={isProcessing}>
