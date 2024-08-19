@@ -8,4 +8,7 @@ export default defineConfig({
     host: true,
     port: 5173
   },
+  optimizeDeps: {
+    exclude: ['videojs-quality-selector-hls']
+  }
 })
