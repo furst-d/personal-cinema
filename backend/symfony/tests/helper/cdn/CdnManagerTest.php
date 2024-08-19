@@ -37,7 +37,7 @@ class CdnManagerTest extends TestCase
 
         $this->mockClient->method('get')->willReturn($mockResponse);
 
-        $result = $this->cdnManager->getManifestContent($video);
+        $result = $this->cdnManager->getManifestContent($video, 1080);
 
         $this->assertEquals('manifest content', $result);
     }
@@ -54,7 +54,7 @@ class CdnManagerTest extends TestCase
 
         $this->mockClient->method('get')->willReturn($mockResponse);
 
-        $this->cdnManager->getManifestContent($video);
+        $this->cdnManager->getManifestContent($video, 1080);
     }
 
     public function testGetManifestContentRequestException()
@@ -67,6 +67,6 @@ class CdnManagerTest extends TestCase
 
         $this->mockClient->method('get')->willThrowException(new RequestException('Error', new \GuzzleHttp\Psr7\Request('GET', 'test')));
 
-        $this->cdnManager->getManifestContent($video);
+        $this->cdnManager->getManifestContent($video, 1080);
     }
 }

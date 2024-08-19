@@ -12,6 +12,7 @@ use App\Repository\Account\AccountRepository;
 use App\Service\Account\AccountService;
 use App\Service\Account\RoleService;
 use App\Service\Storage\StorageService;
+use App\Service\Video\VideoService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use PHPUnit\Framework\TestCase;
@@ -26,6 +27,7 @@ class AccountServiceTest extends TestCase
     private $entityManager;
     private $roleService;
     private $storageService;
+    private $videoService;
     private $accountRepository;
     private $authenticator;
     private $accountService;
@@ -35,6 +37,7 @@ class AccountServiceTest extends TestCase
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
         $this->roleService = $this->createMock(RoleService::class);
         $this->storageService = $this->createMock(StorageService::class);
+        $this->videoService = $this->createMock(VideoService::class);
         $this->accountRepository = $this->createMock(AccountRepository::class);
         $this->authenticator = $this->createMock(Authenticator::class);
 
@@ -42,6 +45,7 @@ class AccountServiceTest extends TestCase
             $this->entityManager,
             $this->roleService,
             $this->storageService,
+            $this->videoService,
             $this->accountRepository,
             $this->authenticator
         );

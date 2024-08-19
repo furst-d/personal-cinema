@@ -11,6 +11,7 @@ use App\Exception\NotFoundException;
 use App\Helper\Generator\UrlGenerator;
 use App\Helper\DTO\PaginatorResult;
 use App\Helper\Video\FolderData;
+use App\Repository\Video\ConversionRepository;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 use App\Service\Cdn\CdnDeletionService;
@@ -24,6 +25,7 @@ class VideoServiceTest extends TestCase
     private $videoService;
     private $mockVideoRepository;
     private $mockMd5Repository;
+    private $mockConversionRepository;
     private $mockUrlGenerator;
     private $mockShareService;
     private $mockFolderService;
@@ -33,6 +35,7 @@ class VideoServiceTest extends TestCase
     {
         $this->mockVideoRepository = $this->createMock(VideoRepository::class);
         $this->mockMd5Repository = $this->createMock(MD5Repository::class);
+        $this->mockConversionRepository = $this->createMock(ConversionRepository::class);
         $this->mockUrlGenerator = $this->createMock(UrlGenerator::class);
         $this->mockShareService = $this->createMock(ShareService::class);
         $this->mockFolderService = $this->createMock(FolderService::class);
@@ -41,6 +44,7 @@ class VideoServiceTest extends TestCase
         $this->videoService = new VideoService(
             $this->mockVideoRepository,
             $this->mockMd5Repository,
+            $this->mockConversionRepository,
             $this->mockUrlGenerator,
             $this->mockShareService,
             $this->mockFolderService,

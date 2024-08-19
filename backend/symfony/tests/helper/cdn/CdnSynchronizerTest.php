@@ -64,6 +64,7 @@ class CdnSynchronizerTest extends TestCase
         $videoData->md5 = 'valid-md5-hash';
         $videoData->createdAt = new \DateTimeImmutable();
         $videoData->updatedAt = new \DateTimeImmutable();
+        $videoData->conversions = [];
 
         return $videoData;
     }
