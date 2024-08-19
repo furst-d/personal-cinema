@@ -12,7 +12,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use phpDocumentor\Reflection\Types\Self_;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: VideoRepository::class)]
@@ -75,10 +74,6 @@ class Video
 
     #[ORM\Column(nullable: true)]
     #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
-    private ?string $path = null;
-
-    #[ORM\Column(nullable: true)]
-    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private ?int $originalWidth = null;
 
     #[ORM\Column(nullable: true)]
@@ -111,6 +106,12 @@ class Video
     private Collection $sharesPublic;
 
     /**
+     * @var Collection<int, Conversion>
+     */
+    #[ORM\OneToMany(targetEntity: Conversion::class, mappedBy: 'video', orphanRemoval: true)]
+    private Collection $conversions;
+
+    /**
      * @param string $name
      * @param Account $account
      */
@@ -122,6 +123,7 @@ class Video
         $this->createdAt = new DateTimeImmutable();
         $this->shares = new ArrayCollection();
         $this->sharesPublic = new ArrayCollection();
+        $this->conversions = new ArrayCollection();
     }
 
     /**
@@ -294,23 +296,6 @@ class Video
     }
 
     /**
-     * @return string|null
-     */
-    public function getPath(): ?string
-    {
-        return $this->path;
-    }
-
-    /**
-     * @param string|null $path
-     * @return void
-     */
-    public function setPath(?string $path): void
-    {
-        $this->path = $path;
-    }
-
-    /**
      * @return int|null
      */
     public function getOriginalWidth(): ?int
@@ -426,5 +411,13 @@ class Video
     public function isShared(): bool
     {
         return $this->shares->count() > 0 || $this->sharesPublic->count() > 0;
+    }
+
+    /**
+     * @return Collection<int, Conversion>
+     */
+    public function getConversions(): Collection
+    {
+        return $this->conversions;
     }
 }

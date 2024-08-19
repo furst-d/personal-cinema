@@ -103,7 +103,7 @@ export const prepareVideoData = async (video: Video) => {
             width: video.originalWidth,
             height: video.originalHeight,
         },
-        path: video.hlsPath,
+        conversions: video.conversions,
         md5: video.md5 ? video.md5.md5 : null,
         createdAt: video.createdAt,
         updatedAt: video.updatedAt,

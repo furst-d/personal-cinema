@@ -5,6 +5,7 @@ namespace App\Service\Video;
 use App\DTO\PaginatorRequest;
 use App\DTO\Video\VideoQueryRequest;
 use App\Entity\Account\Account;
+use App\Entity\Video\Conversion;
 use App\Entity\Video\Folder;
 use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
@@ -15,10 +16,12 @@ use App\Helper\DTO\PaginatorResult;
 use App\Helper\Video\FolderData;
 use App\Helper\Video\NameNormalizer;
 use App\Helper\Video\ThirdParty;
+use App\Repository\Video\ConversionRepository;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 use App\Service\Cdn\CdnDeletionService;
 use App\Service\Cdn\CdnService;
+use Doctrine\DBAL\Exception;
 
 class VideoService
 {
@@ -31,6 +34,11 @@ class VideoService
      * @var MD5Repository $md5Repository
      */
     private MD5Repository $md5Repository;
+
+    /**
+     * @var ConversionRepository $conversionRepository
+     */
+    private ConversionRepository $conversionRepository;
 
     /**
      * @var UrlGenerator $urlGenerator
@@ -57,6 +65,7 @@ class VideoService
     /**
      * @param VideoRepository $videoRepository
      * @param MD5Repository $md5Repository
+     * @param ConversionRepository $conversionRepository
      * @param UrlGenerator $urlGenerator
      * @param ShareService $shareService
      * @param FolderService $folderService
@@ -65,6 +74,7 @@ class VideoService
     public function __construct(
         VideoRepository $videoRepository,
         MD5Repository $md5Repository,
+        ConversionRepository $conversionRepository,
         UrlGenerator $urlGenerator,
         ShareService $shareService,
         FolderService $folderService,
@@ -73,6 +83,7 @@ class VideoService
     {
         $this->videoRepository = $videoRepository;
         $this->md5Repository = $md5Repository;
+        $this->conversionRepository = $conversionRepository;
         $this->urlGenerator = $urlGenerator;
         $this->shareService = $shareService;
         $this->folderService = $folderService;
@@ -276,7 +287,7 @@ class VideoService
      */
     public function addVideoUrlToVideo(Video $video, Account $account): void
     {
-        if ($video->getPath()) {
+        if (!$video->getConversions()->isEmpty()) {
             $video->setVideoUrl($this->urlGenerator->generateVideo($account, $video));
         }
     }
@@ -288,8 +299,26 @@ class VideoService
      */
     public function addPublicVideoUrlToVideo(Video $video): void
     {
-        if ($video->getPath()) {
+        if (!$video->getConversions()->isEmpty()) {
             $video->setVideoUrl($this->urlGenerator->generatePublicVideo($video));
         }
+    }
+
+    /**
+     * @param Video $video
+     * @param array $conversions
+     * @return array
+     */
+    public function getUnusedConversions(Video $video, array $conversions): array
+    {
+        $videoConversions = $video->getConversions();
+
+        $existingQualities = array_map(function($conversion) {
+            return $conversion->getQuality();
+        }, $videoConversions->toArray());
+
+        return array_filter($conversions, function ($conversion) use ($existingQualities) {
+            return !in_array($conversion, $existingQualities);
+        });
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Helper\Cdn;
 
 use App\DTO\Video\CdnVideoRequest;
+use App\Entity\Video\Conversion;
 use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
 use App\Exception\BadRequestException;
@@ -164,7 +165,7 @@ class CdnSynchronizer
         $video->setCodec($videoData->codec);
         $video->setExtension($videoData->extension);
         $video->setLength($videoData->length);
-        $video->setPath($videoData->path);
+        $this->updateConversions($video, $videoData);
         $this->updateVideoResolution($video, $videoData);
         $this->updateVideoMd5($video, $videoData);
 
@@ -186,6 +187,23 @@ class CdnSynchronizer
                 $video->setFolder($this->folderService->getFolderById($folderId));
             } catch (NotFoundException) {
                 $video->setFolder(null);
+            }
+        }
+    }
+
+    /**
+     * @param Video $video
+     * @param CdnVideoRequest $videoData
+     * @return void
+     */
+    private function updateConversions(Video $video, CdnVideoRequest $videoData): void
+    {
+        $conversions = $videoData->conversions;
+
+        if (!empty($conversions)) {
+            foreach ($this->videoService->getUnusedConversions($video, $conversions) as $quality) {
+                $conversion = new Conversion($video, $quality);
+                $this->em->persist($conversion);
             }
         }
     }
