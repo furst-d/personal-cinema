@@ -48,15 +48,19 @@ class CdnManager
 
     /**
      * @param Video $video
+     * @param int $quality
      * @return string
      * @throws InternalException
      */
-    public function getManifestContent(Video $video): string
+    public function getManifestContent(Video $video, int $quality): string
     {
         try {
             $response = $this->client->get("{$this->cdnUrl}/videos/{$video->getCdnId()}/file.m3u8", [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $this->cdnSecretKey,
+                ],
+                'query' => [
+                    'quality' => $quality,
                 ],
             ]);
 

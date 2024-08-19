@@ -2,9 +2,10 @@ import React from 'react';
 import { FileManagerSeparator } from "../../styles/file/FileManager";
 import VideoItem from "./VideoItem";
 import {useTheme} from "styled-components";
+import {Video} from "../../service/fileManagerService";
 
 interface VideoListProps {
-    videos: any[];
+    videos: Video[];
     onVideoDoubleClick: (hash: string) => void;
     onContextMenuOpen: (event: React.MouseEvent<HTMLElement>, item: any) => void;
 }
@@ -14,7 +15,8 @@ const VideoList: React.FC<VideoListProps> = ({ videos, onVideoDoubleClick, onCon
 
     return (
         videos.map((video, index) => {
-            const isProcessing = !video.thumbnailUrl || !video.path;
+            const isProcessing = !video.thumbnailUrl || video.conversions.length === 0;
+
             return (
                 <React.Fragment key={video.id}>
                     <VideoItem

@@ -3,22 +3,22 @@
 namespace App\Service\Video;
 
 use App\DTO\PaginatorRequest;
-use App\DTO\Video\VideoQueryRequest;
 use App\Entity\Account\Account;
+use App\Entity\Video\Conversion;
 use App\Entity\Video\Folder;
 use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
-use App\Helper\Generator\UrlGenerator;
 use App\Helper\DTO\PaginatorResult;
+use App\Helper\Generator\UrlGenerator;
 use App\Helper\Video\FolderData;
 use App\Helper\Video\NameNormalizer;
 use App\Helper\Video\ThirdParty;
+use App\Repository\Video\ConversionRepository;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 use App\Service\Cdn\CdnDeletionService;
-use App\Service\Cdn\CdnService;
 
 class VideoService
 {
@@ -31,6 +31,11 @@ class VideoService
      * @var MD5Repository $md5Repository
      */
     private MD5Repository $md5Repository;
+
+    /**
+     * @var ConversionRepository $conversionDataRepository
+     */
+    private ConversionRepository $conversionDataRepository;
 
     /**
      * @var UrlGenerator $urlGenerator
@@ -57,22 +62,25 @@ class VideoService
     /**
      * @param VideoRepository $videoRepository
      * @param MD5Repository $md5Repository
+     * @param ConversionRepository $conversionDataRepository
      * @param UrlGenerator $urlGenerator
      * @param ShareService $shareService
      * @param FolderService $folderService
      * @param CdnDeletionService $cdnDeletionService
      */
     public function __construct(
-        VideoRepository $videoRepository,
-        MD5Repository $md5Repository,
-        UrlGenerator $urlGenerator,
-        ShareService $shareService,
-        FolderService $folderService,
-        CdnDeletionService $cdnDeletionService
+        VideoRepository      $videoRepository,
+        MD5Repository        $md5Repository,
+        ConversionRepository $conversionDataRepository,
+        UrlGenerator         $urlGenerator,
+        ShareService         $shareService,
+        FolderService        $folderService,
+        CdnDeletionService   $cdnDeletionService
     )
     {
         $this->videoRepository = $videoRepository;
         $this->md5Repository = $md5Repository;
+        $this->conversionDataRepository = $conversionDataRepository;
         $this->urlGenerator = $urlGenerator;
         $this->shareService = $shareService;
         $this->folderService = $folderService;
@@ -276,7 +284,7 @@ class VideoService
      */
     public function addVideoUrlToVideo(Video $video, Account $account): void
     {
-        if ($video->getPath()) {
+        if (!$video->getConversions()->isEmpty()) {
             $video->setVideoUrl($this->urlGenerator->generateVideo($account, $video));
         }
     }
@@ -288,8 +296,18 @@ class VideoService
      */
     public function addPublicVideoUrlToVideo(Video $video): void
     {
-        if ($video->getPath()) {
+        if (!$video->getConversions()->isEmpty()) {
             $video->setVideoUrl($this->urlGenerator->generatePublicVideo($video));
         }
+    }
+
+    /**
+     * @param Video $video
+     * @param array $heights
+     * @return Conversion[]
+     */
+    public function getUnusedConversionData(Video $video, array $heights): array
+    {
+        return $this->conversionDataRepository->findUnusedConversions($video, $heights);
     }
 }

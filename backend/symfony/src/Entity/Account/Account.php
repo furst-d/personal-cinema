@@ -45,10 +45,6 @@ class Account implements UserInterface
     #[ORM\Column]
     #[Groups([self::ACCOUNT_READ])]
     private bool $isActive = false;
-
-    #[ORM\Column]
-    private bool $isDeleted = false;
-
     /**
      * @var Collection<int, Role>
      */
@@ -190,23 +186,6 @@ class Account implements UserInterface
     public function setActive(bool $isActive): void
     {
         $this->isActive = $isActive;
-    }
-
-    /**
-     * @return bool|null
-     */
-    public function isDeleted(): ?bool
-    {
-        return $this->isDeleted;
-    }
-
-    /**
-     * @param bool $isDeleted
-     * @return void
-     */
-    public function setDeleted(bool $isDeleted): void
-    {
-        $this->isDeleted = $isDeleted;
     }
 
     /**

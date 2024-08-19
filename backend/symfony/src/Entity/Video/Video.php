@@ -12,7 +12,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use phpDocumentor\Reflection\Types\Self_;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: VideoRepository::class)]
@@ -75,10 +74,6 @@ class Video
 
     #[ORM\Column(nullable: true)]
     #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
-    private ?string $path = null;
-
-    #[ORM\Column(nullable: true)]
-    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private ?int $originalWidth = null;
 
     #[ORM\Column(nullable: true)]
@@ -89,14 +84,8 @@ class Video
     private ?string $thumbnail = null;
 
     #[ORM\Column]
-    private bool $isDeleted;
-
-    #[ORM\Column]
     #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
     private DateTimeImmutable $createdAt;
-
-    #[ORM\Column(nullable: true)]
-    private ?DateTimeImmutable $deletedAt = null;
 
     #[Groups([self::VIDEO_READ, self::VIDEO_PUBLIC_READ])]
     private ?string $videoUrl = null;
@@ -117,6 +106,14 @@ class Video
     private Collection $sharesPublic;
 
     /**
+     * @var Collection<int, Conversion>
+     */
+    #[ORM\ManyToMany(targetEntity: Conversion::class, inversedBy: 'videos')]
+    #[ORM\JoinTable(name: 'video_conversion')]
+    #[Groups([self::VIDEO_READ, self::VIDEOS_READ])]
+    private Collection $conversions;
+
+    /**
      * @param string $name
      * @param Account $account
      */
@@ -125,10 +122,10 @@ class Video
         $this->setName($name);
         $this->account = $account;
         $this->hash = uniqid();
-        $this->isDeleted = false;
         $this->createdAt = new DateTimeImmutable();
         $this->shares = new ArrayCollection();
         $this->sharesPublic = new ArrayCollection();
+        $this->conversions = new ArrayCollection();
     }
 
     /**
@@ -301,23 +298,6 @@ class Video
     }
 
     /**
-     * @return string|null
-     */
-    public function getPath(): ?string
-    {
-        return $this->path;
-    }
-
-    /**
-     * @param string|null $path
-     * @return void
-     */
-    public function setPath(?string $path): void
-    {
-        $this->path = $path;
-    }
-
-    /**
      * @return int|null
      */
     public function getOriginalWidth(): ?int
@@ -369,45 +349,11 @@ class Video
     }
 
     /**
-     * @return bool
-     */
-    public function isDeleted(): bool
-    {
-        return $this->isDeleted;
-    }
-
-    /**
-     * @param bool $isDeleted
-     * @return void
-     */
-    public function setIsDeleted(bool $isDeleted): void
-    {
-        $this->isDeleted = $isDeleted;
-    }
-
-    /**
      * @return DateTimeImmutable
      */
     public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
-    }
-
-    /**
-     * @return DateTimeImmutable|null
-     */
-    public function getDeletedAt(): ?DateTimeImmutable
-    {
-        return $this->deletedAt;
-    }
-
-    /**
-     * @return void
-     */
-    public function setDeleted(): void
-    {
-        $this->isDeleted = true;
-        $this->deletedAt = new DateTimeImmutable();
     }
 
     /**
@@ -467,5 +413,25 @@ class Video
     public function isShared(): bool
     {
         return $this->shares->count() > 0 || $this->sharesPublic->count() > 0;
+    }
+
+    /**
+     * @return Collection<int, Conversion>
+     */
+    public function getConversions(): Collection
+    {
+        return $this->conversions;
+    }
+
+    /**
+     * @param Conversion $conversion
+     * @return void
+     */
+    public function addConversion(Conversion $conversion): void
+    {
+        if (!$this->conversions->contains($conversion)) {
+            $this->conversions->add($conversion);
+            $conversion->addVideo($this);
+        }
     }
 }

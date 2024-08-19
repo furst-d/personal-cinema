@@ -3,6 +3,7 @@
 namespace App\Helper\Generator;
 
 use App\Entity\Account\Account;
+use App\Entity\Video\Conversion;
 use App\Entity\Video\Video;
 use App\Exception\InternalException;
 use App\Helper\Jwt\JwtUsage;
@@ -58,6 +59,21 @@ class UrlGenerator
         ]);
 
         return "$this->backendUrl/v1/private/videos/url?token=$token";
+    }
+
+    /**
+     * @param Video $video
+     * @param Conversion $conversion
+     * @return string
+     * @throws InternalException
+     */
+    public function generateManifest(Video $video, Conversion $conversion): string
+    {
+        $token = $this->jwtService->generateToken(null, JwtUsage::USAGE_VIDEO_ACCESS, [
+            'video_id' => $video->getId(),
+        ]);
+
+        return "$this->backendUrl/v1/private/videos/url?token=$token&quality={$conversion->getHeight()}";
     }
 
     /**

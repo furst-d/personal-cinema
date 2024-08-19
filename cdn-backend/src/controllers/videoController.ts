@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import {getSignedThumbnails, getVideo, prepareVideoData} from "../services/videoService";
 import Video from "../entities/video";
 import minioClient, { bucketName } from "../config/minio";
-import path from "path";
 import {StreamUtils} from "../helpers/video/StreamUtils";
 import {isUUID} from "validator";
 import {VideoProcessingUtils} from "../helpers/video/VideoProcessingUtils";
@@ -27,21 +26,25 @@ export const getThumbsRoute = async (req: Request, res: Response): Promise<void>
 
 export const getVideoUrlRoute = async (req: Request, res: Response): Promise<void> => {
     const videoId = req.params.id;
+    const quality = req.query.quality as string;
 
-    const video = await Video.findByPk(videoId) as any;
-    if (!video) {
-        res.status(404).json({ error: "Video not found" });
+    if (!quality) {
+        res.status(400).json({ error: "Quality parameter is required" });
         return;
     }
+
+    const video = await getVideo(videoId);
 
     if (!video.hlsPath) {
         res.status(404).json({ error: "Video not processed" });
         return;
     }
 
+    const manifestPath = `${video.hlsPath}/${quality}.m3u8`;
+
     try {
         // Load manifest file from Minio
-        const manifestStream = await minioClient.getObject(bucketName, video.hlsPath);
+        const manifestStream = await minioClient.getObject(bucketName, manifestPath);
         const manifestBuffer = await StreamUtils.streamToBuffer(manifestStream);
         const manifestContent = manifestBuffer.toString('utf-8');
 
@@ -51,7 +54,7 @@ export const getVideoUrlRoute = async (req: Request, res: Response): Promise<voi
         // Generate signed URLs for segment files
         const signedUrls: Record<string, string> = {};
         for (const segment of segmentFiles) {
-            const segmentPath = `${path.dirname(video.hlsPath)}/segments/${segment}`;
+            const segmentPath = `${video.hlsPath}/segments/${quality}/${segment}`;
             signedUrls[segment] =  await minioClient.presignedUrl('GET', bucketName, segmentPath, 24 * 60 * 60);
         }
 
@@ -63,7 +66,12 @@ export const getVideoUrlRoute = async (req: Request, res: Response): Promise<voi
 
         res.set('Content-Type', 'application/vnd.apple.mpegurl');
         res.send(updatedContent);
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === 'NoSuchKey') {
+            res.status(404).json({ error: "Quality not found" });
+            return;
+        }
+
         console.error('Error generating HLS manifest:', error);
         res.status(500).send('Internal Server Error');
     }

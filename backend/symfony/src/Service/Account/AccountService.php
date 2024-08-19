@@ -2,6 +2,7 @@
 
 namespace App\Service\Account;
 
+use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
 use App\Exception\BadRequestException;
 use App\Exception\ConflictException;
@@ -12,8 +13,10 @@ use App\Exception\UnauthorizedException;
 use App\Helper\Authenticator\Authenticator;
 use App\Helper\DTO\PaginatorResult;
 use App\Helper\Storage\ByteSizeConverter;
+use App\Helper\Video\ThirdParty;
 use App\Repository\Account\AccountRepository;
 use App\Service\Storage\StorageService;
+use App\Service\Video\VideoService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
@@ -35,6 +38,11 @@ class AccountService
     private StorageService $storageService;
 
     /**
+     * @var VideoService $videoService
+     */
+    private VideoService $videoService;
+
+    /**
      * @var AccountRepository $accountRepository
      */
     private AccountRepository $accountRepository;
@@ -50,20 +58,23 @@ class AccountService
      * @param EntityManagerInterface $em
      * @param RoleService $roleService
      * @param StorageService $storageService
+     * @param VideoService $videoService
      * @param AccountRepository $accountRepository
      * @param Authenticator $authenticator
      */
     public function __construct(
         EntityManagerInterface $em,
-        RoleService            $roleService,
-        StorageService         $storageService,
-        AccountRepository      $accountRepository,
-        Authenticator          $authenticator,
+        RoleService $roleService,
+        StorageService $storageService,
+        VideoService $videoService,
+        AccountRepository $accountRepository,
+        Authenticator $authenticator,
     )
     {
         $this->em = $em;
         $this->roleService = $roleService;
         $this->storageService = $storageService;
+        $this->videoService = $videoService;
         $this->accountRepository = $accountRepository;
         $this->authenticator = $authenticator;
     }
@@ -105,7 +116,7 @@ class AccountService
      */
     public function loginUser(string $email, string $password, array $roles): Account
     {
-        $user = $this->accountRepository->findOneBy(['email' => $email, 'isDeleted' => false]);
+        $user = $this->accountRepository->findOneBy(['email' => $email]);
 
         if (!$user || !$this->authenticator->verifyPassword($password, $user->getPassword(), $user->getSalt())) {
             throw new BadRequestException('Invalid email or password.');
@@ -182,7 +193,7 @@ class AccountService
     public function getAccountByEmail(string $email): Account
     {
         /** @var Account $user */
-        $user = $this->accountRepository->findOneBy(['email' => $email, 'isDeleted' => false]);
+        $user = $this->accountRepository->findOneBy(['email' => $email]);
 
         if (!$user) {
             throw new NotFoundException(self::ACCOUNT_NOT_FOUND_MESSAGE);
@@ -199,7 +210,7 @@ class AccountService
     public function getAccountById(int $id): Account
     {
         /** @var Account $user */
-        $user = $this->accountRepository->findOneBy(['id' => $id, 'isDeleted' => false]);
+        $user = $this->accountRepository->findOneBy(['id' => $id]);
 
         if (!$user) {
             throw new NotFoundException(self::ACCOUNT_NOT_FOUND_MESSAGE);
@@ -209,13 +220,12 @@ class AccountService
     }
 
     /**
-     * @param int|null $limit
-     * @param int|null $offset
+     * @param PaginatorRequest $paginatorRequest
      * @return PaginatorResult<Account>
      */
-    public function getAccounts(?int $limit, ?int $offset): PaginatorResult
+    public function getAccounts(PaginatorRequest $paginatorRequest): PaginatorResult
     {
-        return $this->accountRepository->findAccounts($limit, $offset);
+        return $this->accountRepository->findAccounts($paginatorRequest);
     }
 
     /**
@@ -235,5 +245,27 @@ class AccountService
             'sharedFoldersCount' => count($account->getSharedFolders()),
             'created' => $account->getCreatedAt(),
         ];
+    }
+
+    /**
+     * @param Account $account
+     * @param string $password
+     * @return void
+     * @throws ForbiddenException
+     */
+    public function checkPasswordAndDeleteAccount(Account $account, string $password): void
+    {
+        if (!$this->authenticator->verifyPassword($password, $account->getPassword(), $account->getSalt())) {
+            throw new ForbiddenException('Invalid password.');
+        }
+
+        $this->deleteAccount($account);
+    }
+
+    public function deleteAccount(Account $account): void
+    {
+        $this->videoService->deleteVideos($account->getVideos()->toArray(), [ThirdParty::CDN]);
+
+        $this->accountRepository->delete($account);
     }
 }

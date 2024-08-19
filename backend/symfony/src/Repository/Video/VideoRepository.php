@@ -46,8 +46,7 @@ class VideoRepository extends ServiceEntityRepository
      */
     public function findVideos(?Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
     {
-        $qb = $this->createQueryBuilder('v')
-            ->where('v.isDeleted = false');
+        $qb = $this->createQueryBuilder('v');
 
         if ($folderData->isDefaultFolder()) {
             $qb->andWhere('v.folder IS NULL');
@@ -81,7 +80,6 @@ class VideoRepository extends ServiceEntityRepository
     public function searchVideos(Account $account, string $phrase, PaginatorRequest $paginatorRequest): PaginatorResult
     {
         $qb = $this->createQueryBuilder('v')
-            ->where('v.isDeleted = false')
             ->andWhere('v.account = :account')->setParameter('account', $account)
             ->andWhere('v.normalizedName LIKE :phrase')->setParameter('phrase', "%$phrase%")
             ->orderBy('v.createdAt', 'DESC');
@@ -111,10 +109,9 @@ class VideoRepository extends ServiceEntityRepository
     public function findRecommendations(Video $video, PaginatorRequest $paginatorRequest): PaginatorResult
     {
         $qb = $this->createQueryBuilder('v')
-            ->where('v.isDeleted = false')
+            ->join('v.conversions', 'c')
             ->andWhere('v.id != :id')->setParameter('id', $video->getId())
             ->andWhere('v.account = :account')->setParameter('account', $video->getAccount())
-            ->andWhere('v.path IS NOT NULL')
             ->andWhere('v.thumbnail IS NOT NULL')
             ->orderBy('RAND()');
 

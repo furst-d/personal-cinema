@@ -12,7 +12,6 @@ import {getOrCreateMd5, getVideo, getVideoUrl} from '../../services/videoService
 import {sendNotificationCallback, sendThumbnailCallback} from "../../services/callbackService";
 import path from "path";
 import { promises as fs } from 'fs';
-import crypto from 'crypto';
 import {mkdirSync} from "fs";
 import {VideoProcessingUtils} from "./VideoProcessingUtils";
 
@@ -25,15 +24,16 @@ const processVideoUpload = async (job: Job) => {
     try {
         const fileBuffer = await fs.readFile(tempFilePath);
 
+        console.log("Starting upload video of id:" + videoId + " to Minio");
         await minioClient.putObject(bucketName, urlPath, fileBuffer, size, {
             'Content-Type': mimetype,
         });
 
+        await video.reload();
         video.status = 'uploaded-original';
         await video.save();
 
         await videoProcessQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
-        await videoConversionQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
         await videoThumbnailQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
     } catch (error) {
         console.error('Error uploading to Minio:', error);
@@ -66,7 +66,7 @@ const processVideoInfo = async (job: Job) => {
                         const md5Hash = await VideoProcessingUtils.calculateMd5(videoUrl);
                         const md5 = await getOrCreateMd5(md5Hash);
 
-                        const video = await getVideo(videoId);
+                        await video.reload();
                         video.md5Id = md5.id;
 
                         video.length = Math.round(metadata.format.duration);
@@ -76,6 +76,7 @@ const processVideoInfo = async (job: Job) => {
 
                         video.status = 'processed-info';
                         await video.save();
+                        await videoConversionQueue.add({ videoId }, { removeOnComplete: true, removeOnFail: true });
                         await sendNotificationCallback(video.id);
                     } else {
                         throw new Error('Cannot get video info');
@@ -101,74 +102,122 @@ const processVideoConversion = async (job: Job) => {
     const videoPath = video.originalPath;
     const videoUrl = await getVideoUrl(videoPath);
 
-    const hlsHash = crypto.createHash('md5').update(videoUrl).digest('hex');
     const hlsDir = `${videoTempDir}/hls/segments`;
-    const hlsManifest = `${videoTempDir}/hls/${hlsHash}.m3u8`;
+    const hlsManifestDir = `${videoTempDir}/hls/manifests`;
 
-    // Create the directory if it doesn't exist
-    mkdirSync(hlsDir, { recursive: true });
+    await fs.mkdir(hlsDir, { recursive: true });
+    await fs.mkdir(hlsManifestDir, { recursive: true });
+
+    const resolutions = [
+        { width: 256, height: 144, label: "144" },
+        { width: 426, height: 240, label: "240" },
+        { width: 640, height: 360, label: "360" },
+        { width: 854, height: 480, label: "480" },
+        { width: 1280, height: 720, label: "720" },
+        { width: 1920, height: 1080, label: "1080" },
+    ];
 
     try {
-        await new Promise((resolve, reject) => {
-            ffmpeg(videoUrl)
-                .outputOptions([
-                    '-profile:v baseline', // HLS requires baseline profile
-                    '-level 3.0',
-                    '-start_number 0',
-                    '-hls_time 10', // Segment length in seconds
-                    '-hls_list_size 0',
-                    '-hls_segment_filename', `${hlsDir}/%03d.ts`,
-                    '-f hls'
-                ])
-                .output(hlsManifest)
-                .on('end', resolve)
-                .on('error', (err, stdout, stderr) => {
-                    console.error('Error: ' + err.message);
-                    console.error('ffmpeg stdout: ' + stdout);
-                    console.error('ffmpeg stderr: ' + stderr);
-                    reject(err);
-                })
-                .run();
-        });
+        const originalWidth = video.originalWidth;
+        const originalHeight = video.originalHeight;
 
-        // Read the manifest file and all segment files
-        const hlsBuffer = await fs.readFile(hlsManifest);
-        const segmentFiles = await fs.readdir(hlsDir);
+        const validResolutions = resolutions.filter(resolution =>
+            resolution.width <= originalWidth && resolution.height <= originalHeight
+        );
 
-        // Upload manifest file
-        await minioClient.putObject(bucketName, `${path.dirname(videoPath)}/hls/${hlsHash}.m3u8`, hlsBuffer);
+        // If the original resolution is closer to the next resolution, convert it as next resolution
+        if (validResolutions.length < resolutions.length) {
+            const lastValidResolution = validResolutions[validResolutions.length - 1];
+            const nextResolution = resolutions[validResolutions.length];
 
-        // Upload segment files
-        for (const segment of segmentFiles) {
-            if (segment.endsWith('.ts')) {
-                const segmentBuffer = await fs.readFile(path.join(hlsDir, segment));
-                await minioClient.putObject(bucketName, `${path.dirname(videoPath)}/hls/segments/${segment}`, segmentBuffer);
+            const lastDifference = Math.abs(originalWidth - lastValidResolution.width) + Math.abs(originalHeight - lastValidResolution.height);
+            const nextDifference = Math.abs(originalWidth - nextResolution.width) + Math.abs(originalHeight - nextResolution.height);
+
+            if (nextDifference < lastDifference) {
+                validResolutions.push({
+                    width: originalWidth,
+                    height: originalHeight,
+                    label: nextResolution.label
+                });
             }
         }
 
-        // Delete the local HLS files after upload
-        await fs.unlink(hlsManifest);
-        for (const segment of segmentFiles) {
-            if (segment.endsWith('.ts')) {
-                await fs.unlink(path.join(hlsDir, segment));
+        let conversions = Array.isArray(video.conversions) ? [...video.conversions] : [];
+
+        for (const { width, height, label } of validResolutions) {
+            const resolutionDir = `${hlsDir}/${label}`;
+            const hlsManifest = `${hlsManifestDir}/${label}.m3u8`;
+
+            await fs.mkdir(resolutionDir, { recursive: true });
+
+            await new Promise((resolve, reject) => {
+                ffmpeg(videoUrl)
+                    .outputOptions([
+                        `-vf scale=w=${Math.floor(width / 2) * 2}:h=${Math.floor(height / 2) * 2}`,
+                        '-c:a aac',
+                        '-ar 48000',
+                        '-c:v h264',
+                        '-profile:v baseline',
+                        '-crf 20',
+                        '-sc_threshold 0',
+                        '-g 48',
+                        '-keyint_min 48',
+                        '-hls_time 10',
+                        '-hls_playlist_type vod',
+                        '-b:v 800k',
+                        '-maxrate 856k',
+                        '-bufsize 1200k',
+                        '-b:a 96k',
+                        `-hls_segment_filename ${resolutionDir}/%03d.ts`,
+                        '-f hls',
+                    ])
+                    .output(hlsManifest)
+                    .on('end', resolve)
+                    .on('error', (err, stdout, stderr) => {
+                        console.error('Error: ' + err.message);
+                        console.error('ffmpeg stdout: ' + stdout);
+                        console.error('ffmpeg stderr: ' + stderr);
+                        reject(err);
+                    })
+                    .run();
+            });
+
+            const hlsBuffer = await fs.readFile(hlsManifest);
+            await minioClient.putObject(bucketName, `${path.dirname(videoPath)}/hls/${label}.m3u8`, hlsBuffer);
+
+            const segmentFiles = await fs.readdir(resolutionDir);
+            for (const segment of segmentFiles) {
+                if (segment.endsWith('.ts')) {
+                    const segmentBuffer = await fs.readFile(path.join(resolutionDir, segment));
+                    await minioClient.putObject(bucketName, `${path.dirname(videoPath)}/hls/segments/${label}/${segment}`, segmentBuffer);
+                }
             }
+
+            await video.reload();
+
+            conversions.push(parseInt(label));
+            video.conversions = conversions;
+            video.status = `converted_${label}`;
+            await video.save();
+
+            await sendNotificationCallback(video.id);
         }
 
-        // Clean up HLS temp directory
-        await VideoProcessingUtils.cleanUpTempSubDir(videoId, 'hls');
-
-        const video = await getVideo(videoId);
-        video.hlsPath = `${path.dirname(videoPath)}/hls/${hlsHash}.m3u8`;
-        video.status = 'converted';
+        video.hlsPath = `${videoId}/hls`;
         await video.save();
-        await sendNotificationCallback(video.id);
+
+        await VideoProcessingUtils.cleanUpTempSubDir(videoId, 'hls');
     } catch (error) {
+        await video.reload();
+        video.hlsPath = `${videoId}/hls`;
+        await video.save();
         await VideoProcessingUtils.markForDeletion(video);
         throw error;
     }
 
     await VideoProcessingUtils.checkForDeletion(videoId);
 };
+
 
 const processVideoThumbnail = async (job: Job) => {
     const { videoId } = job.data;
@@ -228,13 +277,16 @@ const processVideoThumbnail = async (job: Job) => {
         // Clean up thumbnails temp directory
         await VideoProcessingUtils.cleanUpTempSubDir(videoId, 'thumbs');
 
-        const video = await getVideo(videoId);
+        await video.reload();
         video.thumbnailPath = `${videoId}/thumbs`;
         video.status = 'thumbnails-generated';
         await video.save();
         await sendThumbnailCallback(video.id);
     } catch (error) {
         console.error('Error generating thumbnails:', error);
+        await video.reload();
+        video.thumbnailPath = `${videoId}/thumbs`;
+        await video.save();
         await VideoProcessingUtils.markForDeletion(video);
         throw error;
     }
