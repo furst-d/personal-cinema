@@ -23,11 +23,11 @@ const BackButton: React.FC<BackButtonProps> = ({ currentFolderId, onBackClick, m
     });
 
     return (
-        currentFolderId && (
+        currentFolderId ? (
             <IconButton ref={dropBack} onClick={onBackClick} sx={{ marginBottom: '10px', color: theme.textLight }}>
                 <ArrowBackIcon />
             </IconButton>
-        )
+        ) : null
     );
 };
 

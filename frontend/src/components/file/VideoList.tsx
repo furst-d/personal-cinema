@@ -1,8 +1,8 @@
 import React from 'react';
 import { FileManagerSeparator } from "../../styles/file/FileManager";
 import VideoItem from "./VideoItem";
-import {useTheme} from "styled-components";
-import {Video} from "../../service/fileManagerService";
+import { useTheme } from "styled-components";
+import { Video } from "../../service/fileManagerService";
 
 interface VideoListProps {
     videos: Video[];
@@ -14,22 +14,24 @@ const VideoList: React.FC<VideoListProps> = ({ videos, onVideoDoubleClick, onCon
     const theme = useTheme();
 
     return (
-        videos.map((video, index) => {
-            const isProcessing = !video.thumbnailUrl || video.conversions.length === 0;
+        <React.Fragment>
+            {videos.map((video, index) => {
+                const isProcessing = !video.thumbnailUrl || video.conversions.length === 0;
 
-            return (
-                <React.Fragment key={video.id}>
-                    <VideoItem
-                        video={video}
-                        onVideoDoubleClick={onVideoDoubleClick}
-                        onContextMenuOpen={onContextMenuOpen}
-                        isProcessing={isProcessing}
-                    />
-                    {index < videos.length - 1 && <FileManagerSeparator theme={theme} />}
-                </React.Fragment>
-            );
-        })
-    )
+                return (
+                    <React.Fragment key={video.id}>
+                        <VideoItem
+                            video={video}
+                            onVideoDoubleClick={onVideoDoubleClick}
+                            onContextMenuOpen={onContextMenuOpen}
+                            isProcessing={isProcessing}
+                        />
+                        {index < videos.length - 1 && <FileManagerSeparator theme={theme} />}
+                    </React.Fragment>
+                );
+            })}
+        </React.Fragment>
+    );
 };
 
 export default VideoList;
