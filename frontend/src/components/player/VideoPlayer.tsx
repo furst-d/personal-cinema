@@ -1,10 +1,9 @@
 import React from 'react';
 import 'video.js/dist/video-js.css';
-import videojs from "video.js";
-import 'videojs-hotkeys';
-import 'videojs-hls-quality-selector/dist/videojs-hls-quality-selector.js';
 
 import {VideoPlayerContainerStyle} from "../../styles/player/VideoPlayer";
+
+declare const videojs: any;
 
 interface IVideoPlayerProps {
     src: string;
