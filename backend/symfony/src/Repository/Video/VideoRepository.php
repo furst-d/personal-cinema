@@ -60,12 +60,19 @@ class VideoRepository extends ServiceEntityRepository
             }
         }
 
-        if ($sortBy = $paginatorRequest->getOrderBy()) {
-            if ($sortBy === SortBy::NAME) {
-                $qb->orderBy('v.name');
-            } elseif ($sortBy === SortBy::UPDATE_DATE) {
-                $qb->orderBy('v.createdAt', 'DESC');
-            }
+        $sort = $paginatorRequest->getSort();
+        $order = $paginatorRequest->getOrder()->value;
+
+        switch ($sort) {
+            case SortBy::NAME:
+                $qb->orderBy('v.name', $order);
+                break;
+            case SortBy::UPDATE_DATE:
+                $qb->orderBy('v.createdAt', $order);
+                break;
+            default:
+                $qb->orderBy('v.id', $order);
+                break;
         }
 
         return $this->getPaginatorResult($qb, $paginatorRequest);

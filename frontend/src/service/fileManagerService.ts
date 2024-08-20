@@ -46,12 +46,13 @@ interface UpdateRequest {
     folderId?: string;
 }
 
-export const fetchFolders = async (limit: number, offset: number, sortBy: string, currentFolderId: string | null): Promise<FolderPayload> => {
+export const fetchFolders = async (limit: number, offset: number, sort: string, order: string, currentFolderId: string | null): Promise<FolderPayload> => {
     const response = await axiosPrivate.get('/v1/personal/folders', {
         params: {
             limit: limit,
             offset: offset,
-            sortBy: sortBy,
+            sort: sort,
+            order: order,
             parentId: currentFolderId || 0
         }
     });
@@ -69,23 +70,25 @@ export const searchFolders = async (phrase: string, limit: number, offset: numbe
     return response.data.payload;
 };
 
-export const fetchSharedFolders = async (limit: number, offset: number, sortBy: string): Promise<FolderPayload> => {
+export const fetchSharedFolders = async (limit: number, offset: number, sort: string, order: string): Promise<FolderPayload> => {
     const response = await axiosPrivate.get('/v1/personal/folders/share', {
         params: {
             limit: limit,
             offset: offset,
-            sortBy: sortBy,
+            sort: sort,
+            order: order,
         }
     });
     return response.data.payload;
 };
 
-export const fetchVideos = async (limit: number, offset: number, sortBy: string, currentFolderId: string | null): Promise<VideoPayload> => {
+export const fetchVideos = async (limit: number, offset: number, sort: string, order: string, currentFolderId: string | null): Promise<VideoPayload> => {
     const response = await axiosPrivate.get('/v1/personal/videos', {
         params: {
             limit: limit,
             offset: offset,
-            sortBy: sortBy,
+            sort: sort,
+            order: order,
             folderId: currentFolderId || 0
         }
     });
@@ -103,12 +106,13 @@ export const searchVideos = async (phrase: string, limit: number, offset: number
     return response.data.payload;
 };
 
-export const fetchSharedVideos = async (limit: number, offset: number, sortBy: string): Promise<VideoPayload> => {
+export const fetchSharedVideos = async (limit: number, offset: number, sort: string, order: string): Promise<VideoPayload> => {
     const response = await axiosPrivate.get('/v1/personal/videos/share', {
         params: {
             limit: limit,
             offset: offset,
-            sortBy: sortBy,
+            sort: sort,
+            order: order,
         }
     });
     return response.data.payload;

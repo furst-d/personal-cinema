@@ -43,8 +43,8 @@ const VideoSearch: React.FC<VideoSearchProps> = ({ phrase }) => {
 
             if (currentFolder) {
                 Promise.all([
-                    fetchVideos(videoLimit, videoOffset, "update_date", currentFolder.id),
-                    fetchFolders(folderLimit, folderOffset, "update_date", currentFolder.id)
+                    fetchVideos(videoLimit, videoOffset, "updatedAt", "DESC", currentFolder.id),
+                    fetchFolders(folderLimit, folderOffset, "updatedAt", "DESC", currentFolder.id)
                 ])
                     .then(([videoResults, folderResults]) => {
                         setVideos(videoResults.data);

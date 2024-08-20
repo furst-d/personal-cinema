@@ -12,7 +12,7 @@ const authProvider: AuthProvider = {
 
         const { tokens, user } = response.data.payload.data;
 
-        if (!user.roles.some(role => role.key === 'ROLE_ADMIN')) {
+        if (!user.roles.some((role: any) => role.key === 'ROLE_ADMIN')) {
             throw new Error('Nemáte dostatečná oprávnění pro přístup k administraci.');
         }
 
@@ -58,16 +58,17 @@ export const refreshAuthToken = async () => {
     return access_token;
 };
 
-export const fetchJsonWithAuth = async (url, options: any = {}) => {
+export const fetchJsonWithAuth = async (url: string, options: any = {}) => {
     let accessToken = localStorage.getItem('access_token');
     options.headers = {
+        'Content-Type': 'application/json',
         ...options.headers,
         Authorization: `Bearer ${accessToken}`,
     };
 
     try {
         return await axios(url, options);
-    } catch (error) {
+    } catch (error: any) {
         const status = error.response ? error.response.status : null;
         if (status === 401 || status === 403) {
             try {

@@ -13,6 +13,8 @@ import authProvider from "./providers/authProvider";
 import LoginPage from './components/login/LoginPage';
 import polyglotI18nProvider from 'ra-i18n-polyglot';
 import czechMessages from "ra-language-czech";
+import {UserEdit} from "./components/users/UserEdit";
+import {UserCreate} from "./components/users/UserCreate";
 
 const i18nProvider = polyglotI18nProvider(() => czechMessages, 'cs', { allowMissing: true });
 
@@ -27,8 +29,8 @@ export const App: React.FC = () => (
         <Resource
             name="users"
             list={UserList}
-            show={ShowGuesser}
-            edit={EditGuesser}
+            edit={UserEdit}
+            create={UserCreate}
             options={{ label: 'Uživatelé' }}
         />
         <Resource

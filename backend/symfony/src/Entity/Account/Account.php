@@ -139,6 +139,15 @@ class Account implements UserInterface
     }
 
     /**
+     * @param string $email
+     * @return void
+     */
+    public function setEmail(string $email): void
+    {
+        $this->email = $email;
+    }
+
+    /**
      * @return string
      */
     public function getPassword(): string
@@ -218,6 +227,15 @@ class Account implements UserInterface
         if (!$this->roles->contains($role)) {
             $this->roles[] = $role;
         }
+    }
+
+    /**
+     * @param array $roles
+     * @return void
+     */
+    public function setRoles(array $roles): void
+    {
+        $this->roles = new ArrayCollection($roles);
     }
 
     /**

@@ -28,13 +28,14 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
 
     const limit = 1000;
     const offset = 0;
-    const sortBy = 'name';
+    const sort = 'name';
+    const order = 'ASC';
 
     useEffect(() => {
         setLoading(true);
         Promise.all([
-            fetchFolders(limit, offset, sortBy, currentFolderId),
-            fetchVideos(limit, offset, sortBy, currentFolderId)
+            fetchFolders(limit, offset, sort, order, currentFolderId),
+            fetchVideos(limit, offset, sort, order, currentFolderId)
         ])
             .then(([foldersData, videosData]) => {
                 setFolders(foldersData.data);
@@ -249,7 +250,7 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
     }, [folders, videos]);
 
     const handleSingleUploadCompleted = async () => {
-        const videosData = await fetchVideos(1000, 0, 'name', currentFolderId);
+        const videosData = await fetchVideos(1000, 0, 'name', 'ASC', currentFolderId);
         setVideos(videosData.data);
     };
 

@@ -1,45 +1,31 @@
 <?php
 
-namespace App\DTO\Video;
+namespace App\DTO\Admin\Account;
 
 use App\DTO\PaginatorRequest;
 use App\Helper\DTO\OrderBy;
 use App\Helper\DTO\SortBy;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class FolderQueryRequest extends PaginatorRequest
+class AccountQueryRequest extends PaginatorRequest
 {
-    #[Assert\PositiveOrZero]
-    private ?int $parentId;
-
-    #[Assert\Choice(choices: [SortBy::NAME, SortBy::UPDATE_DATE], message: "Choose a valid sort order.")]
+    #[Assert\Choice(choices: [SortBy::ID, SortBy::EMAIL, SortBy::CREATE_DATE, SortBy::IS_ACTIVE], message: "Choose a valid sort order.")]
     private SortBy $sort;
 
     /**
      * @param int $limit
      * @param int $offset
-     * @param int|null $parentId
      * @param OrderBy $order
      * @param SortBy $sort
      */
     public function __construct(
         int $limit = 32,
         int $offset = 0,
-        ?int $parentId = null,
         OrderBy $order = OrderBy::ASC,
         SortBy $sort = SortBy::ID
     )
     {
         $this->sort = $sort;
-        $this->parentId = $parentId;
         parent::__construct($limit, $offset, $order, $this->sort);
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getParentId(): ?int
-    {
-        return $this->parentId;
     }
 }
