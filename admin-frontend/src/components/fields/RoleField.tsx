@@ -4,9 +4,10 @@ import { useRecordContext } from 'react-admin';
 interface RoleFieldProps {
     source: string;
     label?: string;
+    sortable?: boolean;
 }
 
-const RoleField: React.FC<RoleFieldProps> = ({ source, label }) => {
+const RoleField: React.FC<RoleFieldProps> = ({ source }) => {
     const record = useRecordContext();
     if (!record || !record[source]) return null;
 

@@ -55,12 +55,19 @@ class FolderRepository extends ServiceEntityRepository
             }
         }
 
-        if ($sortBy = $paginatorRequest->getOrderBy()) {
-            if ($sortBy === SortBy::NAME) {
-                $qb->orderBy('f.name');
-            } elseif ($sortBy === SortBy::UPDATE_DATE) {
-                $qb->orderBy('f.updatedAt', 'DESC');
-            }
+        $sort = $paginatorRequest->getSort();
+        $order = $paginatorRequest->getOrder()->value;
+
+        switch ($sort) {
+            case SortBy::NAME:
+                $qb->orderBy('f.name', $order);
+                break;
+            case SortBy::UPDATE_DATE:
+                $qb->orderBy('f.updatedAt', $order);
+                break;
+            default:
+                $qb->orderBy('f.id', $order);
+                break;
         }
 
         return $this->getPaginatorResult($qb, $paginatorRequest);

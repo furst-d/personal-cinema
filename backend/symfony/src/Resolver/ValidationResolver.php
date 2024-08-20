@@ -2,17 +2,13 @@
 
 namespace App\Resolver;
 
-use App\Exception\ApiException;
 use App\Exception\BadRequestException;
 use App\Helper\Api\ResponseEntity;
 use Exception;
 use InvalidArgumentException;
-use JetBrains\PhpStorm\NoReturn;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -34,14 +30,12 @@ class ValidationResolver implements ValueResolverInterface
         $this->re = $re;
     }
 
-    /**
-     * @param Request $request
-     * @param ArgumentMetadata $argument
-     * @return iterable
-     * @throws ExceptionInterface
-     */
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
+        if (is_subclass_of($argument->getType(), 'App\DTO\Filter\FilterRequest')) {
+            return $this->resolveFilter($request, $argument);
+        }
+
         if (is_subclass_of($argument->getType(), 'App\DTO\AbstractQueryRequest')) {
             return $this->resolveQuery($request, $argument);
         }
@@ -53,12 +47,55 @@ class ValidationResolver implements ValueResolverInterface
         return [];
     }
 
-    /**
-     * @param Request $request
-     * @param ArgumentMetadata $argument
-     * @return iterable
-     * @throws ExceptionInterface
-     */
+    private function resolveFilter(Request $request, ArgumentMetadata $argument): iterable
+    {
+        $filterData = $request->query->get('filter');
+
+        if (!$filterData) {
+            if ($argument->isNullable()) {
+                yield null;
+                return;
+            } else {
+                $this->sendErrorResponse(new BadRequestException('Filter parameter is required'));
+            }
+        }
+
+        try {
+            $filterArray = json_decode($filterData, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->sendErrorResponse(new BadRequestException('Invalid JSON format in filter parameter'));
+            }
+
+            $object = $this->denormalizer->denormalize($filterArray, $argument->getType());
+        } catch (NotNormalizableValueException | InvalidArgumentException $e) {
+            $this->sendErrorResponse(new BadRequestException($e->getMessage()));
+        } catch (Exception $e) {
+            $this->sendErrorResponse(new BadRequestException('Invalid query parameters'));
+        }
+
+        $this->resolveValidation($object);
+
+        yield $object;
+    }
+
+    private function resolveQuery(Request $request, ArgumentMetadata $argument): iterable
+    {
+        $data = $this->convertQueryParameters($request->query->all());
+
+        try {
+            $object = $this->denormalizer->denormalize($data, $argument->getType());
+        } catch (NotNormalizableValueException|InvalidArgumentException $e) {
+            $this->sendErrorResponse(new BadRequestException($e->getMessage()));
+        } catch (Exception $e) {
+            $this->sendErrorResponse(new BadRequestException('Invalid query parameters'));
+        }
+
+        $this->resolveValidation($object);
+
+        yield $object;
+    }
+
     private function resolveBody(Request $request, ArgumentMetadata $argument): iterable
     {
         $data = json_decode($request->getContent(), true);
@@ -69,11 +106,9 @@ class ValidationResolver implements ValueResolverInterface
 
         try {
             $object = $this->denormalizer->denormalize($data, $argument->getType());
-        } catch (NotEncodableValueException) {
-            $this->sendErrorResponse(new BadRequestException('Invalid data format'));
-        } catch (NotNormalizableValueException $e) {
+        } catch (NotNormalizableValueException | InvalidArgumentException $e) {
             $this->sendErrorResponse(new BadRequestException($e->getMessage()));
-        } catch (Exception) {
+        } catch (Exception $e) {
             $this->sendErrorResponse(new BadRequestException('Invalid data parameters'));
         }
 
@@ -82,33 +117,6 @@ class ValidationResolver implements ValueResolverInterface
         yield $object;
     }
 
-    /**
-     * @param Request $request
-     * @param ArgumentMetadata $argument
-     * @return iterable
-     * @throws ExceptionInterface
-     */
-    private function resolveQuery(Request $request, ArgumentMetadata $argument): iterable
-    {
-        $data = $this->convertQueryParameters($request->query->all());
-
-        try {
-            $object = $this->denormalizer->denormalize($data, $argument->getType());
-        } catch (NotNormalizableValueException|InvalidArgumentException $e) {
-            $this->sendErrorResponse(new BadRequestException($e->getMessage()));
-        } catch (Exception) {
-            $this->sendErrorResponse(new BadRequestException('Invalid query parameters'));
-        }
-
-        $this->resolveValidation($object);
-
-        yield $object;
-    }
-
-    /**
-     * @param array $queryParameters
-     * @return array
-     */
     private function convertQueryParameters(array $queryParameters): array
     {
         foreach ($queryParameters as $key => $value) {
@@ -120,20 +128,13 @@ class ValidationResolver implements ValueResolverInterface
         return $queryParameters;
     }
 
-    /**
-     * @param ApiException $ex
-     * @return void
-     */
-    #[NoReturn] private function sendErrorResponse(ApiException $ex): void
+    private function sendErrorResponse(BadRequestException $ex): void
     {
         $response = $this->re->withException($ex);
         $response->send();
         exit;
     }
 
-    /**
-     * @param mixed $object
-     */
     private function resolveValidation(mixed $object): void
     {
         $errors = $this->validator->validate($object);

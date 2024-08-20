@@ -3,6 +3,7 @@
 namespace App\Service\Account;
 
 use App\Entity\Account\Account;
+use App\Entity\Account\Role;
 use App\Exception\NotFoundException;
 use App\Repository\Account\RoleRepository;
 
@@ -85,5 +86,22 @@ class RoleService
 
         $user->addRole($role);
         return $user;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRoles(): array
+    {
+        return $this->roleRepository->findAll();
+    }
+
+    /**
+     * @param array $roles
+     * @return Role[]
+     */
+    public function getRolesByKeywords(array $roles): array
+    {
+        return $this->roleRepository->findByKeywords($roles);
     }
 }

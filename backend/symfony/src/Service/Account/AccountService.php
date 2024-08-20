@@ -2,8 +2,11 @@
 
 namespace App\Service\Account;
 
+use App\DTO\Admin\Account\UpdateUserRequest;
+use App\DTO\Filter\FilterRequest;
 use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
+use App\Entity\Account\Role;
 use App\Exception\BadRequestException;
 use App\Exception\ConflictException;
 use App\Exception\ForbiddenException;
@@ -203,6 +206,22 @@ class AccountService
     }
 
     /**
+     * @param int[] $ids
+     * @return Account[]
+     * @throws NotFoundException
+     */
+    public function getAccountsByIds(array $ids): array
+    {
+        $accounts = $this->accountRepository->findByIds($ids);
+
+        if (count($accounts) !== count($ids)) {
+            throw new NotFoundException("Some accounts not found.");
+        }
+
+        return $accounts;
+    }
+
+    /**
      * @param int $id
      * @return Account
      * @throws NotFoundException
@@ -221,11 +240,12 @@ class AccountService
 
     /**
      * @param PaginatorRequest $paginatorRequest
+     * @param FilterRequest|null $filter
      * @return PaginatorResult<Account>
      */
-    public function getAccounts(PaginatorRequest $paginatorRequest): PaginatorResult
+    public function getAccounts(PaginatorRequest $paginatorRequest, ?FilterRequest $filter): PaginatorResult
     {
-        return $this->accountRepository->findAccounts($paginatorRequest);
+        return $this->accountRepository->findAccounts($paginatorRequest, $filter);
     }
 
     /**
@@ -262,10 +282,38 @@ class AccountService
         $this->deleteAccount($account);
     }
 
+    /**
+     * @param Account $account
+     * @return void
+     */
     public function deleteAccount(Account $account): void
     {
         $this->videoService->deleteVideos($account->getVideos()->toArray(), [ThirdParty::CDN]);
 
         $this->accountRepository->delete($account);
+    }
+
+    /**
+     * @return Role[]
+     */
+    public function getRoles(): array
+    {
+        return $this->roleService->getRoles();
+    }
+
+    /**
+     * @param Account $account
+     * @param UpdateUserRequest $updateUserRequest
+     * @return void
+     */
+    public function updateAccount(Account $account, UpdateUserRequest $updateUserRequest): void
+    {
+        $account->setActive($updateUserRequest->active);
+        $account->setEmail($updateUserRequest->email);
+
+        $roles = $this->roleService->getRolesByKeywords($updateUserRequest->roles);
+        $account->setRoles($roles);
+
+        $this->accountRepository->save($account);
     }
 }

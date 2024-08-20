@@ -31,4 +31,17 @@ class RoleRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * @param array $roles
+     * @return Role[]
+     */
+    public function findByKeywords(array $roles): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.keyName IN (:roles)')
+            ->setParameter('roles', $roles)
+            ->getQuery()
+            ->getResult();
+    }
 }

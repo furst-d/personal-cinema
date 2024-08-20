@@ -22,7 +22,8 @@ const MediaDashboard: React.FC = () => {
 
     const videoLimit = 16;
     const folderLimit = 12;
-    const sortBy = 'update_date';
+    const sort = 'updatedAt';
+    const order = 'DESC';
 
     const calculateMaxPages = (
         videoCount: number | undefined | null,
@@ -45,15 +46,15 @@ const MediaDashboard: React.FC = () => {
         const folderOffset = (page - 1) * folderLimit;
 
         const ownDataPromises = [
-            fetchVideos(videoLimit, videoOffset, sortBy, folderId),
-            fetchFolders(folderLimit, folderOffset, sortBy, folderId)
+            fetchVideos(videoLimit, videoOffset, sort, order, folderId),
+            fetchFolders(folderLimit, folderOffset, sort, order, folderId)
         ];
 
         const sharedDataPromises = currentFolder
             ? []
             : [
-                fetchSharedVideos(videoLimit, videoOffset, sortBy),
-                fetchSharedFolders(folderLimit, folderOffset, sortBy)
+                fetchSharedVideos(videoLimit, videoOffset, sort, order),
+                fetchSharedFolders(folderLimit, folderOffset, sort, order)
             ];
 
         Promise.all([
