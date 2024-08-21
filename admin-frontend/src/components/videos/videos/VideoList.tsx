@@ -1,9 +1,9 @@
 import React from 'react';
 import {List, Datagrid, TextField, TextInput, DateField} from 'react-admin';
 import { ListProps } from 'react-admin';
-import DurationField from "../fields/video/DurationField";
-import VideoInfoField from "../fields/video/VideoInfoField";
-import SizeField from "../fields/storage/SizeField";
+import DurationField from "../../fields/video/DurationField";
+import VideoInfoField from "../../fields/video/VideoInfoField";
+import SizeField from "../../fields/storage/SizeField";
 
 const VideoFilters = [
     <TextInput label="Název" source="name" alwaysOn />,

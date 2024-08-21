@@ -8,7 +8,7 @@ import polyglotI18nProvider from 'ra-i18n-polyglot';
 import { UserList } from './components/users/UserList';
 import { UserEdit } from './components/users/UserEdit';
 import { UserCreate } from './components/users/UserCreate';
-import { VideoList } from './components/videos/VideoList';
+import { VideoList } from './components/videos/videos/VideoList';
 import { ListGuesser } from 'react-admin';
 
 import PeopleIcon from '@mui/icons-material/People';
@@ -18,11 +18,11 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import SettingsIcon from '@mui/icons-material/Settings';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
 import RepeatIcon from '@mui/icons-material/Repeat';
-import VideoEdit from "./components/videos/VideoEdit";
+import VideoEdit from "./components/videos/videos/VideoEdit";
 import {extendedCzechMessages} from "./lang/CzechMessages";
-import {VideoConversionList} from "./components/videos/VideoConversionList";
-import {VideoConversionEdit} from "./components/videos/VideoConversionEdit";
-import {VideoConversionCreate} from "./components/videos/VideoConversionCreate";
+import {VideoConversionList} from "./components/videos/conversions/VideoConversionList";
+import {VideoConversionEdit} from "./components/videos/conversions/VideoConversionEdit";
+import {VideoConversionCreate} from "./components/videos/conversions/VideoConversionCreate";
 
 const i18nProvider = polyglotI18nProvider(() => extendedCzechMessages, 'cs', { allowMissing: true });
 
