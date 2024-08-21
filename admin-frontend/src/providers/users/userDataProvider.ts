@@ -1,4 +1,4 @@
-import { fetchJsonWithAuth } from './authProvider';
+import { fetchJsonWithAuth } from '../authProvider';
 import { stringify } from 'query-string';
 
 const apiUrl = import.meta.env.VITE_API_URL;

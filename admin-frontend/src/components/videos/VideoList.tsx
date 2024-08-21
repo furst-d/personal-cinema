@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, Datagrid, TextField, DateField } from 'react-admin';
+import { List, Datagrid, TextField } from 'react-admin';
 import { ListProps } from 'react-admin';
 import ResolutionField from "../fields/ResolutionField";
 

@@ -1,10 +1,20 @@
 import { DataProvider } from 'react-admin';
-import { userDataProvider } from './userDataProvider';
-import { videoDataProvider } from './videoDataProvider';
+import { userDataProvider } from './users/userDataProvider';
+import { videoDataProvider } from './videos/videoDataProvider';
+import {storagePriceDataProvider} from "./storage/storagePriceDataProvider";
+import {storageUserDataProvider} from "./storage/storageUserDataProvider";
+import {storageUpgradeDataProvider} from "./storage/storageUpgradeDataProvider";
+import {settingDataProvider} from "./settings/settingDataProvider";
+import {videoConversionDataProvider} from "./videos/videoConversionDataProvider";
 
 const dataProviderMap: Record<string, DataProvider> = {
-    users: userDataProvider,
-    videos: videoDataProvider,
+    "users": userDataProvider,
+    "videos": videoDataProvider,
+    "videos.conversions": videoConversionDataProvider,
+    "storages.users": storageUserDataProvider,
+    "storages.prices": storagePriceDataProvider,
+    "storages.upgrades": storageUpgradeDataProvider,
+    "settings": settingDataProvider,
 };
 
 const combinedDataProvider: DataProvider = {
