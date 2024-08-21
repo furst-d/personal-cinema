@@ -5,7 +5,6 @@ namespace App\Service\Video;
 use App\DTO\Filter\FilterRequest;
 use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
-use App\Entity\Video\Conversion;
 use App\Entity\Video\Folder;
 use App\Entity\Video\MD5;
 use App\Entity\Video\Video;
@@ -16,7 +15,6 @@ use App\Helper\Generator\UrlGenerator;
 use App\Helper\Video\FolderData;
 use App\Helper\Video\NameNormalizer;
 use App\Helper\Video\ThirdParty;
-use App\Repository\Video\ConversionRepository;
 use App\Repository\Video\MD5Repository;
 use App\Repository\Video\VideoRepository;
 use App\Service\Cdn\CdnDeletionService;
@@ -32,11 +30,6 @@ class VideoService
      * @var MD5Repository $md5Repository
      */
     private MD5Repository $md5Repository;
-
-    /**
-     * @var ConversionRepository $conversionDataRepository
-     */
-    private ConversionRepository $conversionDataRepository;
 
     /**
      * @var UrlGenerator $urlGenerator
@@ -63,7 +56,6 @@ class VideoService
     /**
      * @param VideoRepository $videoRepository
      * @param MD5Repository $md5Repository
-     * @param ConversionRepository $conversionDataRepository
      * @param UrlGenerator $urlGenerator
      * @param ShareService $shareService
      * @param FolderService $folderService
@@ -72,7 +64,6 @@ class VideoService
     public function __construct(
         VideoRepository      $videoRepository,
         MD5Repository        $md5Repository,
-        ConversionRepository $conversionDataRepository,
         UrlGenerator         $urlGenerator,
         ShareService         $shareService,
         FolderService        $folderService,
@@ -81,7 +72,6 @@ class VideoService
     {
         $this->videoRepository = $videoRepository;
         $this->md5Repository = $md5Repository;
-        $this->conversionDataRepository = $conversionDataRepository;
         $this->urlGenerator = $urlGenerator;
         $this->shareService = $shareService;
         $this->folderService = $folderService;
@@ -304,17 +294,7 @@ class VideoService
     }
 
     /**
-     * @param Video $video
-     * @param array $heights
-     * @return Conversion[]
-     */
-    public function getUnusedConversionData(Video $video, array $heights): array
-    {
-        return $this->conversionDataRepository->findUnusedConversions($video, $heights);
-    }
-
-    /**
-     * @param array $ids
+     * @param int[] $ids
      * @return Video[]
      * @throws NotFoundException
      */

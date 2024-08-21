@@ -13,6 +13,7 @@ use App\Exception\UnauthorizedException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
+use App\Service\Video\ConversionService;
 use App\Service\Video\FolderService;
 use App\Service\Video\VideoService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,6 +29,11 @@ class CdnSynchronizer
      * @var FolderService $folderService
      */
     private FolderService $folderService;
+
+    /**
+     * @var ConversionService $conversionService
+     */
+    private ConversionService $conversionService;
 
     /**
      * @var JwtService $jwtService
@@ -52,6 +58,7 @@ class CdnSynchronizer
     /**
      * @param VideoService $videoService
      * @param FolderService $folderService
+     * @param ConversionService $conversionService
      * @param JwtService $jwtService
      * @param AccountService $accountService
      * @param EntityManagerInterface $em
@@ -60,6 +67,7 @@ class CdnSynchronizer
     public function __construct(
         VideoService $videoService,
         FolderService $folderService,
+        ConversionService $conversionService,
         JwtService $jwtService,
         AccountService $accountService,
         EntityManagerInterface $em,
@@ -68,6 +76,7 @@ class CdnSynchronizer
     {
         $this->videoService = $videoService;
         $this->folderService = $folderService;
+        $this->conversionService = $conversionService;
         $this->jwtService = $jwtService;
         $this->accountService = $accountService;
         $this->em = $em;
@@ -201,7 +210,7 @@ class CdnSynchronizer
         $conversions = $videoData->conversions;
 
         if (!empty($conversions)) {
-            foreach ($this->videoService->getUnusedConversionData($video, $conversions) as $conversion) {
+            foreach ($this->conversionService->getUnusedConversions($video, $conversions) as $conversion) {
                 $conversion->addVideo($video);
                 $this->em->persist($conversion);
             }

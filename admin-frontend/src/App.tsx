@@ -20,6 +20,9 @@ import UpgradeIcon from '@mui/icons-material/Upgrade';
 import RepeatIcon from '@mui/icons-material/Repeat';
 import VideoEdit from "./components/videos/VideoEdit";
 import {extendedCzechMessages} from "./lang/CzechMessages";
+import {VideoConversionList} from "./components/videos/VideoConversionList";
+import {VideoConversionEdit} from "./components/videos/VideoConversionEdit";
+import {VideoConversionCreate} from "./components/videos/VideoConversionCreate";
 
 const i18nProvider = polyglotI18nProvider(() => extendedCzechMessages, 'cs', { allowMissing: true });
 
@@ -48,7 +51,9 @@ export const App: React.FC = () => (
         />
         <Resource
             name="videos.conversions"
-            list={VideoList}
+            list={VideoConversionList}
+            edit={VideoConversionEdit}
+            create={VideoConversionCreate}
             icon={RepeatIcon}
             options={{ label: 'Konverze' }}
         />

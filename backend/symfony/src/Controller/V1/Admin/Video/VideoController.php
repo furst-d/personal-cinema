@@ -60,7 +60,7 @@ class VideoController extends BasePersonalController
         }
     }
 
-    #[Route('/{id}', name: 'admin_video', methods: ['GET'])]
+    #[Route('/{id<\d+>}', name: 'admin_video', methods: ['GET'])]
     public function getVideoDetail(int $id): JsonResponse
     {
         try {
@@ -71,7 +71,7 @@ class VideoController extends BasePersonalController
         }
     }
 
-    #[Route('/{id}', name: 'admin_video_update', methods: ['PUT'])]
+    #[Route('/{id<\d+>}', name: 'admin_video_update', methods: ['PUT'])]
     public function updateVideo(int $id, VideoRequest $videoRequest): JsonResponse
     {
         try {
@@ -83,7 +83,7 @@ class VideoController extends BasePersonalController
         }
     }
 
-    #[Route('/{id}', name: 'admin_video_delete', methods: ['DELETE'])]
+    #[Route('/{id<\d+>}', name: 'admin_video_delete', methods: ['DELETE'])]
     public function deleteVideo(int $id): JsonResponse
     {
         try {

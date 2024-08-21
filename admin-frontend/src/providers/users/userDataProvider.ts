@@ -23,10 +23,9 @@ export const userDataProvider = {
             query.filter = JSON.stringify(filter);
         }
 
-        const url = `${apiUrl}/v1/admin/users?${stringify(query)}`;
-
-        let response = await fetchJsonWithAuth(url);
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/users?${stringify(query)}`);
         const {data, totalCount} = response.data.payload;
+
         return {
             data,
             total: totalCount,
@@ -34,10 +33,10 @@ export const userDataProvider = {
     },
 
     getOne: async (resource: any, params: any) => {
-        const url = `${apiUrl}/v1/admin/users/${params.id}`;
-        let response = await fetchJsonWithAuth(url);
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/users/${params.id}`);
         const userData = response.data.payload.data;
         const roles = userData.roles.map((role: any) => role.key);
+
         return {
             data: {
                 ...userData,
@@ -55,18 +54,17 @@ export const userDataProvider = {
     },
 
     update: async (resource: any, params: any) => {
-        const url = `${apiUrl}/v1/admin/users/${params.id}`;
-
         const updatedData = {
             active: params.data.isActive,
             roles: params.data.roles,
             email: params.data.email
         };
 
-        let response = await fetchJsonWithAuth(url, {
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/users/${params.id}`, {
             method: 'PUT',
             data: JSON.stringify(updatedData),
         });
+
         return ({
             data: response.data.payload.data,
         });
@@ -77,8 +75,6 @@ export const userDataProvider = {
     },
 
     create: async (resource: any, params: any) => {
-        const url = `${apiUrl}/v1/admin/users`;
-
         const updatedData = {
             email: params.data.email,
             password: params.data.password,
@@ -86,20 +82,21 @@ export const userDataProvider = {
             roles: params.data.roles,
         };
 
-        let response = await fetchJsonWithAuth(url, {
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/users`, {
             method: 'POST',
             data: JSON.stringify(updatedData),
         });
+
         return ({
             data: {...params.data, id: response.data.payload.id},
         });
     },
 
     delete: async (resource: any, params: any) => {
-        const url = `${apiUrl}/v1/admin/users/${params.id}`;
-        let response = await fetchJsonWithAuth(url, {
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/users/${params.id}`, {
             method: 'DELETE',
         });
+
         return ({
             data: response.data.payload,
         });
@@ -110,10 +107,10 @@ export const userDataProvider = {
             filter: JSON.stringify({ids: params.ids}),
         };
 
-        const url = `${apiUrl}/v1/admin/users?${stringify(query)}`;
-        let response = await fetchJsonWithAuth(url, {
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/users?${stringify(query)}`, {
             method: 'DELETE',
         });
+
         return ({
             data: response.data.payload.data,
         });

@@ -12,4 +12,7 @@ enum SortBy: string
     case IS_ACTIVE = 'isActive';
     case LENGTH = 'length';
     case SIZE = 'size';
+    case WIDTH = 'width';
+    case HEIGHT = 'height';
+    case BANDWIDTH = 'bandwidth';
 }

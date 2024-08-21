@@ -23,32 +23,31 @@ export const videoDataProvider = {
             query.filter = JSON.stringify(filter);
         }
 
-        const url = `${apiUrl}/v1/admin/videos?${stringify(query)}`;
+        return fetchJsonWithAuth(`${apiUrl}/v1/admin/videos?${stringify(query)}`)
+            .then(response => {
+                const { data, totalCount } = response.data.payload;
 
-        return fetchJsonWithAuth(url).then(response => {
-            const { data, totalCount } = response.data.payload;
+                const transformedData = data.map((video: any) => {
+                    const { conversions, md5, account, ...rest } = video;
+                    return {
+                        ...rest,
+                        md5: md5.md5,
+                        email: account.email,
+                    };
+                });
 
-            const transformedData = data.map((video: any) => {
-                const { conversions, md5, account, ...rest } = video;
                 return {
-                    ...rest,
-                    md5: md5.md5,
-                    email: account.email,
+                    data: transformedData,
+                    total: totalCount,
                 };
             });
-
-            return {
-                data: transformedData,
-                total: totalCount,
-            };
-        });
     },
 
     getOne: async (resource: any, params: any) => {
-        const url = `${apiUrl}/v1/admin/videos/${params.id}`;
-        return fetchJsonWithAuth(url).then(response => ({
-            data: response.data.payload.data,
-        }));
+        return fetchJsonWithAuth(`${apiUrl}/v1/admin/videos/${params.id}`)
+            .then(response => ({
+                data: response.data.payload.data,
+            }));
     },
 
     getMany: async (resource: any, params: any) => {
@@ -60,18 +59,11 @@ export const videoDataProvider = {
     },
 
     update: async (resource: any, params: any) => {
-        const url = `${apiUrl}/v1/admin/videos/${params.id}`;
-
-        const updatedData = {
-            active: params.data.isActive,
-            roles: params.data.roles,
-            email: params.data.email
-        };
-
-        let response = await fetchJsonWithAuth(url, {
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/videos/${params.id}`, {
             method: 'PUT',
             data: JSON.stringify(params.data),
         });
+
         return ({
             data: response.data.payload.data,
         });
@@ -86,10 +78,10 @@ export const videoDataProvider = {
     },
 
     delete: async (resource: any, params: any) => {
-        const url = `${apiUrl}/v1/admin/videos/${params.id}`;
-        let response = await fetchJsonWithAuth(url, {
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/videos/${params.id}`, {
             method: 'DELETE',
         });
+
         return ({
             data: response.data.payload,
         });
@@ -100,10 +92,10 @@ export const videoDataProvider = {
             filter: JSON.stringify({ids: params.ids}),
         };
 
-        const url = `${apiUrl}/v1/admin/videos?${stringify(query)}`;
-        let response = await fetchJsonWithAuth(url, {
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/videos?${stringify(query)}`, {
             method: 'DELETE',
         });
+
         return ({
             data: response.data.payload.data,
         });
