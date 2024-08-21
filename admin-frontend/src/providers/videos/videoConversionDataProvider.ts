@@ -27,7 +27,7 @@ export const videoConversionDataProvider = {
     },
 
     getOne: async (resource: any, params: any) => {
-        return fetchJsonWithAuth(`${apiUrl}/v1/admin/videos/conversionstest/${params.id}`)
+        return fetchJsonWithAuth(`${apiUrl}/v1/admin/videos/conversions/${params.id}`)
             .then(response => ({
                 data: response.data.payload.data,
             }));
