@@ -1,13 +1,8 @@
 import React from 'react';
-import {BooleanField, BooleanFieldProps, useRecordContext} from 'react-admin';
+import {useRecordContext} from 'react-admin';
+import {FieldProps} from "../types/field/FieldProps";
 
-interface CustomBooleanFieldProps {
-    source: string;
-    label: string;
-    sortable?: boolean;
-}
-
-const CustomBooleanField: React.FC<CustomBooleanFieldProps> = ({ source }) => {
+const CustomBooleanField: React.FC<FieldProps> = ({ source }) => {
     const record = useRecordContext();
     const value = record ? record[source] : false;
 

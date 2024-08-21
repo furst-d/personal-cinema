@@ -1,13 +1,8 @@
 import React from 'react';
 import { useRecordContext } from 'react-admin';
+import {FieldProps} from "../../types/field/FieldProps";
 
-interface RoleFieldProps {
-    source: string;
-    label?: string;
-    sortable?: boolean;
-}
-
-const RoleField: React.FC<RoleFieldProps> = ({ source }) => {
+const RoleField: React.FC<FieldProps> = ({ source }) => {
     const record = useRecordContext();
     if (!record || !record[source]) return null;
 

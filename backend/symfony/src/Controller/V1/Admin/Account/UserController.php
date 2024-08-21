@@ -105,7 +105,7 @@ class UserController extends BasePersonalController
         return $this->re->withData($this->accountService->getRoles());
     }
 
-    #[Route('/{id}', name: 'admin_user', methods: ['GET'])]
+    #[Route('/{id<\d+>}', name: 'admin_user', methods: ['GET'])]
     public function getUserDetail(int $id): JsonResponse
     {
         try {
@@ -116,7 +116,7 @@ class UserController extends BasePersonalController
         }
     }
 
-    #[Route('/{id}', name: 'admin_user_update', methods: ['PUT'])]
+    #[Route('/{id<\d+>}', name: 'admin_user_update', methods: ['PUT'])]
     public function updateUser(int $id, UpdateUserRequest $updateUserRequest): JsonResponse
     {
         try {
@@ -128,7 +128,7 @@ class UserController extends BasePersonalController
         }
     }
 
-    #[Route('/{id}', name: 'admin_user_delete', methods: ['DELETE'])]
+    #[Route('/{id<\d+>}', name: 'admin_user_delete', methods: ['DELETE'])]
     public function deleteUser(int $id): JsonResponse
     {
         try {

@@ -11,18 +11,24 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: ConversionRepository::class)]
 class Conversion
 {
+    public const CONVERSION_READ = 'CONVERSION_READ';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups([self::CONVERSION_READ])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups([self::CONVERSION_READ])]
     private int $width;
 
     #[ORM\Column]
+    #[Groups([self::CONVERSION_READ])]
     private int $height;
 
     #[ORM\Column]
+    #[Groups([self::CONVERSION_READ])]
     private int $bandwidth;
 
     /**
@@ -61,6 +67,15 @@ class Conversion
     }
 
     /**
+     * @param int $width
+     * @return void
+     */
+    public function setWidth(int $width): void
+    {
+        $this->width = $width;
+    }
+
+    /**
      * @return int
      */
     public function getHeight(): int
@@ -69,11 +84,29 @@ class Conversion
     }
 
     /**
+     * @param int $height
+     * @return void
+     */
+    public function setHeight(int $height): void
+    {
+        $this->height = $height;
+    }
+
+    /**
      * @return int
      */
     public function getBandwidth(): int
     {
         return $this->bandwidth;
+    }
+
+    /**
+     * @param int $bandwidth
+     * @return void
+     */
+    public function setBandwidth(int $bandwidth): void
+    {
+        $this->bandwidth = $bandwidth;
     }
 
     /**

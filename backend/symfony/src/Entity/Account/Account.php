@@ -99,7 +99,7 @@ class Account implements UserInterface
      */
     public function __construct(string $email, string $password, string $salt, int $maxStorage)
     {
-        $this->email = $email;
+        $this->email = strtolower($email);
         $this->password = $password;
         $this->createdAt = new DateTimeImmutable();
         $this->salt = $salt;
@@ -144,7 +144,7 @@ class Account implements UserInterface
      */
     public function setEmail(string $email): void
     {
-        $this->email = $email;
+        $this->email = strtolower($email);
     }
 
     /**

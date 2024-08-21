@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Edit, SimpleForm, TextInput, BooleanInput, SelectArrayInput } from 'react-admin';
-import {userDataProvider} from "../../providers/userDataProvider";
+import {userDataProvider} from "../../providers/users/userDataProvider";
 
 export const UserEdit: React.FC = (props) => {
     const [roles, setRoles] = useState([]);
