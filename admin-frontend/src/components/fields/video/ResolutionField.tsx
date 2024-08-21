@@ -1,12 +1,8 @@
 import React from 'react';
 import { useRecordContext } from 'react-admin';
+import {FieldProps} from "../../types/field/FieldProps";
 
-interface ResolutionFieldProps {
-    source: string;
-    label?: string;
-}
-
-const ResolutionField: React.FC<ResolutionFieldProps> = ({ source, label }) => {
+const ResolutionField: React.FC<FieldProps> = () => {
     const record = useRecordContext();
     if (!record) return null;
 

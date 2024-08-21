@@ -12,7 +12,7 @@ class VideoQueryRequest extends PaginatorRequest
     #[Assert\PositiveOrZero]
     private ?int $folderId;
 
-    #[Assert\Choice(choices: [SortBy::ID, SortBy::NAME, SortBy::UPDATE_DATE], message: "Choose a valid sort order.")]
+    #[Assert\Choice(choices: [SortBy::ID, SortBy::NAME, SortBy::EMAIL, SortBy::UPDATE_DATE], message: "Choose a valid sort order.")]
     private SortBy $sort;
 
     /**

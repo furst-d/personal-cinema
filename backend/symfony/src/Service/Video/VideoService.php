@@ -2,6 +2,7 @@
 
 namespace App\Service\Video;
 
+use App\DTO\Filter\FilterRequest;
 use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
 use App\Entity\Video\Conversion;
@@ -168,11 +169,12 @@ class VideoService
      * @param Account|null $account
      * @param FolderData $folderData
      * @param PaginatorRequest $paginatorRequest
+     * @param FilterRequest|null $filter
      * @return PaginatorResult<Video>
      */
-    public function getVideos(?Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest): PaginatorResult
+    public function getVideos(?Account $account, FolderData $folderData, PaginatorRequest $paginatorRequest, ?FilterRequest $filter = null): PaginatorResult
     {
-        return $this->videoRepository->findVideos($account, $folderData, $paginatorRequest);
+        return $this->videoRepository->findVideos($account, $folderData, $paginatorRequest, $filter);
     }
 
     /**
@@ -309,5 +311,21 @@ class VideoService
     public function getUnusedConversionData(Video $video, array $heights): array
     {
         return $this->conversionDataRepository->findUnusedConversions($video, $heights);
+    }
+
+    /**
+     * @param array $ids
+     * @return Video[]
+     * @throws NotFoundException
+     */
+    public function getVideosByIds(array $ids): array
+    {
+        $videos = $this->videoRepository->findByIds($ids);
+
+        if (count($videos) !== count($ids)) {
+            throw new NotFoundException("Some videos not found.");
+        }
+
+        return $videos;
     }
 }

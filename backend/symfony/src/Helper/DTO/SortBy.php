@@ -10,4 +10,6 @@ enum SortBy: string
     case CREATE_DATE = 'createdAt';
     case UPDATE_DATE = 'updatedAt';
     case IS_ACTIVE = 'isActive';
+    case LENGTH = 'length';
+    case SIZE = 'size';
 }

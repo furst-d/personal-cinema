@@ -4,107 +4,108 @@ import { stringify } from 'query-string';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export const videoDataProvider = {
-    getList: (resource, params) => {
+    getList: async (resource: any, params: any) => {
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort;
-        const query = {
+
+        const filter = {
+            ...params.filter,
+        };
+
+        const query: any = {
             limit: perPage,
             offset: (page - 1) * perPage,
             sort: field,
-            order: order,
+            order: order
         };
+
+        if (Object.keys(filter).length > 0) {
+            query.filter = JSON.stringify(filter);
+        }
+
         const url = `${apiUrl}/v1/admin/videos?${stringify(query)}`;
 
         return fetchJsonWithAuth(url).then(response => {
             const { data, totalCount } = response.data.payload;
+
+            const transformedData = data.map((video: any) => {
+                const { conversions, md5, account, ...rest } = video;
+                return {
+                    ...rest,
+                    md5: md5.md5,
+                    email: account.email,
+                };
+            });
+
             return {
-                data,
+                data: transformedData,
                 total: totalCount,
             };
         });
     },
-    getOne: (resource, params) => {
-        const url = `${apiUrl}/v1/admin/videos/${params.id}`;
-        return fetchJsonWithAuth(url).then(response => ({
-            data: response.data.payload,
-        }));
-    },
-    getMany: (resource, params) => {
-        const query = {
-            filter: JSON.stringify({ id: params.ids }),
-        };
-        const url = `${apiUrl}/v1/admin/videos?${stringify(query)}`;
-        return fetchJsonWithAuth(url).then(response => ({
-            data: response.data.payload,
-        }));
-    },
-    getManyReference: (resource, params) => {
-        const { page, perPage } = params.pagination;
-        const { field, order } = params.sort;
-        const query = {
-            limit: perPage,
-            offset: (page - 1) * perPage,
-            sort: field,
-            order: order,
-            filter: JSON.stringify({
-                ...params.filter,
-                [params.target]: params.id,
-            }),
-        };
-        const url = `${apiUrl}/v1/admin/videos?${stringify(query)}`;
 
+    getOne: async (resource: any, params: any) => {
+        const url = `${apiUrl}/v1/admin/videos/${params.id}`;
         return fetchJsonWithAuth(url).then(response => ({
-            data: response.data.payload,
-            total: response.data.payload.length,
+            data: response.data.payload.data,
         }));
     },
-    update: (resource, params) => {
+
+    getMany: async (resource: any, params: any) => {
+        return Promise.reject(new Error(`getMany is not supported for resource: ${resource}`));
+    },
+
+    getManyReference: async (resource: any, params: any) => {
+        return Promise.reject(new Error(`getManyReference is not supported for resource: ${resource}`));
+    },
+
+    update: async (resource: any, params: any) => {
         const url = `${apiUrl}/v1/admin/videos/${params.id}`;
-        return fetchJsonWithAuth(url, {
-            method: 'PUT',
-            data: params.data,
-        }).then(response => ({
-            data: response.data.payload,
-        }));
-    },
-    updateMany: (resource, params) => {
-        const query = {
-            filter: JSON.stringify({ id: params.ids }),
+
+        const updatedData = {
+            active: params.data.isActive,
+            roles: params.data.roles,
+            email: params.data.email
         };
-        const url = `${apiUrl}/v1/admin/videos?${stringify(query)}`;
-        return fetchJsonWithAuth(url, {
+
+        let response = await fetchJsonWithAuth(url, {
             method: 'PUT',
-            data: params.data,
-        }).then(response => ({
-            data: response.data.payload,
-        }));
+            data: JSON.stringify(params.data),
+        });
+        return ({
+            data: response.data.payload.data,
+        });
     },
-    create: (resource, params) => {
-        const url = `${apiUrl}/v1/admin/videos`;
-        return fetchJsonWithAuth(url, {
-            method: 'POST',
-            data: params.data,
-        }).then(response => ({
-            data: { ...params.data, id: response.data.payload.id },
-        }));
+
+    updateMany: async (resource: any, params: any) => {
+        return Promise.reject(new Error(`updateMany is not supported for resource: ${resource}`));
     },
-    delete: (resource, params) => {
+
+    create: async (resource: any, params: any) => {
+        return Promise.reject(new Error(`create is not supported for resource: ${resource}`));
+    },
+
+    delete: async (resource: any, params: any) => {
         const url = `${apiUrl}/v1/admin/videos/${params.id}`;
-        return fetchJsonWithAuth(url, {
+        let response = await fetchJsonWithAuth(url, {
             method: 'DELETE',
-        }).then(response => ({
+        });
+        return ({
             data: response.data.payload,
-        }));
+        });
     },
-    deleteMany: (resource, params) => {
+
+    deleteMany: async (resource: any, params: any) => {
         const query = {
-            filter: JSON.stringify({ id: params.ids }),
+            filter: JSON.stringify({ids: params.ids}),
         };
+
         const url = `${apiUrl}/v1/admin/videos?${stringify(query)}`;
-        return fetchJsonWithAuth(url, {
+        let response = await fetchJsonWithAuth(url, {
             method: 'DELETE',
-        }).then(response => ({
-            data: response.data.payload,
-        }));
+        });
+        return ({
+            data: response.data.payload.data,
+        });
     },
 };

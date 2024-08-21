@@ -11,10 +11,10 @@ export const storagePriceDataProvider = {
             { id: 3, name: 'Test C' },
         ];
 
-        return Promise.resolve({
+        return {
             data: data,
             total: data.length,
-        });
+        };
     },
 
     getOne: async (resource: any, params: any) => {
