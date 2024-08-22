@@ -23,6 +23,9 @@ import {extendedCzechMessages} from "./lang/CzechMessages";
 import {VideoConversionList} from "./components/videos/conversions/VideoConversionList";
 import {VideoConversionEdit} from "./components/videos/conversions/VideoConversionEdit";
 import {VideoConversionCreate} from "./components/videos/conversions/VideoConversionCreate";
+import {SettingList} from "./components/settings/SettingList";
+import SettingEdit from "./components/settings/SettingEdit";
+import {SettingCreate} from "./components/settings/SettingCreate";
 
 const i18nProvider = polyglotI18nProvider(() => extendedCzechMessages, 'cs', { allowMissing: true });
 
@@ -77,7 +80,9 @@ export const App: React.FC = () => (
         />
         <Resource
             name="settings"
-            list={ListGuesser}
+            list={SettingList}
+            edit={SettingEdit}
+            create={SettingCreate}
             icon={SettingsIcon}
             options={{ label: 'Nastavení' }}
         />
