@@ -46,6 +46,15 @@ class Settings
     }
 
     /**
+     * @param string $key
+     * @return void
+     */
+    public function setKey(string $key): void
+    {
+        $this->key = $key;
+    }
+
+    /**
      * @return string
      */
     public function getValue(): string

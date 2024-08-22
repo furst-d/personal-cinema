@@ -5,20 +5,56 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 export const storageUserDataProvider = {
     getList: async (resource: any, params: any) => {
-        const data = [
-            { id: 1, name: 'Test A' },
-            { id: 2, name: 'Test B' },
-            { id: 3, name: 'Test C' },
-        ];
+        const {page, perPage} = params.pagination;
+        const {field, order} = params.sort;
+
+        const filter = {
+            ...params.filter,
+        };
+
+        const query: any = {
+            limit: perPage,
+            offset: (page - 1) * perPage,
+            sort: field,
+            order: order
+        };
+
+        if (Object.keys(filter).length > 0) {
+            query.filter = JSON.stringify(filter);
+        }
+
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/storage?${stringify(query)}`);
+        const {data, totalCount} = response.data.payload;
+
+        const transformedData = data.map((storage: any) => {
+            const { account, ...rest } = storage;
+            return {
+                ...rest,
+                email: account.email,
+            };
+        });
 
         return {
-            data: data,
-            total: data.length,
+            data: transformedData,
+            total: totalCount,
         };
     },
 
     getOne: async (resource: any, params: any) => {
-        return Promise.reject(new Error(`getOne is not supported for resource: ${resource}`));
+        return fetchJsonWithAuth(`${apiUrl}/v1/admin/storage/${params.id}`)
+            .then(response => {
+                const transformedData = (data: any) => {
+                    const { account, ...rest } = data;
+                    return {
+                        ...rest,
+                        email: account.email,
+                    };
+                };
+
+                return {
+                    data: transformedData(response.data.payload.data),
+                };
+            });
     },
 
     getMany: async (resource: any, params: any) => {
@@ -30,7 +66,18 @@ export const storageUserDataProvider = {
     },
 
     update: async (resource: any, params: any) => {
-        return Promise.reject(new Error(`update is not supported for resource: ${resource}`));
+        const updatedData = {
+            maxStorage: params.data.maxStorage,
+        };
+
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/storage/${params.id}`, {
+            method: 'PUT',
+            data: JSON.stringify(updatedData),
+        });
+
+        return ({
+            data: response.data.payload.data,
+        });
     },
 
     updateMany: async (resource: any, params: any) => {

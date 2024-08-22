@@ -15,6 +15,7 @@ use App\Helper\Storage\StoragePaymentMetadata;
 use App\Helper\Storage\StoragePaymentType;
 use App\Repository\Settings\SettingsRepository;
 use App\Repository\Storage\StorageCardPaymentRepository;
+use App\Repository\Storage\StorageRepository;
 use App\Repository\Storage\StorageUpgradePriceRepository;
 use App\Repository\Storage\StorageUpgradeRepository;
 use App\Service\Storage\StorageService;
@@ -24,6 +25,7 @@ class StorageServiceTest extends TestCase
 {
     private StorageService $storageService;
     private $mockSettingsRepository;
+    private $mockStorageRepository;
     private $mockStorageUpgradePriceRepository;
     private $mockStorageUpgradeRepository;
     private $mockStorageCardPaymentRepository;
@@ -31,12 +33,14 @@ class StorageServiceTest extends TestCase
     protected function setUp(): void
     {
         $this->mockSettingsRepository = $this->createMock(SettingsRepository::class);
+        $this->mockStorageRepository = $this->createMock(StorageRepository::class);
         $this->mockStorageUpgradePriceRepository = $this->createMock(StorageUpgradePriceRepository::class);
         $this->mockStorageUpgradeRepository = $this->createMock(StorageUpgradeRepository::class);
         $this->mockStorageCardPaymentRepository = $this->createMock(StorageCardPaymentRepository::class);
 
         $this->storageService = new StorageService(
             $this->mockSettingsRepository,
+            $this->mockStorageRepository,
             $this->mockStorageUpgradePriceRepository,
             $this->mockStorageUpgradeRepository,
             $this->mockStorageCardPaymentRepository

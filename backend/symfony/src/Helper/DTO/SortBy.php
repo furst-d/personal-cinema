@@ -15,4 +15,9 @@ enum SortBy: string
     case WIDTH = 'width';
     case HEIGHT = 'height';
     case BANDWIDTH = 'bandwidth';
+    case KEY = 'key';
+    case VALUE = 'value';
+    case MAX_STORAGE = 'maxStorage';
+    case USED_STORAGE = 'usedStorage';
+    case FILL_SIZE = 'fillSize';
 }

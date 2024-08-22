@@ -9,6 +9,7 @@ use App\DTO\PaginatorRequest;
 use App\DTO\Video\VideoRequest;
 use App\Entity\Video\Video;
 use App\Exception\ApiException;
+use App\Helper\Regex\RegexRoute;
 use App\Helper\Video\FolderData;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Video\VideoService;
@@ -60,7 +61,7 @@ class VideoController extends BasePersonalController
         }
     }
 
-    #[Route('/{id<\d+>}', name: 'admin_video', methods: ['GET'])]
+    #[Route(RegexRoute::ID, name: 'admin_video', methods: ['GET'])]
     public function getVideoDetail(int $id): JsonResponse
     {
         try {
@@ -71,7 +72,7 @@ class VideoController extends BasePersonalController
         }
     }
 
-    #[Route('/{id<\d+>}', name: 'admin_video_update', methods: ['PUT'])]
+    #[Route(RegexRoute::ID, name: 'admin_video_update', methods: ['PUT'])]
     public function updateVideo(int $id, VideoRequest $videoRequest): JsonResponse
     {
         try {
@@ -83,7 +84,7 @@ class VideoController extends BasePersonalController
         }
     }
 
-    #[Route('/{id<\d+>}', name: 'admin_video_delete', methods: ['DELETE'])]
+    #[Route(RegexRoute::ID, name: 'admin_video_delete', methods: ['DELETE'])]
     public function deleteVideo(int $id): JsonResponse
     {
         try {

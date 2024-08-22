@@ -9,6 +9,7 @@ use App\DTO\Video\SearchQueryRequest;
 use App\Entity\Video\Folder;
 use App\Entity\Video\Share\ShareFolder;
 use App\Exception\ApiException;
+use App\Helper\Regex\RegexRoute;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Video\FolderService;
 use App\Service\Video\ShareService;
@@ -72,7 +73,7 @@ class FolderController extends BasePersonalController
         return $this->re->withData($videos, [Folder::FOLDER_READ]);
     }
 
-    #[Route('/{id<\d+>}/share', name: 'user_folder_shares', methods: ['GET'])]
+    #[Route(RegexRoute::ID . '/share', name: 'user_folder_shares', methods: ['GET'])]
     public function getVideoSharedUsers(Request $request, int $id): JsonResponse
     {
         try {
@@ -99,7 +100,7 @@ class FolderController extends BasePersonalController
         }
     }
 
-    #[Route('/{id<\d+>}', 'user_update_folder', methods: ['PUT'])]
+    #[Route(RegexRoute::ID, 'user_update_folder', methods: ['PUT'])]
     public function updateFolder(Request $request, FolderRequest $folderRequest, int $id): JsonResponse
     {
         try {
@@ -112,7 +113,7 @@ class FolderController extends BasePersonalController
         }
     }
 
-    #[Route('/{id<\d+>}', name: 'user_delete_folder', methods: ['DELETE'])]
+    #[Route(RegexRoute::ID, name: 'user_delete_folder', methods: ['DELETE'])]
     public function deleteFolder(Request $request, int $id): JsonResponse
     {
         try {

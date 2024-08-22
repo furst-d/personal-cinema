@@ -5,20 +5,32 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 export const settingDataProvider = {
     getList: async (resource: any, params: any) => {
-        const data = [
-            { id: 1, name: 'Test A' },
-            { id: 2, name: 'Test B' },
-            { id: 3, name: 'Test C' },
-        ];
+        const { page, perPage } = params.pagination;
+        const { field, order } = params.sort;
 
-        return Promise.resolve({
-            data: data,
-            total: data.length,
-        });
+        const query: any = {
+            limit: perPage,
+            offset: (page - 1) * perPage,
+            sort: field,
+            order: order
+        };
+
+        return fetchJsonWithAuth(`${apiUrl}/v1/admin/settings?${stringify(query)}`)
+            .then(response => {
+                const { data, totalCount } = response.data.payload;
+
+                return {
+                    data: data,
+                    total: totalCount,
+                };
+            });
     },
 
     getOne: async (resource: any, params: any) => {
-        return Promise.reject(new Error(`getOne is not supported for resource: ${resource}`));
+        return fetchJsonWithAuth(`${apiUrl}/v1/admin/settings/${params.id}`)
+            .then(response => ({
+                data: response.data.payload.data,
+            }));
     },
 
     getMany: async (resource: any, params: any) => {
@@ -30,7 +42,14 @@ export const settingDataProvider = {
     },
 
     update: async (resource: any, params: any) => {
-        return Promise.reject(new Error(`update is not supported for resource: ${resource}`));
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/settings/${params.id}`, {
+            method: 'PUT',
+            data: JSON.stringify(params.data),
+        });
+
+        return ({
+            data: response.data.payload.data,
+        });
     },
 
     updateMany: async (resource: any, params: any) => {
@@ -38,14 +57,37 @@ export const settingDataProvider = {
     },
 
     create: async (resource: any, params: any) => {
-        return Promise.reject(new Error(`create is not supported for resource: ${resource}`));
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/settings`, {
+            method: 'POST',
+            data: JSON.stringify(params.data),
+        });
+
+        return ({
+            data: {...params.data, id: response.data.payload.id},
+        });
     },
 
     delete: async (resource: any, params: any) => {
-        return Promise.reject(new Error(`delete is not supported for resource: ${resource}`));
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/settings/${params.id}`, {
+            method: 'DELETE',
+        });
+
+        return ({
+            data: response.data.payload,
+        });
     },
 
     deleteMany: async (resource: any, params: any) => {
-        return Promise.reject(new Error(`deleteMany is not supported for resource: ${resource}`));
+        const query = {
+            filter: JSON.stringify({ids: params.ids}),
+        };
+
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/settings?${stringify(query)}`, {
+            method: 'DELETE',
+        });
+
+        return ({
+            data: response.data.payload.data,
+        });
     },
 };

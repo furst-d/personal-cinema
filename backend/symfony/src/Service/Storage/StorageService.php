@@ -2,6 +2,9 @@
 
 namespace App\Service\Storage;
 
+use App\DTO\Filter\EmailFilterRequest;
+use App\DTO\Filter\FilterRequest;
+use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
 use App\Entity\Storage\Storage;
 use App\Entity\Storage\StorageCardPayment;
@@ -12,10 +15,12 @@ use App\Exception\FullStorageException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Exception\TooLargeException;
+use App\Helper\DTO\PaginatorResult;
 use App\Helper\Storage\StoragePaymentMetadata;
 use App\Helper\Storage\StoragePaymentType;
 use App\Repository\Settings\SettingsRepository;
 use App\Repository\Storage\StorageCardPaymentRepository;
+use App\Repository\Storage\StorageRepository;
 use App\Repository\Storage\StorageUpgradePriceRepository;
 use App\Repository\Storage\StorageUpgradeRepository;
 use Exception;
@@ -26,6 +31,11 @@ class StorageService
      * @var SettingsRepository
      */
     private SettingsRepository $settingsRepository;
+
+    /**
+     * @var StorageRepository $storageRepository
+     */
+    private StorageRepository $storageRepository;
 
     /**
      * @var StorageUpgradePriceRepository $storageUpgradePriceRepository
@@ -44,21 +54,50 @@ class StorageService
 
     /**
      * @param SettingsRepository $settingsRepository
+     * @param StorageRepository $storageRepository
      * @param StorageUpgradePriceRepository $storageUpgradePriceRepository
      * @param StorageUpgradeRepository $storageUpgradeRepository
      * @param StorageCardPaymentRepository $storageCardPaymentRepository
      */
     public function __construct(
         SettingsRepository $settingsRepository,
+        StorageRepository $storageRepository,
         StorageUpgradePriceRepository $storageUpgradePriceRepository,
         StorageUpgradeRepository $storageUpgradeRepository,
         StorageCardPaymentRepository $storageCardPaymentRepository
     )
     {
         $this->settingsRepository = $settingsRepository;
+        $this->storageRepository = $storageRepository;
         $this->storageUpgradePriceRepository = $storageUpgradePriceRepository;
         $this->storageUpgradeRepository = $storageUpgradeRepository;
         $this->storageCardPaymentRepository = $storageCardPaymentRepository;
+    }
+
+    /**
+     * @param PaginatorRequest $paginatorRequest
+     * @param FilterRequest|null $filterRequest
+     * @return PaginatorResult<Storage>
+     */
+    public function getStorages(PaginatorRequest $paginatorRequest, ?FilterRequest $filterRequest): PaginatorResult
+    {
+        return $this->storageRepository->getStorages($paginatorRequest, $filterRequest);
+    }
+
+    /**
+     * @param int $id
+     * @return Storage
+     * @throws NotFoundException
+     */
+    public function getStorageById(int $id): Storage
+    {
+        $storage = $this->storageRepository->find($id);
+
+        if (!$storage) {
+            throw new NotFoundException('Storage not found');
+        }
+
+        return $storage;
     }
 
     /**
@@ -147,6 +186,17 @@ class StorageService
         $storage->setMaxStorage($storage->getMaxStorage() + $metadata->getSize());
 
         $this->storageUpgradeRepository->save($storageUpgrade);
+    }
+
+    /**
+     * @param Storage $storage
+     * @param int $maxStorage
+     * @return void
+     */
+    public function updateMaxStorage(Storage $storage, int $maxStorage): void
+    {
+        $storage->setMaxStorage($maxStorage);
+        $this->storageRepository->save($storage);
     }
 
 

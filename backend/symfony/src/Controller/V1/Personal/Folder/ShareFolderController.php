@@ -10,6 +10,7 @@ use App\Entity\Video\Folder;
 use App\Exception\ApiException;
 use App\Exception\BadRequestException;
 use App\Helper\Jwt\JwtUsage;
+use App\Helper\Regex\RegexRoute;
 use App\Helper\Video\FolderData;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
@@ -135,7 +136,7 @@ class ShareFolderController extends BasePersonalController
         }
     }
 
-    #[Route('/{id<\d+>}', name: 'user_delete_folder_share', methods: ['DELETE'])]
+    #[Route(RegexRoute::ID, name: 'user_delete_folder_share', methods: ['DELETE'])]
     public function deleteFolderShare(Request $request, int $id): JsonResponse
     {
         try {

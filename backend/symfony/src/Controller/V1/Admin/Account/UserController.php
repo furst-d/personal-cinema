@@ -12,6 +12,7 @@ use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
 use App\Exception\ApiException;
 use App\Helper\Jwt\JwtUsage;
+use App\Helper\Regex\RegexRoute;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
 use App\Service\Locator\BaseControllerLocator;
@@ -105,7 +106,7 @@ class UserController extends BasePersonalController
         return $this->re->withData($this->accountService->getRoles());
     }
 
-    #[Route('/{id<\d+>}', name: 'admin_user', methods: ['GET'])]
+    #[Route(RegexRoute::ID, name: 'admin_user', methods: ['GET'])]
     public function getUserDetail(int $id): JsonResponse
     {
         try {
@@ -116,7 +117,7 @@ class UserController extends BasePersonalController
         }
     }
 
-    #[Route('/{id<\d+>}', name: 'admin_user_update', methods: ['PUT'])]
+    #[Route(RegexRoute::ID, name: 'admin_user_update', methods: ['PUT'])]
     public function updateUser(int $id, UpdateUserRequest $updateUserRequest): JsonResponse
     {
         try {
@@ -128,7 +129,7 @@ class UserController extends BasePersonalController
         }
     }
 
-    #[Route('/{id<\d+>}', name: 'admin_user_delete', methods: ['DELETE'])]
+    #[Route(RegexRoute::ID, name: 'admin_user_delete', methods: ['DELETE'])]
     public function deleteUser(int $id): JsonResponse
     {
         try {
