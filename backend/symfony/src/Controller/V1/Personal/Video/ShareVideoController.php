@@ -12,6 +12,7 @@ use App\Entity\Video\Video;
 use App\Exception\ApiException;
 use App\Exception\BadRequestException;
 use App\Helper\Jwt\JwtUsage;
+use App\Helper\Regex\RegexRoute;
 use App\Helper\Video\FolderData;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
@@ -39,11 +40,6 @@ class ShareVideoController extends BasePersonalController
     private VideoService $videoService;
 
     /**
-     * @var FolderService $folderService
-     */
-    private FolderService $folderService;
-
-    /**
      * @var ShareService $shareService
      */
     private ShareService $shareService;
@@ -62,7 +58,6 @@ class ShareVideoController extends BasePersonalController
      * @param BaseControllerLocator $locator
      * @param JwtService $jwtService
      * @param VideoService $videoService
-     * @param FolderService $folderService
      * @param ShareService $shareService
      * @param AccountService $accountService
      * @param MailerService $mailerService
@@ -71,7 +66,6 @@ class ShareVideoController extends BasePersonalController
         BaseControllerLocator $locator,
         JwtService $jwtService,
         VideoService $videoService,
-        FolderService $folderService,
         ShareService $shareService,
         AccountService $accountService,
         MailerService $mailerService
@@ -80,7 +74,6 @@ class ShareVideoController extends BasePersonalController
         parent::__construct($locator);
         $this->jwtService = $jwtService;
         $this->videoService = $videoService;
-        $this->folderService = $folderService;
         $this->shareService = $shareService;
         $this->accountService = $accountService;
         $this->mailerService = $mailerService;
@@ -168,7 +161,7 @@ class ShareVideoController extends BasePersonalController
         }
     }
 
-    #[Route('/{id<\d+>}', name: 'user_delete_video_share', methods: ['DELETE'])]
+    #[Route(RegexRoute::ID, name: 'user_delete_video_share', methods: ['DELETE'])]
     public function deleteVideoShare(Request $request, int $id): JsonResponse
     {
         try {

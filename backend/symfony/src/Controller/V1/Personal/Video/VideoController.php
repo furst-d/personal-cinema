@@ -13,6 +13,7 @@ use App\Entity\Video\Video;
 use App\Exception\ApiException;
 use App\Exception\InternalException;
 use App\Helper\Jwt\JwtUsage;
+use App\Helper\Regex\RegexRoute;
 use App\Helper\Video\ThirdParty;
 use App\Service\Cdn\CdnService;
 use App\Service\Jwt\JwtService;
@@ -171,12 +172,12 @@ class VideoController extends BasePersonalController
         }
     }
 
-    #[Route('/{videoId<\d+>}/recommend', name: 'user_video_recommendation', methods: ['GET'])]
-    public function getVideoRecommendation(Request $request, int $videoId, VideoQueryRequest $videoQueryRequest): JsonResponse
+    #[Route(RegexRoute::ID . '/recommend', name: 'user_video_recommendation', methods: ['GET'])]
+    public function getVideoRecommendation(Request $request, int $id, VideoQueryRequest $videoQueryRequest): JsonResponse
     {
         try {
             $account = $this->getAccount($request);
-            $video = $this->videoService->getAccountVideoById($account, $videoId);
+            $video = $this->videoService->getAccountVideoById($account, $id);
 
             $videos = $this->videoService->getVideoRecommendations(
                 $video,
@@ -191,12 +192,12 @@ class VideoController extends BasePersonalController
         }
     }
 
-    #[Route('/{videoId<\d+>}/download', name: 'user_video_download', methods: ['GET'])]
-    public function downloadVideo(Request $request, int $videoId): JsonResponse
+    #[Route(RegexRoute::ID . '/download', name: 'user_video_download', methods: ['GET'])]
+    public function downloadVideo(Request $request, int $id): JsonResponse
     {
         try {
             $account = $this->getAccount($request);
-            $video = $this->videoService->getAccountVideoById($account, $videoId);
+            $video = $this->videoService->getAccountVideoById($account, $id);
 
             $link = $this->cdnService->getDownloadLink($video);
             return $this->re->withData(['downloadLink' => $link]);
@@ -205,12 +206,12 @@ class VideoController extends BasePersonalController
         }
     }
 
-    #[Route('/{videoId<\d+>}/share', name: 'user_video_shares', methods: ['GET'])]
-    public function getVideoSharedUsers(Request $request, int $videoId): JsonResponse
+    #[Route(RegexRoute::ID . '/share', name: 'user_video_shares', methods: ['GET'])]
+    public function getVideoSharedUsers(Request $request, int $id): JsonResponse
     {
         try {
             $account = $this->getAccount($request);
-            $video = $this->videoService->getAccountVideoById($account, $videoId);
+            $video = $this->videoService->getAccountVideoById($account, $id);
 
             $shares = $video->getShares();
 
@@ -220,12 +221,12 @@ class VideoController extends BasePersonalController
         }
     }
 
-    #[Route('/{videoId<\d+>}/share/public', name: 'user_video_shares_public', methods: ['GET'])]
-    public function getVideoSharesPublic(Request $request, int $videoId): JsonResponse
+    #[Route(RegexRoute::ID . '/share/public', name: 'user_video_shares_public', methods: ['GET'])]
+    public function getVideoSharesPublic(Request $request, int $id): JsonResponse
     {
         try {
             $account = $this->getAccount($request);
-            $video = $this->videoService->getAccountVideoById($account, $videoId);
+            $video = $this->videoService->getAccountVideoById($account, $id);
 
             $shares = $video->getSharesPublic();
 
@@ -238,7 +239,7 @@ class VideoController extends BasePersonalController
         }
     }
 
-    #[Route('/{id<\d+>}', 'user_update_video', methods: ['PUT'])]
+    #[Route(RegexRoute::ID, 'user_update_video', methods: ['PUT'])]
     public function updateVideo(Request $request, VideoRequest $videoRequest, int $id): JsonResponse
     {
         try {
@@ -257,7 +258,7 @@ class VideoController extends BasePersonalController
         }
     }
 
-    #[Route('/{id<\d+>}', name: 'user_delete_video', methods: ['DELETE'])]
+    #[Route(RegexRoute::ID, name: 'user_delete_video', methods: ['DELETE'])]
     public function deleteVideo(Request $request, int $id): JsonResponse
     {
         try {

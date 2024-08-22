@@ -6,9 +6,9 @@ use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Admin\Video\ConversionRequest;
 use App\DTO\Admin\Video\VideoConversionQueryRequest;
 use App\DTO\Filter\BatchDeleteFilterRequest;
-use App\DTO\PaginatorRequest;
 use App\Entity\Video\Conversion;
 use App\Exception\ApiException;
+use App\Helper\Regex\RegexRoute;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Video\ConversionService;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -65,7 +65,7 @@ class VideoConversionController extends BasePersonalController
         }
     }
 
-    #[Route('/{id<\d+>}', name: 'admin_conversion', methods: ['GET'])]
+    #[Route(RegexRoute::ID, name: 'admin_conversion', methods: ['GET'])]
     public function getConversionDetail(int $id): JsonResponse
     {
         try {
@@ -76,7 +76,7 @@ class VideoConversionController extends BasePersonalController
         }
     }
 
-    #[Route('/{id<\d+>}', name: 'admin_conversion_update', methods: ['PUT'])]
+    #[Route(RegexRoute::ID, name: 'admin_conversion_update', methods: ['PUT'])]
     public function updateConversion(int $id, ConversionRequest $conversionRequest): JsonResponse
     {
         try {
@@ -88,7 +88,7 @@ class VideoConversionController extends BasePersonalController
         }
     }
 
-    #[Route('/{id<\d+>}', name: 'admin_conversion_delete', methods: ['DELETE'])]
+    #[Route(RegexRoute::ID, name: 'admin_conversion_delete', methods: ['DELETE'])]
     public function deleteConversion(int $id): JsonResponse
     {
         try {
