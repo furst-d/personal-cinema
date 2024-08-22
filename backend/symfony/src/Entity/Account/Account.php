@@ -29,7 +29,15 @@ class Account implements UserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups([self::ACCOUNT_READ, Video::VIDEO_READ, Video::VIDEOS_READ, ShareVideo::SHARE_VIDEO_READ, ShareFolder::SHARE_FOLDER_READ, Folder::FOLDER_READ])]
+    #[Groups([
+        self::ACCOUNT_READ,
+        Video::VIDEO_READ,
+        Video::VIDEOS_READ,
+        ShareVideo::SHARE_VIDEO_READ,
+        ShareFolder::SHARE_FOLDER_READ,
+        Folder::FOLDER_READ,
+        Storage::STORAGE_READ
+    ])]
     private string $email;
 
     #[ORM\Column(length: 255)]

@@ -26,6 +26,8 @@ import {VideoConversionCreate} from "./components/videos/conversions/VideoConver
 import {SettingList} from "./components/settings/SettingList";
 import SettingEdit from "./components/settings/SettingEdit";
 import {SettingCreate} from "./components/settings/SettingCreate";
+import {StorageUserList} from "./components/storage/users/StorageUserList";
+import {StorageUserEdit} from "./components/storage/users/StorageUserEdit";
 
 const i18nProvider = polyglotI18nProvider(() => extendedCzechMessages, 'cs', { allowMissing: true });
 
@@ -62,7 +64,8 @@ export const App: React.FC = () => (
         />
         <Resource
             name="storages.users"
-            list={ListGuesser}
+            list={StorageUserList}
+            edit={StorageUserEdit}
             icon={ContactPageIcon}
             options={{ label: 'Úložiště' }}
         />
