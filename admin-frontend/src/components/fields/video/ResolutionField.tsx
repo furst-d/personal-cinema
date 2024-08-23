@@ -4,7 +4,7 @@ import {FieldProps} from "../../types/field/FieldProps";
 
 const ResolutionField: React.FC<FieldProps> = () => {
     const record = useRecordContext();
-    if (!record) return null;
+    if (!record) return <span>-</span>;
 
     const width = record['originalWidth'];
     const height = record['originalHeight'];

@@ -28,6 +28,9 @@ import SettingEdit from "./components/settings/SettingEdit";
 import {SettingCreate} from "./components/settings/SettingCreate";
 import {StorageUserList} from "./components/storage/users/StorageUserList";
 import {StorageUserEdit} from "./components/storage/users/StorageUserEdit";
+import {StoragePriceList} from "./components/storage/prices/StoragePriceList";
+import {StoragePriceEdit} from "./components/storage/prices/StoragePriceEdit";
+import {StoragePriceCreate} from "./components/storage/prices/StoragePriceCreate";
 
 const i18nProvider = polyglotI18nProvider(() => extendedCzechMessages, 'cs', { allowMissing: true });
 
@@ -71,7 +74,9 @@ export const App: React.FC = () => (
         />
         <Resource
             name="storages.prices"
-            list={ListGuesser}
+            list={StoragePriceList}
+            edit={StoragePriceEdit}
+            create={StoragePriceCreate}
             icon={AttachMoneyIcon}
             options={{ label: 'Ceny' }}
         />

@@ -74,7 +74,7 @@ class SettingController extends BasePersonalController
         }
     }
 
-    #[Route(RegexRoute::ID, name: 'admin_user_update', methods: ['PUT'])]
+    #[Route(RegexRoute::ID, name: 'admin_setting_update', methods: ['PUT'])]
     public function updateSetting(int $id, SettingRequest $settingRequest): JsonResponse
     {
         try {
@@ -86,7 +86,7 @@ class SettingController extends BasePersonalController
         }
     }
 
-    #[Route(RegexRoute::ID, name: 'admin_user_delete', methods: ['DELETE'])]
+    #[Route(RegexRoute::ID, name: 'admin_setting_delete', methods: ['DELETE'])]
     public function deleteSetting(int $id): JsonResponse
     {
         try {

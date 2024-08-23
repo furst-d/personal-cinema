@@ -5,7 +5,7 @@ import {FieldProps} from "../../types/field/FieldProps";
 
 const VideoInfoField: React.FC<FieldProps> = ({ label }) => {
     const record = useRecordContext();
-    if (!record) return null;
+    if (!record) return <span>-</span>;
 
     return (
         <div>
