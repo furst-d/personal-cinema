@@ -2,6 +2,7 @@
 
 namespace App\Tests\Service\Storage;
 
+use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
 use App\Entity\Storage\Storage;
 use App\Entity\Storage\StorageCardPayment;
@@ -18,12 +19,17 @@ use App\Repository\Storage\StorageCardPaymentRepository;
 use App\Repository\Storage\StorageRepository;
 use App\Repository\Storage\StorageUpgradePriceRepository;
 use App\Repository\Storage\StorageUpgradeRepository;
+use App\Service\Storage\StoragePriceService;
 use App\Service\Storage\StorageService;
+use App\Service\Storage\StorageUpgradeService;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 class StorageServiceTest extends TestCase
 {
     private StorageService $storageService;
+    private StoragePriceService $storagePriceService;
+    private StorageUpgradeService $storageUpgradeService;
     private $mockSettingsRepository;
     private $mockStorageRepository;
     private $mockStorageUpgradePriceRepository;
@@ -34,14 +40,22 @@ class StorageServiceTest extends TestCase
     {
         $this->mockSettingsRepository = $this->createMock(SettingsRepository::class);
         $this->mockStorageRepository = $this->createMock(StorageRepository::class);
-        $this->mockStorageUpgradePriceRepository = $this->createMock(StorageUpgradePriceRepository::class);
-        $this->mockStorageUpgradeRepository = $this->createMock(StorageUpgradeRepository::class);
-        $this->mockStorageCardPaymentRepository = $this->createMock(StorageCardPaymentRepository::class);
 
         $this->storageService = new StorageService(
             $this->mockSettingsRepository,
-            $this->mockStorageRepository,
-            $this->mockStorageUpgradePriceRepository,
+            $this->mockStorageRepository
+        );
+
+        $this->mockStorageUpgradePriceRepository = $this->createMock(StorageUpgradePriceRepository::class);
+
+        $this->storagePriceService = new StoragePriceService(
+            $this->mockStorageUpgradePriceRepository
+        );
+
+        $this->mockStorageUpgradeRepository = $this->createMock(StorageUpgradeRepository::class);
+        $this->mockStorageCardPaymentRepository = $this->createMock(StorageCardPaymentRepository::class);
+
+        $this->storageUpgradeService = new StorageUpgradeService(
             $this->mockStorageUpgradeRepository,
             $this->mockStorageCardPaymentRepository
         );
@@ -97,7 +111,7 @@ class StorageServiceTest extends TestCase
         $prices = [$this->createMock(StorageUpgradePrice::class)];
         $this->mockStorageUpgradePriceRepository->method('getAllBySize')->willReturn($prices);
 
-        $result = $this->storageService->getPrices();
+        $result = $this->storagePriceService->getPricesBySize();
         $this->assertEquals($prices, $result);
     }
 
@@ -106,7 +120,7 @@ class StorageServiceTest extends TestCase
         $storageCardPayment = $this->createMock(StorageCardPayment::class);
         $this->mockStorageCardPaymentRepository->method('findBySessionId')->willReturn($storageCardPayment);
 
-        $result = $this->storageService->getStorageCardPaymentBySession('sessionId');
+        $result = $this->storageUpgradeService->getStorageCardPaymentBySession('sessionId');
         $this->assertEquals($storageCardPayment, $result);
     }
 
@@ -115,7 +129,7 @@ class StorageServiceTest extends TestCase
         $price = $this->createMock(StorageUpgradePrice::class);
         $this->mockStorageUpgradePriceRepository->method('find')->willReturn($price);
 
-        $result = $this->storageService->getPriceById(1);
+        $result = $this->storagePriceService->getPriceById(1);
         $this->assertEquals($price, $result);
     }
 
@@ -124,7 +138,7 @@ class StorageServiceTest extends TestCase
         $this->expectException(NotFoundException::class);
         $this->mockStorageUpgradePriceRepository->method('find')->willReturn(null);
 
-        $this->storageService->getPriceById(1);
+        $this->storagePriceService->getPriceById(1);
     }
 
     public function testCreateUpgradeSuccess()
@@ -137,13 +151,15 @@ class StorageServiceTest extends TestCase
         $metadata = $this->createMock(StoragePaymentMetadata::class);
         $metadata->method('getPriceCzk')->willReturn(1000);
         $metadata->method('getSize')->willReturn(500 * 1024 * 1024); // 500MB
+        $metadata->method('getType')->willReturn(StoragePaymentType::CARD);
+        $metadata->method('getAccount')->willReturn($account);
 
         $storage->expects($this->once())->method('setMaxStorage')->with($this->equalTo(1500 * 1024 * 1024)); // 1.5GB
 
         $this->mockStorageCardPaymentRepository->method('findBySessionId')->willReturn(null);
         $this->mockStorageUpgradeRepository->expects($this->once())->method('save');
 
-        $this->storageService->createUpgrade($account, $metadata, 'sessionId');
+        $this->storageUpgradeService->createUpgrade($metadata);
     }
 
     public function testCreateUpgradeThrowsConflictException()
@@ -153,16 +169,20 @@ class StorageServiceTest extends TestCase
         $storageCardPayment = $this->createMock(StorageCardPayment::class);
         $this->mockStorageCardPaymentRepository->method('findBySessionId')->willReturn($storageCardPayment);
 
-        $this->storageService->createUpgrade(
-            $this->createMock(Account::class),
-            $this->createMock(StoragePaymentMetadata::class),
-            'sessionId'
+        $this->storageUpgradeService->createUpgrade(
+            new StoragePaymentMetadata(
+                $this->createMock(Account::class),
+                1000,
+                500 * 1024 * 1024,
+                StoragePaymentType::CARD,
+                'test_session_id'
+            )
         );
     }
 
     public function testConvertSizeToBytes()
     {
-        $reflection = new \ReflectionClass($this->storageService);
+        $reflection = new ReflectionClass($this->storageService);
         $method = $reflection->getMethod('convertSizeToBytes');
         $method->setAccessible(true);
 
@@ -174,7 +194,7 @@ class StorageServiceTest extends TestCase
 
     public function testHasExceededStorageLimit()
     {
-        $reflection = new \ReflectionClass($this->storageService);
+        $reflection = new ReflectionClass($this->storageService);
         $method = $reflection->getMethod('hasExceededStorageLimit');
         $method->setAccessible(true);
 
@@ -184,7 +204,7 @@ class StorageServiceTest extends TestCase
 
     public function testHasExceededFileLimit()
     {
-        $reflection = new \ReflectionClass($this->storageService);
+        $reflection = new ReflectionClass($this->storageService);
         $method = $reflection->getMethod('hasExceededFileLimit');
         $method->setAccessible(true);
 
