@@ -4,6 +4,7 @@ namespace App\Entity\Storage;
 
 use App\Repository\Storage\StorageCardPaymentRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: StorageCardPaymentRepository::class)]
 class StorageCardPayment
@@ -18,6 +19,7 @@ class StorageCardPayment
     private StorageUpgrade $storageUpgrade;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Groups([StorageUpgrade::STORAGE_UPGRADE_ADMIN_READ])]
     private string $sessionId;
 
     /**

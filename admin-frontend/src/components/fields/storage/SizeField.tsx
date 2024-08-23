@@ -4,7 +4,7 @@ import {FieldProps} from "../../types/field/FieldProps";
 
 const SizeField: React.FC<FieldProps> = ({ source = "" }) => {
     const record = useRecordContext();
-    if (!record || !record[source]) return null;
+    if (!record || !record[source]) return <span>-</span>;
 
     const size = record[source];
 

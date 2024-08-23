@@ -20,4 +20,8 @@ enum SortBy: string
     case MAX_STORAGE = 'maxStorage';
     case USED_STORAGE = 'usedStorage';
     case FILL_SIZE = 'fillSize';
+    case PRICE_CZK = 'priceCzk';
+
+    case PERCENTAGE_DISCOUNT = 'percentageDiscount';
+    case DISCOUNT_EXPIRATION_AT = 'discountExpirationAt';
 }

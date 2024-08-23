@@ -9,7 +9,8 @@ use App\Entity\Storage\StorageUpgrade;
 use App\Exception\ApiException;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Payment\PaymentService;
-use App\Service\Storage\StorageService;
+use App\Service\Storage\StoragePriceService;
+use App\Service\Storage\StorageUpgradeService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,9 +19,14 @@ use Symfony\Component\Routing\Attribute\Route;
 class StorageUpgradeController extends BasePersonalController
 {
     /**
-     * @var StorageService $storageService
+     * @var StoragePriceService $storagePriceService
      */
-    private StorageService $storageService;
+    private StoragePriceService $storagePriceService;
+
+    /**
+     * @var StorageUpgradeService $storageUpgradeService
+     */
+    private StorageUpgradeService $storageUpgradeService;
 
     /**
      * @var PaymentService $paymentService
@@ -29,17 +35,20 @@ class StorageUpgradeController extends BasePersonalController
 
     /**
      * @param BaseControllerLocator $locator
-     * @param StorageService $storageService
+     * @param StoragePriceService $storagePriceService
+     * @param StorageUpgradeService $storageUpgradeService
      * @param PaymentService $paymentService
      */
     public function __construct(
         BaseControllerLocator $locator,
-        StorageService $storageService,
+        StoragePriceService $storagePriceService,
+        StorageUpgradeService $storageUpgradeService,
         PaymentService $paymentService
     )
     {
         parent::__construct($locator);
-        $this->storageService = $storageService;
+        $this->storagePriceService = $storagePriceService;
+        $this->storageUpgradeService = $storageUpgradeService;
         $this->paymentService = $paymentService;
     }
 
@@ -56,7 +65,7 @@ class StorageUpgradeController extends BasePersonalController
     {
         try {
             $account = $this->getAccount($request);
-            $storagePrice = $this->storageService->getPriceById($storagePaymentRequest->storagePriceId);
+            $storagePrice = $this->storagePriceService->getPriceById($storagePaymentRequest->storagePriceId);
             $checkoutSession = $this->paymentService->createCheckoutSession($account, $storagePrice);
 
             return $this->re->withData(['checkoutSessionId' => $checkoutSession->id]);
@@ -69,13 +78,12 @@ class StorageUpgradeController extends BasePersonalController
     public function handlePaymentSuccess(Request $request, StoragePaymentSuccessRequest $storagePaymentSuccessRequest): JsonResponse
     {
         try {
-            $account = $this->getAccount($request);
             $sessionId = $storagePaymentSuccessRequest->checkoutSessionId;
 
             $session = $this->paymentService->validatePayment($sessionId);
             $metadata = $this->paymentService->validateMetadata($session->metadata);
 
-            $this->storageService->createUpgrade($account, $metadata, $sessionId);
+            $this->storageUpgradeService->createUpgrade($metadata);
 
             return $this->re->withMessage('Storage upgraded successfully');
         } catch (ApiException $e) {

@@ -1,19 +1,12 @@
 import { fetchJsonWithAuth } from '../authProvider';
 import { stringify } from 'query-string';
+import {getListQuery} from "../../components/utils/QueryBuilder";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export const videoConversionDataProvider = {
     getList: async (resource: any, params: any) => {
-        const { page, perPage } = params.pagination;
-        const { field, order } = params.sort;
-
-        const query: any = {
-            limit: perPage,
-            offset: (page - 1) * perPage,
-            sort: field,
-            order: order
-        };
+        const query = getListQuery(params);
 
         return fetchJsonWithAuth(`${apiUrl}/v1/admin/videos/conversions?${stringify(query)}`)
             .then(response => {

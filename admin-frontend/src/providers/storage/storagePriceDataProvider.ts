@@ -1,24 +1,27 @@
 import { fetchJsonWithAuth } from '../authProvider';
 import { stringify } from 'query-string';
+import {getListQuery} from "../../components/utils/QueryBuilder";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export const storagePriceDataProvider = {
     getList: async (resource: any, params: any) => {
-        const data = [
-            { id: 1, name: 'Test A' },
-            { id: 2, name: 'Test B' },
-            { id: 3, name: 'Test C' },
-        ];
+        const query = getListQuery(params);
+
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/storage/upgrade/price?${stringify(query)}`);
+        const {data, totalCount} = response.data.payload;
 
         return {
             data: data,
-            total: data.length,
+            total: totalCount,
         };
     },
 
     getOne: async (resource: any, params: any) => {
-        return Promise.reject(new Error(`getOne is not supported for resource: ${resource}`));
+        return fetchJsonWithAuth(`${apiUrl}/v1/admin/storage/upgrade/price/${params.id}`)
+            .then(response => ({
+                data: response.data.payload.data,
+            }));
     },
 
     getMany: async (resource: any, params: any) => {
@@ -30,7 +33,14 @@ export const storagePriceDataProvider = {
     },
 
     update: async (resource: any, params: any) => {
-        return Promise.reject(new Error(`update is not supported for resource: ${resource}`));
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/storage/upgrade/price/${params.id}`, {
+            method: 'PUT',
+            data: JSON.stringify(params.data),
+        });
+
+        return ({
+            data: response.data.payload.data,
+        });
     },
 
     updateMany: async (resource: any, params: any) => {
@@ -38,14 +48,37 @@ export const storagePriceDataProvider = {
     },
 
     create: async (resource: any, params: any) => {
-        return Promise.reject(new Error(`create is not supported for resource: ${resource}`));
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/storage/upgrade/price`, {
+            method: 'POST',
+            data: JSON.stringify(params.data),
+        });
+
+        return ({
+            data: {...params.data, id: response.data.payload.id},
+        });
     },
 
     delete: async (resource: any, params: any) => {
-        return Promise.reject(new Error(`delete is not supported for resource: ${resource}`));
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/storage/upgrade/price/${params.id}`, {
+            method: 'DELETE',
+        });
+
+        return ({
+            data: response.data.payload,
+        });
     },
 
     deleteMany: async (resource: any, params: any) => {
-        return Promise.reject(new Error(`deleteMany is not supported for resource: ${resource}`));
+        const query = {
+            filter: JSON.stringify({ids: params.ids}),
+        };
+
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/storage/upgrade/price?${stringify(query)}`, {
+            method: 'DELETE',
+        });
+
+        return ({
+            data: response.data.payload.data,
+        });
     },
 };

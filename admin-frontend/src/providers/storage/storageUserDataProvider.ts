@@ -1,27 +1,12 @@
 import { fetchJsonWithAuth } from '../authProvider';
 import { stringify } from 'query-string';
+import {getListQuery} from "../../components/utils/QueryBuilder";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export const storageUserDataProvider = {
     getList: async (resource: any, params: any) => {
-        const {page, perPage} = params.pagination;
-        const {field, order} = params.sort;
-
-        const filter = {
-            ...params.filter,
-        };
-
-        const query: any = {
-            limit: perPage,
-            offset: (page - 1) * perPage,
-            sort: field,
-            order: order
-        };
-
-        if (Object.keys(filter).length > 0) {
-            query.filter = JSON.stringify(filter);
-        }
+        const query = getListQuery(params, true);
 
         let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/storage?${stringify(query)}`);
         const {data, totalCount} = response.data.payload;

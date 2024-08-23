@@ -32,7 +32,7 @@ const LoginPage = () => {
             <form onSubmit={submit} noValidate>
                 <Card sx={{ padding: '2em', maxWidth: '400px', width: '100%' }}>
                     <Typography variant="h4" align="center" gutterBottom>
-                        Admin Login
+                        Přihlášení do Admin panelu
                     </Typography>
                     <TextField
                         label="Email"
@@ -44,7 +44,7 @@ const LoginPage = () => {
                         margin="normal"
                     />
                     <TextField
-                        label="Password"
+                        label="Heslo"
                         name="password"
                         type="password"
                         value={password}
@@ -59,7 +59,7 @@ const LoginPage = () => {
                             color="primary"
                             disabled={loading}
                         >
-                            {loading ? <CircularProgress size={24} /> : 'Login'}
+                            {loading ? <CircularProgress size={24} /> : 'Přihlásit se'}
                         </Button>
                     </CardActions>
                 </Card>

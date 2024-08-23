@@ -32,14 +32,14 @@ class ManifestService
 
     /**
      * @param Video $video
-     * @param QualityRequest $qualityRequest
+     * @param int|null $quality
      * @return string
      * @throws InternalException
      */
-    public function getManifest(Video $video, QualityRequest $qualityRequest): string
+    public function getManifest(Video $video, ?int $quality = null): string
     {
-        if ($qualityRequest->quality) {
-            return $this->getQualityManifestContent($video, $qualityRequest->quality);
+        if ($quality) {
+            return $this->getQualityManifestContent($video, $quality);
         }
 
         return $this->getMainManifestContent($video);

@@ -43,11 +43,11 @@ const ProfileStats: React.FC = () => {
                             </TableRow>
                             <TableRow>
                                 <TableHeadCellStyle sx={{ width: '200px' }}>Využité úložiště</TableHeadCellStyle>
-                                <TableCellStyle sx={{ textAlign: 'right' }}>{stats.storageUsedGB} GB</TableCellStyle>
+                                <TableCellStyle sx={{ textAlign: 'right' }}>{stats.storageUsedGB.toFixed(2)} GB</TableCellStyle>
                             </TableRow>
                             <TableRow>
                                 <TableHeadCellStyle sx={{ width: '200px' }}>Limit úložiště</TableHeadCellStyle>
-                                <TableCellStyle sx={{ textAlign: 'right' }}>{stats.storageLimitGB} GB</TableCellStyle>
+                                <TableCellStyle sx={{ textAlign: 'right' }}>{stats.storageLimitGB.toFixed(2)} GB</TableCellStyle>
                             </TableRow>
                             <TableRow>
                                 <TableHeadCellStyle sx={{ width: '200px' }}>Počet navýšení úložiště</TableHeadCellStyle>

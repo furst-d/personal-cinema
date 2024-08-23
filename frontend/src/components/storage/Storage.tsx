@@ -14,7 +14,7 @@ const Storage: React.FC = () => {
     const [totalStorage, setTotalStorage] = useState<number>(0);
     const [usedStorage, setUsedStorage] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
-    const [upgrades, setUpgrades] = useState<{ sizeInGB: number, priceCzk: number, paymentTypeName: string, createdAt: string }[]>([]);
+    const [upgrades, setUpgrades] = useState<{ sizeInGB: number, priceCzk: number, paymentType: any, createdAt: string }[]>([]);
 
     useEffect(() => {
         // Ensure that payment result is handled only once

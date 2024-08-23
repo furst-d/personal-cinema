@@ -1,19 +1,28 @@
 import { fetchJsonWithAuth } from '../authProvider';
 import { stringify } from 'query-string';
+import {getListQuery} from "../../components/utils/QueryBuilder";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export const storageUpgradeDataProvider = {
     getList: async (resource: any, params: any) => {
-        const data = [
-            { id: 1, name: 'Test A' },
-            { id: 2, name: 'Test B' },
-            { id: 3, name: 'Test C' },
-        ];
+        const query = getListQuery(params, true);
+
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/storage/upgrade?${stringify(query)}`);
+        const {data, totalCount} = response.data.payload;
+
+        const transformedData = data.map((storage: any) => {
+            const { account, storageCardPayment, ...rest } = storage;
+            return {
+                ...rest,
+                email: account.email,
+                stripeSessionId: storage.storageCardPayment?.sessionId,
+            };
+        });
 
         return {
-            data: data,
-            total: data.length,
+            data: transformedData,
+            total: totalCount,
         };
     },
 
@@ -38,7 +47,14 @@ export const storageUpgradeDataProvider = {
     },
 
     create: async (resource: any, params: any) => {
-        return Promise.reject(new Error(`create is not supported for resource: ${resource}`));
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/storage/upgrade`, {
+            method: 'POST',
+            data: JSON.stringify(params.data),
+        });
+
+        return ({
+            data: {...params.data, id: response.data.payload.id},
+        });
     },
 
     delete: async (resource: any, params: any) => {
@@ -46,6 +62,21 @@ export const storageUpgradeDataProvider = {
     },
 
     deleteMany: async (resource: any, params: any) => {
-        return Promise.reject(new Error(`deleteMany is not supported for resource: ${resource}`));
+        const query = {
+            filter: JSON.stringify({ids: params.ids}),
+        };
+
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/storage/upgrade?${stringify(query)}`, {
+            method: 'DELETE',
+        });
+
+        return ({
+            data: response.data.payload.data,
+        });
+    },
+
+    getPaymentTypes: async () => {
+        let response = await fetchJsonWithAuth(`${apiUrl}/v1/admin/storage/upgrade/payment-types`);
+        return response.data.payload.data;
     },
 };
