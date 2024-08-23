@@ -53,9 +53,15 @@ class StorageUpgrade
      * @param int $priceCzk
      * @param int $size
      * @param StoragePaymentType $paymentType
-     * @param string|null $cardSessionid
+     * @param string|null $cardPaymentIntent
      */
-    public function __construct(Account $account, int $priceCzk, int $size, StoragePaymentType $paymentType, ?string $cardSessionid = null)
+    public function __construct(
+        Account $account,
+        int $priceCzk,
+        int $size,
+        StoragePaymentType $paymentType,
+        ?string $cardPaymentIntent = null
+    )
     {
         $this->account = $account;
         $this->paymentType = $paymentType->value;
@@ -63,8 +69,8 @@ class StorageUpgrade
         $this->size = $size;
         $this->createdAt = new DateTimeImmutable();
 
-        if ($cardSessionid) {
-            $this->storageCardPayment = new StorageCardPayment($this, $cardSessionid);
+        if ($cardPaymentIntent) {
+            $this->storageCardPayment = new StorageCardPayment($this, $cardPaymentIntent);
         }
     }
 
@@ -84,10 +90,22 @@ class StorageUpgrade
         return $this->account;
     }
 
-    #[Groups([self::STORAGE_UPGRADE_READ, self::STORAGE_UPGRADE_ADMIN_READ])]
-    public function getPaymentType(): array
+    /**
+     * @return StoragePaymentType
+     */
+    public function getPaymentType(): StoragePaymentType
     {
-        return StoragePaymentType::from($this->paymentType)->getInfo();
+        return StoragePaymentType::from($this->paymentType);
+    }
+
+    /**
+     * @return array
+     */
+    #[Groups([self::STORAGE_UPGRADE_READ, self::STORAGE_UPGRADE_ADMIN_READ])]
+
+    public function getPaymentTypeInfo(): array
+    {
+        return $this->getPaymentType()->getInfo();
     }
 
     /**

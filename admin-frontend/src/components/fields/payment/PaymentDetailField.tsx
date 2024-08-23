@@ -10,11 +10,11 @@ const PaymentDetailsField: React.FC<FieldProps> = ({ label }) => {
     return (
         <Box>
             <Typography variant="body2">
-                <strong>Způsob platby:</strong> {record.paymentType?.label || 'N/A'}
+                <strong>Způsob platby:</strong> {record.paymentTypeInfo?.label || 'N/A'}
             </Typography>
-            {record.paymentType.name === "CARD" && (
+            {record.paymentTypeInfo.name === "CARD" && (
                 <Typography variant="body2">
-                    <strong>Stripe session ID:</strong> {record.stripeSessionId}
+                    <strong>Stripe payment intent:</strong> {record.stripePaymentIntent}
                 </Typography>
             )}
         </Box>

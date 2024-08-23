@@ -19,6 +19,7 @@ use App\Repository\Storage\StorageCardPaymentRepository;
 use App\Repository\Storage\StorageRepository;
 use App\Repository\Storage\StorageUpgradePriceRepository;
 use App\Repository\Storage\StorageUpgradeRepository;
+use App\Service\Payment\PaymentService;
 use App\Service\Storage\StoragePriceService;
 use App\Service\Storage\StorageService;
 use App\Service\Storage\StorageUpgradeService;
@@ -35,6 +36,7 @@ class StorageServiceTest extends TestCase
     private $mockStorageUpgradePriceRepository;
     private $mockStorageUpgradeRepository;
     private $mockStorageCardPaymentRepository;
+    private $mockPaymentService;
 
     protected function setUp(): void
     {
@@ -54,10 +56,12 @@ class StorageServiceTest extends TestCase
 
         $this->mockStorageUpgradeRepository = $this->createMock(StorageUpgradeRepository::class);
         $this->mockStorageCardPaymentRepository = $this->createMock(StorageCardPaymentRepository::class);
+        $this->mockPaymentService = $this->createMock(PaymentService::class);
 
         $this->storageUpgradeService = new StorageUpgradeService(
             $this->mockStorageUpgradeRepository,
-            $this->mockStorageCardPaymentRepository
+            $this->mockStorageCardPaymentRepository,
+            $this->mockPaymentService
         );
     }
 
@@ -115,12 +119,12 @@ class StorageServiceTest extends TestCase
         $this->assertEquals($prices, $result);
     }
 
-    public function testGetStorageCardPaymentBySession()
+    public function testGetStorageCardPaymentByIntent()
     {
         $storageCardPayment = $this->createMock(StorageCardPayment::class);
-        $this->mockStorageCardPaymentRepository->method('findBySessionId')->willReturn($storageCardPayment);
+        $this->mockStorageCardPaymentRepository->method('findByPaymentIntent')->willReturn($storageCardPayment);
 
-        $result = $this->storageUpgradeService->getStorageCardPaymentBySession('sessionId');
+        $result = $this->storageUpgradeService->getStorageCardPaymentByPaymentIntent('intent');
         $this->assertEquals($storageCardPayment, $result);
     }
 
@@ -156,7 +160,7 @@ class StorageServiceTest extends TestCase
 
         $storage->expects($this->once())->method('setMaxStorage')->with($this->equalTo(1500 * 1024 * 1024)); // 1.5GB
 
-        $this->mockStorageCardPaymentRepository->method('findBySessionId')->willReturn(null);
+        $this->mockStorageCardPaymentRepository->method('findByPaymentIntent')->willReturn(null);
         $this->mockStorageUpgradeRepository->expects($this->once())->method('save');
 
         $this->storageUpgradeService->createUpgrade($metadata);
@@ -167,16 +171,18 @@ class StorageServiceTest extends TestCase
         $this->expectException(ConflictException::class);
 
         $storageCardPayment = $this->createMock(StorageCardPayment::class);
-        $this->mockStorageCardPaymentRepository->method('findBySessionId')->willReturn($storageCardPayment);
+        $this->mockStorageCardPaymentRepository->method('findByPaymentIntent')->willReturn($storageCardPayment);
+
+        $metadata = new StoragePaymentMetadata(
+            $this->createMock(Account::class),
+            1000,
+            500 * 1024 * 1024,
+            StoragePaymentType::CARD
+        );
+        $metadata->setPaymentIntent('intent');
 
         $this->storageUpgradeService->createUpgrade(
-            new StoragePaymentMetadata(
-                $this->createMock(Account::class),
-                1000,
-                500 * 1024 * 1024,
-                StoragePaymentType::CARD,
-                'test_session_id'
-            )
+            $metadata
         );
     }
 

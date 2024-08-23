@@ -20,16 +20,16 @@ class StorageCardPayment
 
     #[ORM\Column(length: 255, unique: true)]
     #[Groups([StorageUpgrade::STORAGE_UPGRADE_ADMIN_READ])]
-    private string $sessionId;
+    private string $paymentIntent;
 
     /**
      * @param StorageUpgrade $storageUpgrade
-     * @param string $sessionId
+     * @param string $paymentIntent
      */
-    public function __construct(StorageUpgrade $storageUpgrade, string $sessionId)
+    public function __construct(StorageUpgrade $storageUpgrade, string $paymentIntent)
     {
         $this->storageUpgrade = $storageUpgrade;
-        $this->sessionId = $sessionId;
+        $this->paymentIntent = $paymentIntent;
     }
 
     /**
@@ -51,8 +51,8 @@ class StorageCardPayment
     /**
      * @return string
      */
-    public function getSessionId(): string
+    public function getPaymentIntent(): string
     {
-        return $this->sessionId;
+        return $this->paymentIntent;
     }
 }

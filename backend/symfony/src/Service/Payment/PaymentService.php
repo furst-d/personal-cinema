@@ -10,8 +10,11 @@ use App\Exception\PaymentRequiredException;
 use App\Helper\Storage\StoragePaymentMetadata;
 use App\Helper\Storage\StoragePaymentType;
 use App\Service\Account\AccountService;
+use Stripe\Charge;
 use Stripe\Checkout\Session;
 use Stripe\Exception\ApiErrorException;
+use Stripe\PaymentIntent;
+use Stripe\Refund;
 use Stripe\Stripe;
 use Stripe\StripeObject;
 
@@ -79,6 +82,44 @@ class PaymentService
     }
 
     /**
+     * @param string $paymentIntent
+     * @return void
+     * @throws InternalException
+     */
+    public function cancelPayment(string $paymentIntent): void
+    {
+        try {
+            Refund::create([
+                'payment_intent' => $paymentIntent,
+            ]);
+        } catch (ApiErrorException) {
+            throw new InternalException('Failed to cancel checkout session');
+        }
+    }
+
+    /**
+     * @param string $paymentIntent
+     * @return bool
+     * @throws InternalException
+     */
+    public function isRefunded(string $paymentIntent): bool
+    {
+        try {
+            $paymentIntentObject = PaymentIntent::retrieve($paymentIntent);
+
+            $lastCharge = $paymentIntentObject->latest_charge;
+
+            if (is_string($lastCharge)) {
+                $lastCharge = Charge::retrieve($lastCharge);
+            }
+
+            return $lastCharge->refunded;
+        } catch (ApiErrorException $e) {
+            throw new InternalException('Failed to check payment status: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * @param string $sessionId
      * @return Session
      * @throws InternalException|PaymentRequiredException
@@ -117,6 +158,11 @@ class PaymentService
 
         $account = $this->accountService->getAccountById($metadata->user_id);
 
-        return new StoragePaymentMetadata($account, $metadata->price_czk, $metadata->size, StoragePaymentType::CARD, $metadata->session_id);
+        return new StoragePaymentMetadata(
+            $account,
+            $metadata->price_czk,
+            $metadata->size,
+            StoragePaymentType::CARD
+        );
     }
 }

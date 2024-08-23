@@ -17,11 +17,11 @@ class StorageCardPaymentRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param string $sessionId
+     * @param string $paymentIntent
      * @return StorageCardPayment|null
      */
-    public function findBySessionId(string $sessionId): ?StorageCardPayment
+    public function findByPaymentIntent(string $paymentIntent): ?StorageCardPayment
     {
-        return $this->findOneBy(['sessionId' => $sessionId]);
+        return $this->findOneBy(['paymentIntent' => $paymentIntent]);
     }
 }

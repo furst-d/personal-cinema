@@ -10,12 +10,14 @@ use App\Entity\Account\Account;
 use App\Entity\Storage\StorageCardPayment;
 use App\Entity\Storage\StorageUpgrade;
 use App\Exception\ConflictException;
+use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Helper\DTO\PaginatorResult;
 use App\Helper\Storage\StoragePaymentMetadata;
 use App\Helper\Storage\StoragePaymentType;
 use App\Repository\Storage\StorageCardPaymentRepository;
 use App\Repository\Storage\StorageUpgradeRepository;
+use App\Service\Payment\PaymentService;
 
 class StorageUpgradeService
 {
@@ -30,16 +32,24 @@ class StorageUpgradeService
     private StorageCardPaymentRepository $storageCardPaymentRepository;
 
     /**
+     * @var PaymentService $paymentService
+     */
+    private PaymentService $paymentService;
+
+    /**
      * @param StorageUpgradeRepository $storageUpgradeRepository
      * @param StorageCardPaymentRepository $storageCardPaymentRepository
+     * @param PaymentService $paymentService
      */
     public function __construct(
         StorageUpgradeRepository $storageUpgradeRepository,
-        StorageCardPaymentRepository $storageCardPaymentRepository
+        StorageCardPaymentRepository $storageCardPaymentRepository,
+        PaymentService $paymentService
     )
     {
         $this->storageUpgradeRepository = $storageUpgradeRepository;
         $this->storageCardPaymentRepository = $storageCardPaymentRepository;
+        $this->paymentService = $paymentService;
     }
 
     /**
@@ -56,10 +66,14 @@ class StorageUpgradeService
      * @param StoragePaymentMetadata $metadata
      * @return StorageUpgrade
      * @throws ConflictException
+     * @throws InternalException
      */
     public function createUpgrade(StoragePaymentMetadata $metadata): StorageUpgrade
     {
-        if ($metadata->getStripeSessionId() && $this->getStorageCardPaymentBySession($metadata->getStripeSessionId())) {
+        if ($metadata->getPaymentIntent()
+            && ($this->getStorageCardPaymentByPaymentIntent($metadata->getPaymentIntent())
+            || $this->paymentService->isRefunded($metadata->getPaymentIntent()))
+        ) {
             throw new ConflictException('Upgrade already exists');
         }
 
@@ -68,7 +82,7 @@ class StorageUpgradeService
             $metadata->getPriceCzk(),
             $metadata->getSize(),
             $metadata->getType(),
-            $metadata->getStripeSessionId()
+            $metadata->getPaymentIntent()
         );
 
         $storage = $metadata->getAccount()->getStorage();
@@ -80,12 +94,12 @@ class StorageUpgradeService
     }
 
     /**
-     * @param string $sessionId
+     * @param string $paymentIntent
      * @return StorageCardPayment|null
      */
-    public function getStorageCardPaymentBySession(string $sessionId): ?StorageCardPayment
+    public function getStorageCardPaymentByPaymentIntent(string $paymentIntent): ?StorageCardPayment
     {
-        return $this->storageCardPaymentRepository->findBySessionId($sessionId);
+        return $this->storageCardPaymentRepository->findByPaymentIntent($paymentIntent);
     }
 
     /**
@@ -107,11 +121,16 @@ class StorageUpgradeService
     /**
      * @param StorageUpgrade $upgrade
      * @return void
+     * @throws InternalException
      */
     public function deleteUpgrade(StorageUpgrade $upgrade): void
     {
         $storage = $upgrade->getAccount()->getStorage();
         $storage->setMaxStorage($storage->getMaxStorage() - $upgrade->getSize());
+
+        if ($upgrade->getPaymentType() === StoragePaymentType::CARD) {
+            $this->paymentService->cancelPayment($upgrade->getStorageCardPayment()->getPaymentIntent());
+        }
 
         $this->storageUpgradeRepository->delete($upgrade);
     }

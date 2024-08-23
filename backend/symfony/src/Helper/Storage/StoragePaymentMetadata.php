@@ -27,24 +27,23 @@ class StoragePaymentMetadata
     private StoragePaymentType $type;
 
     /**
-     * @var string|null $stripeSessionId
+     * @var string|null $paymentIntent
      */
-    private ?string $stripeSessionId;
+    private ?string $paymentIntent;
 
     /**
      * @param Account $account
      * @param int $priceCzk
      * @param int $size
      * @param StoragePaymentType $type
-     * @param string|null $stripeSessionId
      */
-    public function __construct(Account $account, int $priceCzk, int $size, StoragePaymentType $type, ?string $stripeSessionId = null)
+    public function __construct(Account $account, int $priceCzk, int $size, StoragePaymentType $type)
     {
         $this->account = $account;
         $this->priceCzk = $priceCzk;
         $this->size = $size;
         $this->type = $type;
-        $this->stripeSessionId = $stripeSessionId;
+        $this->paymentIntent = null;
     }
 
     /**
@@ -82,8 +81,17 @@ class StoragePaymentMetadata
     /**
      * @return string|null
      */
-    public function getStripeSessionId(): ?string
+    public function getPaymentIntent(): ?string
     {
-        return $this->stripeSessionId;
+        return $this->paymentIntent;
+    }
+
+    /**
+     * @param string|null $paymentIntent
+     * @return void
+     */
+    public function setPaymentIntent(?string $paymentIntent): void
+    {
+        $this->paymentIntent = $paymentIntent;
     }
 }

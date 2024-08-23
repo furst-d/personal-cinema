@@ -7,7 +7,7 @@ import StorageUpgradeSidebarFilter from "./StorageUpgradeSidebarFilter";
 
 const storageUpgradeFilters = [
     <TextInput label="Email" source="email" alwaysOn />,
-    <TextInput label="Stripe session ID" source="stripeSessionId" alwaysOn />
+    <TextInput label="Stripe payment intent" source="stripePaymentIntent" alwaysOn />
 ];
 
 export const StorageUpgradeList: React.FC<ListProps> = (props) => (
