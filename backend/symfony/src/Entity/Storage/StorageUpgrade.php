@@ -15,31 +15,37 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class StorageUpgrade
 {
     public const STORAGE_UPGRADE_READ = 'storage_upgrade:read';
+    public const STORAGE_UPGRADE_ADMIN_READ = 'storage_upgrade:admin:read';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups([self::STORAGE_UPGRADE_ADMIN_READ])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'storageUpgrades')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups([self::STORAGE_UPGRADE_ADMIN_READ])]
     private Account $account;
 
     #[ORM\Column(type: Types::INTEGER)]
+    #[Groups([self::STORAGE_UPGRADE_ADMIN_READ])]
     private int $paymentType;
 
     #[ORM\Column(type: Types::INTEGER)]
-    #[Groups([self::STORAGE_UPGRADE_READ])]
+    #[Groups([self::STORAGE_UPGRADE_READ, self::STORAGE_UPGRADE_ADMIN_READ])]
     private int $priceCzk;
 
     #[ORM\Column(type: Types::BIGINT)]
+    #[Groups([self::STORAGE_UPGRADE_ADMIN_READ])]
     private int $size;
 
     #[ORM\Column]
-    #[Groups([self::STORAGE_UPGRADE_READ])]
+    #[Groups([self::STORAGE_UPGRADE_READ, self::STORAGE_UPGRADE_ADMIN_READ])]
     private DateTimeImmutable $createdAt;
 
     #[ORM\OneToOne(mappedBy: 'storageUpgrade', cascade: ['persist', 'remove'])]
+    #[Groups([self::STORAGE_UPGRADE_ADMIN_READ])]
     private ?StorageCardPayment $storageCardPayment = null;
 
     /**
@@ -78,18 +84,10 @@ class StorageUpgrade
         return $this->account;
     }
 
-    /**
-     * @return StoragePaymentType
-     */
-    public function getPaymentType(): StoragePaymentType
+    #[Groups([self::STORAGE_UPGRADE_READ, self::STORAGE_UPGRADE_ADMIN_READ])]
+    public function getPaymentType(): array
     {
-        return StoragePaymentType::from($this->paymentType);
-    }
-
-    #[Groups([self::STORAGE_UPGRADE_READ])]
-    public function getPaymentTypeName(): string
-    {
-        return $this->getPaymentType()->name;
+        return StoragePaymentType::from($this->paymentType)->getInfo();
     }
 
     /**

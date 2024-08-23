@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {List, Datagrid, TextField, ListProps} from 'react-admin';
 import SizeField from "../../fields/storage/SizeField";
-import PriceField from "../../fields/storage/PriceField";
+import PriceField from "../../fields/payment/PriceField";
 import PercentField from "../../fields/storage/PercentField";
 import ExpirationDateField from "../../fields/ExpirationDateField";
 

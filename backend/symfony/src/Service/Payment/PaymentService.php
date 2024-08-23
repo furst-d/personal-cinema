@@ -8,6 +8,7 @@ use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Exception\PaymentRequiredException;
 use App\Helper\Storage\StoragePaymentMetadata;
+use App\Helper\Storage\StoragePaymentType;
 use App\Service\Account\AccountService;
 use Stripe\Checkout\Session;
 use Stripe\Exception\ApiErrorException;
@@ -116,6 +117,6 @@ class PaymentService
 
         $account = $this->accountService->getAccountById($metadata->user_id);
 
-        return new StoragePaymentMetadata($account, $metadata->price_czk, $metadata->size);
+        return new StoragePaymentMetadata($account, $metadata->price_czk, $metadata->size, StoragePaymentType::CARD, $metadata->session_id);
     }
 }

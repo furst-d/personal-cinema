@@ -78,13 +78,12 @@ class StorageUpgradeController extends BasePersonalController
     public function handlePaymentSuccess(Request $request, StoragePaymentSuccessRequest $storagePaymentSuccessRequest): JsonResponse
     {
         try {
-            $account = $this->getAccount($request);
             $sessionId = $storagePaymentSuccessRequest->checkoutSessionId;
 
             $session = $this->paymentService->validatePayment($sessionId);
             $metadata = $this->paymentService->validateMetadata($session->metadata);
 
-            $this->storageUpgradeService->createUpgrade($account, $metadata, $sessionId);
+            $this->storageUpgradeService->createUpgrade($metadata);
 
             return $this->re->withMessage('Storage upgraded successfully');
         } catch (ApiException $e) {

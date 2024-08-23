@@ -9,7 +9,6 @@ import { UserList } from './components/users/UserList';
 import { UserEdit } from './components/users/UserEdit';
 import { UserCreate } from './components/users/UserCreate';
 import { VideoList } from './components/videos/videos/VideoList';
-import { ListGuesser } from 'react-admin';
 
 import PeopleIcon from '@mui/icons-material/People';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
@@ -31,6 +30,8 @@ import {StorageUserEdit} from "./components/storage/users/StorageUserEdit";
 import {StoragePriceList} from "./components/storage/prices/StoragePriceList";
 import {StoragePriceEdit} from "./components/storage/prices/StoragePriceEdit";
 import {StoragePriceCreate} from "./components/storage/prices/StoragePriceCreate";
+import {StorageUpgradeList} from "./components/storage/upgrades/StorageUpgradeList";
+import {StorageUpgradeCreate} from "./components/storage/upgrades/StorageUpgradeCreate";
 
 const i18nProvider = polyglotI18nProvider(() => extendedCzechMessages, 'cs', { allowMissing: true });
 
@@ -82,7 +83,8 @@ export const App: React.FC = () => (
         />
         <Resource
             name="storages.upgrades"
-            list={ListGuesser}
+            list={StorageUpgradeList}
+            create={StorageUpgradeCreate}
             icon={UpgradeIcon}
             options={{ label: 'Vylepšení' }}
         />

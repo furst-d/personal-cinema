@@ -10,12 +10,8 @@ import {formatDate} from "../../utils/formatter";
 import {TableCellStyle, TableContainerStyle, TableHeadCellStyle} from "../../styles/table/Table";
 
 interface StorageUpgradeListProps {
-    upgrades: { sizeInGB: number, priceCzk: number, paymentTypeName: string, createdAt: string }[];
+    upgrades: { sizeInGB: number, priceCzk: number, paymentType: any, createdAt: string }[];
 }
-
-const getPaymentTypeText = (paymentTypeName: string) => {
-    return paymentTypeName === 'CARD' ? 'Kartou' : paymentTypeName;
-};
 
 const StorageUpgradeList: React.FC<StorageUpgradeListProps> = ({ upgrades }) => {
 
@@ -35,7 +31,7 @@ const StorageUpgradeList: React.FC<StorageUpgradeListProps> = ({ upgrades }) => 
                             <TableHeadCellStyle>Datum</TableHeadCellStyle>
                             <TableHeadCellStyle align="right">Velikost (GB)</TableHeadCellStyle>
                             <TableHeadCellStyle align="right">Cena (Kč)</TableHeadCellStyle>
-                            <TableHeadCellStyle align="right">Typ platby</TableHeadCellStyle>
+                            <TableHeadCellStyle align="right">Způsob platby</TableHeadCellStyle>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -44,7 +40,7 @@ const StorageUpgradeList: React.FC<StorageUpgradeListProps> = ({ upgrades }) => 
                                 <TableCellStyle>{formatDate(upgrade.createdAt)}</TableCellStyle>
                                 <TableCellStyle align="right">{upgrade.sizeInGB}</TableCellStyle>
                                 <TableCellStyle align="right">{upgrade.priceCzk}</TableCellStyle>
-                                <TableCellStyle align="right">{getPaymentTypeText(upgrade.paymentTypeName)}</TableCellStyle>
+                                <TableCellStyle align="right">{upgrade.paymentType.label}</TableCellStyle>
                             </TableRow>
                         ))}
                     </TableBody>

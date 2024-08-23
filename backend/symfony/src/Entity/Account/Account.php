@@ -36,7 +36,8 @@ class Account implements UserInterface
         ShareVideo::SHARE_VIDEO_READ,
         ShareFolder::SHARE_FOLDER_READ,
         Folder::FOLDER_READ,
-        Storage::STORAGE_READ
+        Storage::STORAGE_READ,
+        StorageUpgrade::STORAGE_UPGRADE_ADMIN_READ
     ])]
     private string $email;
 
