@@ -73,9 +73,9 @@ class StorageUpgradeRepository extends ServiceEntityRepository implements Filter
                 ->setParameter('email', "%$filter->email%");
         }
 
-        if (!empty($filter->stripeSessionId)) {
-            $qb->andWhere('p.sessionId LIKE :sessionId')
-                ->setParameter('sessionId', "%$filter->stripeSessionId%");
+        if (!empty($filter->stripePaymentIntent)) {
+            $qb->andWhere('p.paymentIntent LIKE :paymentIntent')
+                ->setParameter('paymentIntent', "%$filter->stripePaymentIntent%");
         }
 
         if (!empty($filter->paymentTypeId)) {

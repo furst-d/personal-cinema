@@ -82,6 +82,7 @@ class StorageUpgradeController extends BasePersonalController
 
             $session = $this->paymentService->validatePayment($sessionId);
             $metadata = $this->paymentService->validateMetadata($session->metadata);
+            $metadata->setPaymentIntent($session->payment_intent);
 
             $this->storageUpgradeService->createUpgrade($metadata);
 

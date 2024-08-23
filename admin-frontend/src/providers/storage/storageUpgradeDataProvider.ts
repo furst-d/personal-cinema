@@ -16,7 +16,7 @@ export const storageUpgradeDataProvider = {
             return {
                 ...rest,
                 email: account.email,
-                stripeSessionId: storage.storageCardPayment?.sessionId,
+                stripePaymentIntent: storage.storageCardPayment?.paymentIntent,
             };
         });
 

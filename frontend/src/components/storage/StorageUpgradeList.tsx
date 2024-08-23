@@ -10,7 +10,7 @@ import {formatDate} from "../../utils/formatter";
 import {TableCellStyle, TableContainerStyle, TableHeadCellStyle} from "../../styles/table/Table";
 
 interface StorageUpgradeListProps {
-    upgrades: { sizeInGB: number, priceCzk: number, paymentType: any, createdAt: string }[];
+    upgrades: { sizeInGB: number, priceCzk: number, paymentTypeInfo: any, createdAt: string }[];
 }
 
 const StorageUpgradeList: React.FC<StorageUpgradeListProps> = ({ upgrades }) => {
@@ -40,7 +40,7 @@ const StorageUpgradeList: React.FC<StorageUpgradeListProps> = ({ upgrades }) => 
                                 <TableCellStyle>{formatDate(upgrade.createdAt)}</TableCellStyle>
                                 <TableCellStyle align="right">{upgrade.sizeInGB}</TableCellStyle>
                                 <TableCellStyle align="right">{upgrade.priceCzk}</TableCellStyle>
-                                <TableCellStyle align="right">{upgrade.paymentType.label}</TableCellStyle>
+                                <TableCellStyle align="right">{upgrade.paymentTypeInfo.label}</TableCellStyle>
                             </TableRow>
                         ))}
                     </TableBody>
