@@ -250,7 +250,7 @@ const useFileManagerHandlers = (initialFolderId: string | null, setLoading: (loa
     }, [folders, videos]);
 
     const handleSingleUploadCompleted = async () => {
-        const videosData = await fetchVideos(1000, 0, 'name', 'ASC', currentFolderId);
+        const videosData = await fetchVideos(limit, offset, sort, order, currentFolderId)
         setVideos(videosData.data);
     };
 

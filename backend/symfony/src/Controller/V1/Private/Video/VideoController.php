@@ -44,7 +44,7 @@ class VideoController extends BasePrivateController
     {
         try {
             $video = $this->authService->authVideo($request, JwtUsage::USAGE_VIDEO_ACCESS);
-            $manifestContent = $this->manifestService->getManifest($video, $qualityRequest);
+            $manifestContent = $this->manifestService->getManifest($video, $qualityRequest->quality);
 
             return new Response($manifestContent, 200, ['Content-Type' => 'application/vnd.apple.mpegurl']);
         } catch (ApiException $e) {

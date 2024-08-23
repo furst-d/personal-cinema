@@ -10,6 +10,7 @@ use App\Service\Account\SessionService;
 use App\Service\Auth\AuthService;
 use App\Service\Cdn\CdnService;
 use App\Service\Locator\BaseControllerLocator;
+use App\Service\Video\ManifestService;
 use App\Service\Video\ShareService;
 use App\Service\Video\VideoService;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -41,9 +42,9 @@ class ShareVideoPublicController extends ApiController
     private AuthService $authService;
 
     /**
-     * @var CdnService $cdnService
+     * @var ManifestService $manifestService
      */
-    private CdnService $cdnService;
+    private ManifestService $manifestService;
 
     /**
      * @param BaseControllerLocator $locator
@@ -51,7 +52,7 @@ class ShareVideoPublicController extends ApiController
      * @param ShareService $shareService
      * @param SessionService $sessionService
      * @param AuthService $authService
-     * @param CdnService $cdnService
+     * @param ManifestService $manifestService
      */
     public function __construct(
         BaseControllerLocator $locator,
@@ -59,7 +60,7 @@ class ShareVideoPublicController extends ApiController
         ShareService $shareService,
         SessionService $sessionService,
         AuthService $authService,
-        CdnService $cdnService
+        ManifestService $manifestService
     )
     {
         parent::__construct($locator);
@@ -67,7 +68,7 @@ class ShareVideoPublicController extends ApiController
         $this->shareService = $shareService;
         $this->sessionService = $sessionService;
         $this->authService = $authService;
-        $this->cdnService = $cdnService;
+        $this->manifestService = $manifestService;
     }
 
     #[Route('/url', name: 'public_video_manifest', methods: ['GET'])]
@@ -75,7 +76,7 @@ class ShareVideoPublicController extends ApiController
     {
         try {
             $video = $this->authService->authVideo($request, JwtUsage::USAGE_PUBLIC_VIDEO_ACCESS);
-            $manifestContent = $this->cdnService->getManifest($video);
+            $manifestContent = $this->manifestService->getManifest($video, null);
             $sessionId = $this->sessionService->generate($request);
 
             $this->shareService->addView($video, $sessionId);

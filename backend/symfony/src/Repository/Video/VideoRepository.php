@@ -53,7 +53,7 @@ class VideoRepository extends ServiceEntityRepository implements FilterSortInter
     {
         $qb = $this->createQueryBuilder('v')
             ->join('v.account', 'a')
-            ->join('v.md5', 'm');
+            ->leftJoin('v.md5', 'm');
 
         if ($folderData->isDefaultFolder()) {
             $qb->andWhere('v.folder IS NULL');
