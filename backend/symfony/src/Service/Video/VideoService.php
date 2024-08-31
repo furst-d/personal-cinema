@@ -51,7 +51,7 @@ class VideoService
      */
     private CdnDeletionService $cdnDeletionService;
 
-    private const NOT_FOUND_MESSAGE = 'Video not found';
+    public const NOT_FOUND_MESSAGE = 'Video not found';
 
     /**
      * @param VideoRepository $videoRepository

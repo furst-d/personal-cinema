@@ -60,18 +60,18 @@ class CdnServiceTest extends TestCase
 
     public function testCreateUploadDataSuccess()
     {
-        $data = ['param1' => 'value1', 'size' => '123'];
+        $data = ['params' => 'value1', 'size' => '123'];
         $this->mockCdnHasher->expects($this->once())
             ->method('addSignature')
-            ->willReturnCallback(function(&$data, $secretKey) {
+            ->willReturnCallback(function(&$data) {
                 $data['signature'] = 'dummy_signature';
             });
 
         $result = $this->cdnService->createUploadData($data);
 
-        $this->assertArrayHasKey('project_id', $result);
-        $this->assertArrayHasKey('nonce', $result);
-        $this->assertArrayHasKey('signature', $result);
+        $this->assertObjectHasProperty('projectId', $result);
+        $this->assertObjectHasProperty('nonce', $result);
+        $this->assertObjectHasProperty('signature', $result);
     }
 
     public function testGetManifestSuccess()
