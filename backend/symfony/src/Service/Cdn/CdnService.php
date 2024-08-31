@@ -3,6 +3,7 @@
 namespace App\Service\Cdn;
 
 use App\DTO\Video\CdnVideoRequest;
+use App\DTO\Video\UploadResponse;
 use App\Entity\Video\Video;
 use App\Exception\BadRequestException;
 use App\Exception\InternalException;
@@ -114,22 +115,22 @@ class CdnService
 
     /**
      * @param array $data
-     * @return array
+     * @return UploadResponse
      * @throws InternalException
      */
-    public function createUploadData(array $data): array
+    public function createUploadData(array $data): UploadResponse
     {
         $data['project_id'] = $this->cdnProjectId;
         $data['nonce'] = $this->generator->generateString(32);
         $this->cdnHasher->addSignature($data, $this->cdnSecretKey);
         $this->logger->info('Generated upload data.', $data);
 
-        // Remove the size from the data array as it is used only for validation a file
-        if (isset($data['size'])) {
-            unset($data['size']);
-        }
-
-        return $data;
+        return new UploadResponse(
+            $data['nonce'],
+            $data['params'],
+            $data['project_id'],
+            $data['signature']
+        );
     }
 
     /**

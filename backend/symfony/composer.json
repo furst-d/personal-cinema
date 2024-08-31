@@ -15,12 +15,14 @@
         "guzzlehttp/guzzle": "^7.8",
         "lexik/jwt-authentication-bundle": "^2.14",
         "mailersend/mailersend": "^0.25.0",
+        "nelmio/api-doc-bundle": "^4.29",
         "nelmio/cors-bundle": "^2.5",
         "nyholm/psr7": "^1.8",
         "php-http/guzzle7-adapter": "^1.0",
         "phpdocumentor/reflection-docblock": "^5.4",
         "phpstan/phpdoc-parser": "^1.29",
         "stripe/stripe-php": "^15.6",
+        "symfony/asset": "6.4.*",
         "symfony/console": "6.4.*",
         "symfony/dotenv": "6.4.*",
         "symfony/flex": "^2",
@@ -34,8 +36,11 @@
         "symfony/security-bundle": "6.4.*",
         "symfony/serializer": "6.4.*",
         "symfony/string": "6.4.*",
+        "symfony/twig-bundle": "6.4.*",
         "symfony/validator": "6.4.*",
-        "symfony/yaml": "6.4.*"
+        "symfony/yaml": "6.4.*",
+        "twig/extra-bundle": "^2.12|^3.0",
+        "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
         "mockery/mockery": "^1.6",
@@ -87,7 +92,8 @@
         ]
     },
     "conflict": {
-        "symfony/symfony": "*"
+        "symfony/symfony": "*",
+        "zircote/swagger-php": "=4.8.7"
     },
     "extra": {
         "symfony": {

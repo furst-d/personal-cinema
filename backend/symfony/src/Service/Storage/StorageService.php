@@ -24,6 +24,9 @@ class StorageService
      */
     private StorageRepository $storageRepository;
 
+    public const FILE_EXCEEDS_STORAGE_LIMIT_MESSAGE = 'File exceeds storage limit';
+    public const FILE_TOO_LARGE_MESSAGE = 'File too large';
+
     /**
      * @param SettingsRepository $settingsRepository
      * @param StorageRepository $storageRepository
@@ -72,13 +75,13 @@ class StorageService
     public function checkStorageBeforeUpload(Storage $storage, int $fileSize): void
     {
         if ($this->hasExceededStorageLimit($storage->getMaxStorage(), $storage->getUsedStorage() + $fileSize)) {
-            throw new FullStorageException('File exceeds storage limit');
+            throw new FullStorageException(self::FILE_EXCEEDS_STORAGE_LIMIT_MESSAGE);
         }
 
         if ($this->hasExceededFileLimit($fileSize)) {
             $maxFile = $this->settingsRepository->getMaxFileSize();
             $maxFile = substr($maxFile, 0, -2) . ' ' . substr($maxFile, -2);
-            throw new TooLargeException('File too large', ['maxFileSize' => $maxFile]);
+            throw new TooLargeException(self::FILE_TOO_LARGE_MESSAGE, ['maxFileSize' => $maxFile]);
         }
     }
 

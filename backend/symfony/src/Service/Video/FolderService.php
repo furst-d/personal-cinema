@@ -20,32 +20,14 @@ class FolderService
      */
     private FolderRepository $folderRepository;
 
-    /**
-     * @var ShareService $shareService
-     */
-    private ShareService $shareService;
-
-    /**
-     * @var EntityManagerInterface $em
-     */
-    private EntityManagerInterface $em;
-
-    private const NOT_FOUND_MESSAGE = 'Folder not found';
+    public const NOT_FOUND_MESSAGE = 'Folder not found';
 
     /**
      * @param FolderRepository $folderRepository
-     * @param EntityManagerInterface $em
-     * @param ShareService $shareService
      */
-    public function __construct(
-        FolderRepository $folderRepository,
-        EntityManagerInterface $em,
-        ShareService $shareService
-    )
+    public function __construct(FolderRepository $folderRepository)
     {
         $this->folderRepository = $folderRepository;
-        $this->em = $em;
-        $this->shareService = $shareService;
     }
 
     /**
