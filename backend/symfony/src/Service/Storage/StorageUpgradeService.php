@@ -36,6 +36,8 @@ class StorageUpgradeService
      */
     private PaymentService $paymentService;
 
+    public const UPGRADE_ALREADY_EXISTS_MESSAGE = 'Upgrade already exists';
+
     /**
      * @param StorageUpgradeRepository $storageUpgradeRepository
      * @param StorageCardPaymentRepository $storageCardPaymentRepository
@@ -74,7 +76,7 @@ class StorageUpgradeService
             && ($this->getStorageCardPaymentByPaymentIntent($metadata->getPaymentIntent())
             || $this->paymentService->isRefunded($metadata->getPaymentIntent()))
         ) {
-            throw new ConflictException('Upgrade already exists');
+            throw new ConflictException(self::UPGRADE_ALREADY_EXISTS_MESSAGE);
         }
 
         $storageUpgrade = new StorageUpgrade(

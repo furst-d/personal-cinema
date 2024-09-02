@@ -16,6 +16,8 @@ class StoragePriceService
      */
     private StorageUpgradePriceRepository $storageUpgradePriceRepository;
 
+    public const INVALID_STORAGE_PRICE_ID = 'Invalid storage price ID';
+
     /**
      * @param StorageUpgradePriceRepository $storageUpgradePriceRepository
      */
@@ -34,7 +36,7 @@ class StoragePriceService
     }
 
     /**
-     * @return array
+     * @return StorageUpgradePrice[]
      */
     public function getPricesBySize(): array
     {
@@ -52,7 +54,7 @@ class StoragePriceService
         $price = $this->storageUpgradePriceRepository->find($storagePriceId);
 
         if (!$price) {
-            throw new NotFoundException('Invalid storage price ID');
+            throw new NotFoundException(self::INVALID_STORAGE_PRICE_ID);
         }
 
         return $price;

@@ -54,7 +54,7 @@ class AccountController extends BasePersonalController
         summary: "Get user's account statistics",
         tags: [self::TAG],
     )]
-    #[ResponseData(entityClass: AccountStatsResponse::class, description: "User's account statistics")]
+    #[ResponseData(entityClass: AccountStatsResponse::class, collection: false, description: "User's account statistics")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: 'Bearer')]

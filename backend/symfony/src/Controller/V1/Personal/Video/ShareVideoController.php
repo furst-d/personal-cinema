@@ -168,7 +168,7 @@ class ShareVideoController extends BasePersonalController
         requestBody: new RequestBody(entityClass: TokenRequest::class),
         tags: [VideoController::TAG],
     )]
-    #[ResponseData(entityClass: Video::class, groups: [Video::VIDEOS_READ], description: "Shared video")]
+    #[ResponseData(entityClass: Video::class, groups: [Video::VIDEOS_READ], collection: false, description: "Shared video")]
     #[ResponseError(exception: new BadRequestException())]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new NotFoundException())]
@@ -201,7 +201,7 @@ class ShareVideoController extends BasePersonalController
         requestBody: new RequestBody(entityClass: VideoPublicShareRequest::class),
         tags: [VideoController::TAG],
     )]
-    #[ResponseData(entityClass: ShareVideoPublic::class, groups: [ShareVideoPublic::VIDEO_SHARED_PUBLIC_READ], description: "Shared video public link")]
+    #[ResponseData(entityClass: ShareVideoPublic::class, groups: [ShareVideoPublic::VIDEO_SHARED_PUBLIC_READ], collection: false, description: "Shared video public link")]
     #[ResponseError(exception: new BadRequestException())]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new ForbiddenException(ShareService::CANNOT_CREATE_LINK_MESSAGE))]

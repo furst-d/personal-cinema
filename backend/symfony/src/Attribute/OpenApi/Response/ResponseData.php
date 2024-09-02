@@ -15,6 +15,7 @@ class ResponseData extends ResponseBase
      * @param string $entityClass
      * @param array $groups
      * @param bool $pagination
+     * @param bool $collection
      * @param string $description
      * @param int $responseCode
      */
@@ -22,27 +23,38 @@ class ResponseData extends ResponseBase
         string $entityClass,
         array $groups = [],
         bool $pagination = false,
+        bool $collection = true,
         string $description = 'Ok',
         int $responseCode = Response::HTTP_OK
     ) {
         $payloadProperties = [
-            new OA\Property(property: 'count', type: 'integer', example: 10),
+            new OA\Property(property: 'count', type: 'integer', example: 1),
         ];
 
         if ($pagination) {
             $payloadProperties[] = new OA\Property(property: 'totalCount', type: 'integer', nullable: true, example: 100);
         }
 
-        $payloadProperties[] = new OA\Property(
-            property: 'data',
-            type: 'array',
-            items: new OA\Items(
+        $dataProperty = $collection
+            ? new OA\Property(
+                property: 'data',
+                type: 'array',
+                items: new OA\Items(
+                    ref: new Model(
+                        type: $entityClass,
+                        groups: empty($groups) ? null : $groups
+                    )
+                )
+            )
+            : new OA\Property(
+                property: 'data',
                 ref: new Model(
                     type: $entityClass,
                     groups: empty($groups) ? null : $groups
                 )
-            )
-        );
+            );
+
+        $payloadProperties[] = $dataProperty;
 
         parent::__construct(
             responseCode: $responseCode,

@@ -161,7 +161,7 @@ class ShareFolderController extends BasePersonalController
         requestBody: new RequestBody(entityClass: TokenRequest::class),
         tags: [FolderController::TAG],
     )]
-    #[ResponseData(entityClass: Folder::class, groups: [Folder::FOLDER_READ], description: "Shared folder")]
+    #[ResponseData(entityClass: Folder::class, groups: [Folder::FOLDER_READ], collection: false, description: "Shared folder")]
     #[ResponseError(exception: new BadRequestException())]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new NotFoundException())]
