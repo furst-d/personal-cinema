@@ -83,8 +83,8 @@ class UserControllerTest extends WebTestCase
         ]));
 
         $this->assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
-        $this->assertStringContainsString('access_token', $this->client->getResponse()->getContent());
-        $this->assertStringContainsString('refresh_token', $this->client->getResponse()->getContent());
+        $this->assertStringContainsString('accessToken', $this->client->getResponse()->getContent());
+        $this->assertStringContainsString('refreshToken', $this->client->getResponse()->getContent());
     }
 
     public function testLoginInvalidCredentials()

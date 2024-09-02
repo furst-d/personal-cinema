@@ -66,8 +66,15 @@ class ShareService
      */
     private RandomGenerator $generator;
 
-    private const VIDEO_NOT_FOUND_MESSAGE = "Video not found";
-    private const NO_PERMISSION_MESSAGE = "You don't have permission to see this video";
+    public const VIDEO_NOT_FOUND_MESSAGE = "Video not found";
+    public const NO_PERMISSION_MESSAGE = "You don't have permission to see this video";
+    public const NO_SHARE_VIDEO_WITH_YOURSELF_MESSAGE = "You can not share video with yourself";
+    public const NO_SHARE_FOLDER_WITH_YOURSELF_MESSAGE = "You can not share folder with yourself";
+    public const VIDEO_ALREADY_SHARED_MESSAGE = "Video is already shared with this user";
+    public const FOLDER_ALREADY_SHARED_MESSAGE = "Folder is already shared with this user";
+    public const CANNOT_CREATE_LINK_MESSAGE = "Cannot create another link until the previous one expires";
+    public const VIDEO_SHARE_NOT_FOUND_MESSAGE = "Video share not found";
+    public const FOLDER_SHARE_NOT_FOUND_MESSAGE = "Folder share not found";
 
     /**
      * @param ShareFolderRepository $shareFolderRepository
@@ -149,7 +156,7 @@ class ShareService
     public function createVideoShare(Account $account, Video $video): ShareVideo
     {
         if ($this->isVideoAlreadyShared($account, $video)) {
-            throw new ConflictException("Video is already shared with this user");
+            throw new ConflictException(self::VIDEO_ALREADY_SHARED_MESSAGE);
         }
 
         $shareVideo = new ShareVideo($video, $account);
@@ -166,7 +173,7 @@ class ShareService
     public function createFolderShare(Account $account, Folder $folder): ShareFolder
     {
         if ($this->isFolderAlreadyShared($account, $folder)) {
-            throw new ConflictException("Folder is already shared with this user");
+            throw new ConflictException(self::FOLDER_ALREADY_SHARED_MESSAGE);
         }
 
         $shareFolder = new ShareFolder($folder, $account);
@@ -182,7 +189,7 @@ class ShareService
     public function createPublicVideoShareLink(Video $video): ShareVideoPublic
     {
         if ($this->shareVideoPublicRepository->findValidByVideo($video)) {
-            throw new ForbiddenException("Cannot create another link until the previous one expires");
+            throw new ForbiddenException(self::CANNOT_CREATE_LINK_MESSAGE);
         }
 
         $hash = $this->generator->generateString(64);
@@ -245,7 +252,7 @@ class ShareService
         $videoShare = $this->shareVideoRepository->findOneBy(['id' => $id]);
 
         if (!$videoShare || $videoShare->getVideo()->getAccount() !== $account) {
-            throw new NotFoundException("Video share not found");
+            throw new NotFoundException(self::VIDEO_SHARE_NOT_FOUND_MESSAGE);
         }
 
         return $videoShare;
@@ -262,7 +269,7 @@ class ShareService
         $folderShare = $this->shareFolderRepository->findOneBy(['id' => $id]);
 
         if (!$folderShare || $folderShare->getFolder()->getOwner() !== $account) {
-            throw new NotFoundException("Folder share not found");
+            throw new NotFoundException(self::FOLDER_SHARE_NOT_FOUND_MESSAGE);
         }
 
         return $folderShare;
@@ -297,11 +304,11 @@ class ShareService
     public function allowedToShareFolder(Account $account, Folder $folder, string $email): void
     {
         if ($account->getEmail() === $email) {
-            throw new ForbiddenException('You can not share folder with yourself');
+            throw new ForbiddenException(self::NO_SHARE_FOLDER_WITH_YOURSELF_MESSAGE);
         }
 
         if ($this->isFolderAlreadyShared($account, $folder)) {
-            throw new ConflictException("Folder is already shared with this user");
+            throw new ConflictException(self::FOLDER_ALREADY_SHARED_MESSAGE);
         }
     }
 
@@ -316,11 +323,11 @@ class ShareService
     public function allowedToShareVideo(Account $account, Video $video, string $email): void
     {
         if ($account->getEmail() === $email) {
-            throw new ForbiddenException('You can not share video with yourself');
+            throw new ForbiddenException(self::NO_SHARE_VIDEO_WITH_YOURSELF_MESSAGE);
         }
 
         if ($this->isVideoAlreadyShared($account, $video)) {
-            throw new ConflictException("Video is already shared with this user");
+            throw new ConflictException(self::VIDEO_ALREADY_SHARED_MESSAGE);
         }
     }
 

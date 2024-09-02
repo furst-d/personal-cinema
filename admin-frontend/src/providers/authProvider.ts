@@ -16,33 +16,33 @@ const authProvider: AuthProvider = {
             throw new Error('Nemáte dostatečná oprávnění pro přístup k administraci.');
         }
 
-        localStorage.setItem('access_token', tokens.access_token);
-        localStorage.setItem('refresh_token', tokens.refresh_token);
+        localStorage.setItem('accessToken', tokens.accessToken);
+        localStorage.setItem('refreshToken', tokens.refreshToken);
 
         return Promise.resolve();
     },
     logout: () => {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         return Promise.resolve();
     },
     checkError: (error) => {
         const status = error.response ? error.response.status : null;
         if (status === 401 || status === 403) {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
             return Promise.reject();
         }
         return Promise.resolve();
     },
     checkAuth: () => {
-        return localStorage.getItem('access_token') ? Promise.resolve() : Promise.reject();
+        return localStorage.getItem('accessToken') ? Promise.resolve() : Promise.reject();
     },
     getPermissions: () => Promise.resolve(),
 };
 
 export const refreshAuthToken = async () => {
-    const refreshToken = localStorage.getItem('refresh_token');
+    const refreshToken = localStorage.getItem('refreshToken');
     if (!refreshToken) {
         return Promise.reject(new Error('No refresh token available'));
     }
@@ -51,15 +51,15 @@ export const refreshAuthToken = async () => {
         token: refreshToken,
     });
 
-    const { access_token } = response.data.payload.data.tokens;
+    const { accessToken } = response.data.payload.data.tokens;
 
-    localStorage.setItem('access_token', access_token);
+    localStorage.setItem('accessToken', accessToken);
 
-    return access_token;
+    return accessToken;
 };
 
 export const fetchJsonWithAuth = async (url: string, options: any = {}) => {
-    let accessToken = localStorage.getItem('access_token');
+    let accessToken = localStorage.getItem('accessToken');
     options.headers = {
         'Content-Type': 'application/json',
         ...options.headers,

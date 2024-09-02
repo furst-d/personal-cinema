@@ -30,6 +30,8 @@ class PaymentService
      */
     private AccountService $accountService;
 
+    public const PAYMENT_NOT_COMPLETED_MESSAGE = 'Payment not completed';
+
     /**
      * @param string $stripeSecretKey
      * @param string $frontendUrl
@@ -130,7 +132,7 @@ class PaymentService
             $session = Session::retrieve($sessionId);
 
             if ($session->payment_status !== 'paid') {
-                throw new PaymentRequiredException('Payment not completed');
+                throw new PaymentRequiredException(self::PAYMENT_NOT_COMPLETED_MESSAGE);
             }
 
             return $session;

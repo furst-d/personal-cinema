@@ -87,6 +87,6 @@ class UrlGenerator
             'video_id' => $video->getId(),
         ]);
 
-        return "$this->backendUrl/v1/share/url?token=$token";
+        return "$this->backendUrl/v1/private/videos/share/url?token=$token";
     }
 }

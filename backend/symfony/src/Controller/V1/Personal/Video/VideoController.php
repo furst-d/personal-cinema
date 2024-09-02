@@ -7,6 +7,7 @@ use App\Attribute\OpenApi\Response\ResponseData;
 use App\Attribute\OpenApi\Response\ResponseError;
 use App\Attribute\OpenApi\Response\ResponseMessage;
 use App\Controller\V1\Personal\BasePersonalController;
+use App\DTO\Video\PublicVideoSharesResponse;
 use App\DTO\Video\SearchQueryRequest;
 use App\DTO\Video\UploadRequest;
 use App\DTO\Video\UploadResponse;
@@ -73,6 +74,8 @@ class VideoController extends BasePersonalController
      */
     private ShareService $shareService;
 
+    public const TAG = 'personal/videos';
+
     /**
      * @param BaseControllerLocator $locator
      * @param JwtService $jwtService
@@ -106,9 +109,9 @@ class VideoController extends BasePersonalController
         description: "Generates a link that can be used to upload a video file to the CDN server.",
         summary: "Create an upload link for a video",
         requestBody: new RequestBody(entityClass: UploadRequest::class),
-        tags: ["videos"],
+        tags: [self::TAG],
     )]
-    #[ResponseData(entityClass: UploadResponse::class, description: "Upload data")]
+    #[ResponseData(entityClass: UploadResponse::class, collection: false, description: "Upload data")]
     #[ResponseError(exception: new BadRequestException())]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new FullStorageException(StorageService::FILE_EXCEEDS_STORAGE_LIMIT_MESSAGE))]
@@ -144,7 +147,7 @@ class VideoController extends BasePersonalController
     #[OA\Get(
         description: "Retrieve a list of videos.",
         summary: "Get user's videos",
-        tags: ["videos"],
+        tags: [self::TAG],
     )]
     #[ResponseData(entityClass: Video::class, groups: [Video::VIDEOS_READ], pagination: true, description: "List of videos")]
     #[ResponseError(exception: new BadRequestException())]
@@ -178,7 +181,7 @@ class VideoController extends BasePersonalController
     #[OA\Get(
         description: "Retrieve a searched list of videos.",
         summary: "Get user's searched videos",
-        tags: ["videos"],
+        tags: [self::TAG],
     )]
     #[ResponseData(entityClass: Video::class, groups: [Video::VIDEOS_READ], pagination: true, description: "List of searched videos")]
     #[ResponseError(exception: new BadRequestException())]
@@ -208,9 +211,9 @@ class VideoController extends BasePersonalController
     #[OA\Get(
         description: "Retrieve a detail of a video.",
         summary: "Get user's video detail",
-        tags: ["videos"],
+        tags: [self::TAG],
     )]
-    #[ResponseData(entityClass: Video::class, groups: [Video::VIDEO_READ], description: "Detail of a video")]
+    #[ResponseData(entityClass: Video::class, groups: [Video::VIDEO_READ], collection: false, description: "Detail of a video")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new NotFoundException(VideoService::NOT_FOUND_MESSAGE))]
     #[ResponseError(exception: new InternalException())]
@@ -233,7 +236,7 @@ class VideoController extends BasePersonalController
     #[OA\Get(
         description: "Retrieve list of recommended videos.",
         summary: "Get user's video recommendations",
-        tags: ["videos"],
+        tags: [self::TAG],
     )]
     #[ResponseData(entityClass: Video::class, groups: [Video::VIDEOS_READ], pagination: true, description: "List of recommended videos")]
     #[ResponseError(exception: new BadRequestException())]
@@ -264,9 +267,9 @@ class VideoController extends BasePersonalController
     #[OA\Get(
         description: "Retrieves a video download link.",
         summary: "Get user's video download link",
-        tags: ["videos"],
+        tags: [self::TAG],
     )]
-    #[ResponseData(entityClass: VideoDownloadLinkResponse::class, description: "Download link for the video")]
+    #[ResponseData(entityClass: VideoDownloadLinkResponse::class, collection: false, description: "Download link for the video")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new NotFoundException(VideoService::NOT_FOUND_MESSAGE))]
     #[ResponseError(exception: new InternalException())]
@@ -286,11 +289,11 @@ class VideoController extends BasePersonalController
     }
 
     #[OA\Get(
-        description: "Retrieves a shared video data.",
-        summary: "Get user's shared video data",
-        tags: ["videos"],
+        description: "Retrieves a users with permission to view the video.",
+        summary: "Get user's shared users for a video",
+        tags: [self::TAG],
     )]
-    #[ResponseData(entityClass: ShareVideo::class, groups: [ShareVideo::SHARE_VIDEO_READ], description: "List of user's shared videos")]
+    #[ResponseData(entityClass: ShareVideo::class, groups: [ShareVideo::SHARE_VIDEO_READ], description: "List of video's shared users")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new NotFoundException(VideoService::NOT_FOUND_MESSAGE))]
     #[ResponseError(exception: new InternalException())]
@@ -313,9 +316,9 @@ class VideoController extends BasePersonalController
     #[OA\Get(
         description: "Retrieves a user's publicly shared video data.",
         summary: "Get user's publicly shared video data",
-        tags: ["videos"],
+        tags: [self::TAG],
     )]
-    #[ResponseData(entityClass: ShareVideoPublic::class, groups: [ShareVideoPublic::VIDEO_SHARED_PUBLIC_READ], description: "List of user's publicly shared videos")]
+    #[ResponseData(entityClass: PublicVideoSharesResponse::class, description: "List of user's publicly shared videos")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new NotFoundException(VideoService::NOT_FOUND_MESSAGE))]
     #[ResponseError(exception: new InternalException())]
@@ -329,10 +332,10 @@ class VideoController extends BasePersonalController
 
             $shares = $video->getSharesPublic();
 
-            return $this->re->withData([
-                'maxViews' => $this->shareService->getPublicLinkViewLimit(),
-                'shares' => $this->serialize($shares, [ShareVideoPublic::VIDEO_SHARED_PUBLIC_READ])
-            ]);
+            return $this->re->withData(new PublicVideoSharesResponse(
+                $this->shareService->getPublicLinkViewLimit(),
+                $this->serialize($shares, [ShareVideoPublic::VIDEO_SHARED_PUBLIC_READ])
+            ));
         } catch (ApiException $e) {
             return $this->re->withException($e);
         }
@@ -342,7 +345,7 @@ class VideoController extends BasePersonalController
         description: "Update a video.",
         summary: "Update user's video",
         requestBody: new RequestBody(entityClass: VideoRequest::class),
-        tags: ["videos"],
+        tags: [self::TAG],
     )]
     #[ResponseMessage(message: "Video updated.")]
     #[ResponseError(exception: new BadRequestException())]
@@ -372,7 +375,7 @@ class VideoController extends BasePersonalController
     #[OA\Delete(
         description: "Delete a video.",
         summary: "Delete user's video",
-        tags: ["videos"],
+        tags: [self::TAG],
     )]
     #[ResponseMessage(message: "Video deleted.")]
     #[ResponseError(exception: new UnauthorizedException())]

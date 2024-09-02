@@ -2,10 +2,18 @@
 
 namespace App\Controller\V1\Front;
 
+use App\Attribute\OpenApi\Request\RequestBody;
+use App\Attribute\OpenApi\Response\ResponseError;
+use App\Attribute\OpenApi\Response\ResponseMessage;
 use App\Controller\ApiController;
 use App\DTO\Account\EmailRequest;
 use App\DTO\Account\TokenRequest;
 use App\Exception\ApiException;
+use App\Exception\BadGatewayException;
+use App\Exception\BadRequestException;
+use App\Exception\InternalException;
+use App\Exception\NotFoundException;
+use App\Exception\UnauthorizedException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
@@ -13,6 +21,7 @@ use App\Service\Locator\BaseControllerLocator;
 use App\Service\Mailer\MailerService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use OpenApi\Attributes as OA;
 
 #[Route('/users/activate')]
 class UserActivationController extends ApiController
@@ -39,10 +48,10 @@ class UserActivationController extends ApiController
      * @param MailerService $mailerService
      */
     public function __construct(
-        BaseControllerLocator    $locator,
-        AccountService         $accountService,
-        JwtService             $jwtService,
-        MailerService          $mailerService,
+        BaseControllerLocator $locator,
+        AccountService $accountService,
+        JwtService $jwtService,
+        MailerService $mailerService,
     ) {
         parent::__construct($locator);
         $this->accountService = $accountService;
@@ -50,10 +59,17 @@ class UserActivationController extends ApiController
         $this->mailerService = $mailerService;
     }
 
-    /**
-     * @param TokenRequest $tokenRequest
-     * @return JsonResponse
-     */
+    #[OA\Post(
+        description: "Activate user account.",
+        summary: "Activate account",
+        requestBody: new RequestBody(entityClass: TokenRequest::class),
+        tags: [UserController::TAG],
+    )]
+    #[ResponseMessage(message: "User was activated successfully.")]
+    #[ResponseError(exception: new BadRequestException())]
+    #[ResponseError(exception: new UnauthorizedException(JwtService::INVALID_TOKEN_MESSAGE))]
+    #[ResponseError(exception: new NotFoundException(AccountService::ACCOUNT_NOT_FOUND_MESSAGE))]
+    #[ResponseError(exception: new InternalException())]
     #[Route('', name: 'user_activate', methods: ['POST'])]
     public function activate(TokenRequest $tokenRequest): JsonResponse
     {
@@ -66,10 +82,17 @@ class UserActivationController extends ApiController
         }
     }
 
-    /**
-     * @param EmailRequest $emailRequest
-     * @return JsonResponse
-     */
+    #[OA\Post(
+        description: "Resend email with activation token.",
+        summary: "Resend activation email",
+        requestBody: new RequestBody(entityClass: EmailRequest::class),
+        tags: [UserController::TAG],
+    )]
+    #[ResponseMessage(message: "Activation email was sent successfully.")]
+    #[ResponseError(exception: new BadRequestException())]
+    #[ResponseError(exception: new NotFoundException(AccountService::ACCOUNT_NOT_FOUND_MESSAGE))]
+    #[ResponseError(exception: new InternalException())]
+    #[ResponseError(exception: new BadGatewayException())]
     #[Route('/send', name: 'user_activate_send', methods: ['POST'])]
     public function resendToken(EmailRequest $emailRequest): JsonResponse
     {
