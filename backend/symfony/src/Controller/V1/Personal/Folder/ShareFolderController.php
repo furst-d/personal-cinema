@@ -2,24 +2,38 @@
 
 namespace App\Controller\V1\Personal\Folder;
 
+use App\Attribute\OpenApi\Request\RequestBody;
+use App\Attribute\OpenApi\Response\ResponseData;
+use App\Attribute\OpenApi\Response\ResponseError;
+use App\Attribute\OpenApi\Response\ResponseMessage;
 use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Account\TokenRequest;
 use App\DTO\Video\FolderQueryRequest;
 use App\DTO\Video\FolderShareRequest;
+use App\DTO\Video\VideoShareRequest;
 use App\Entity\Video\Folder;
+use App\Entity\Video\Video;
 use App\Exception\ApiException;
+use App\Exception\BadGatewayException;
 use App\Exception\BadRequestException;
+use App\Exception\ConflictException;
+use App\Exception\ForbiddenException;
+use App\Exception\InternalException;
+use App\Exception\NotFoundException;
+use App\Exception\UnauthorizedException;
 use App\Helper\Jwt\JwtUsage;
 use App\Helper\Regex\RegexRoute;
-use App\Helper\Video\FolderData;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Mailer\MailerService;
 use App\Service\Video\FolderService;
 use App\Service\Video\ShareService;
+use OpenApi\Attributes as OA;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/personal/folders/share')]
@@ -75,8 +89,18 @@ class ShareFolderController extends BasePersonalController
         $this->accountService = $accountService;
     }
 
+    #[OA\Get(
+        description: "Retrieve a list of folders that was shared with the user",
+        summary: "List of folders shared with the user",
+        tags: [FolderController::TAG],
+    )]
+    #[ResponseData(entityClass: Folder::class, groups: [Folder::FOLDER_READ], pagination: true, description: "List of folders")]
+    #[ResponseError(exception: new BadRequestException())]
+    #[ResponseError(exception: new UnauthorizedException())]
+    #[ResponseError(exception: new InternalException())]
+    #[Security(name: 'Bearer')]
     #[Route('', name: 'user_shared_folders', methods: ['GET'])]
-    public function getSharedFolders(Request $request, FolderQueryRequest $folderQueryRequest): JsonResponse
+    public function getSharedFolders(Request $request, #[MapQueryString] FolderQueryRequest $folderQueryRequest): JsonResponse
     {
         $account = $this->getAccount($request);
 
@@ -85,10 +109,25 @@ class ShareFolderController extends BasePersonalController
             $folderQueryRequest
         );
 
-        return $this->re->withData($folders, ['folder:read']);
+        return $this->re->withData($folders, [Folder::FOLDER_READ]);
     }
 
     #[Route('', name: 'user_share_folder', methods: ['POST'])]
+    #[OA\Post(
+        description: "Share a folder with another user",
+        summary: "Share a folder",
+        requestBody: new RequestBody(entityClass: FolderShareRequest::class),
+        tags: [FolderController::TAG],
+    )]
+    #[ResponseMessage(message: "Folder share request was send to the target email")]
+    #[ResponseError(exception: new BadRequestException())]
+    #[ResponseError(exception: new UnauthorizedException())]
+    #[ResponseError(exception: new ForbiddenException(ShareService::NO_SHARE_FOLDER_WITH_YOURSELF_MESSAGE))]
+    #[ResponseError(exception: new NotFoundException(FolderService::NOT_FOUND_MESSAGE))]
+    #[ResponseError(exception: new ConflictException(ShareService::FOLDER_ALREADY_SHARED_MESSAGE))]
+    #[ResponseError(exception: new InternalException())]
+    #[ResponseError(exception: new BadGatewayException("Failed to send email"))]
+    #[Security(name: 'Bearer')]
     public function share(Request $request, FolderShareRequest $shareRequest): JsonResponse
     {
         try {
@@ -116,6 +155,19 @@ class ShareFolderController extends BasePersonalController
         }
     }
 
+    #[OA\Post(
+        description: "Accept a folder share request",
+        summary: "Accept a folder share",
+        requestBody: new RequestBody(entityClass: TokenRequest::class),
+        tags: [FolderController::TAG],
+    )]
+    #[ResponseData(entityClass: Folder::class, groups: [Folder::FOLDER_READ], description: "Shared folder")]
+    #[ResponseError(exception: new BadRequestException())]
+    #[ResponseError(exception: new UnauthorizedException())]
+    #[ResponseError(exception: new NotFoundException())]
+    #[ResponseError(exception: new ConflictException(ShareService::FOLDER_ALREADY_SHARED_MESSAGE))]
+    #[ResponseError(exception: new InternalException())]
+    #[Security(name: 'Bearer')]
     #[Route('/accept', name: 'user_accept_share_folder', methods: ['POST'])]
     public function acceptShare(Request $request, TokenRequest $tokenRequest): JsonResponse
     {
@@ -136,6 +188,16 @@ class ShareFolderController extends BasePersonalController
         }
     }
 
+    #[OA\Delete(
+        description: "Delete a folder share.",
+        summary: "Delete a folder share",
+        tags: [FolderController::TAG],
+    )]
+    #[ResponseMessage(message: "Folder share deleted.")]
+    #[ResponseError(exception: new UnauthorizedException())]
+    #[ResponseError(exception: new NotFoundException(ShareService::FOLDER_SHARE_NOT_FOUND_MESSAGE))]
+    #[ResponseError(exception: new InternalException())]
+    #[Security(name: 'Bearer')]
     #[Route(RegexRoute::ID, name: 'user_delete_folder_share', methods: ['DELETE'])]
     public function deleteFolderShare(Request $request, int $id): JsonResponse
     {
