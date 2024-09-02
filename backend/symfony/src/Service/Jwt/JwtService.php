@@ -41,6 +41,8 @@ class JwtService
      */
     private SessionService $sessionService;
 
+    public const INVALID_TOKEN_MESSAGE = 'Invalid token.';
+
     /**
      * @param JWTEncoderInterface $jwtEncoder
      * @param EntityManagerInterface $em
@@ -134,17 +136,15 @@ class JwtService
      */
     public function decodeToken(string $token, JwtUsage $usage): array
     {
-        $invalidTokenMessage = 'Invalid token.';
-
         try {
             $decodedToken = $this->jwtEncoder->decode($token);
 
             if ($decodedToken['usage'] !== $usage->value) {
-                throw new UnauthorizedException($invalidTokenMessage);
+                throw new UnauthorizedException(self::INVALID_TOKEN_MESSAGE);
             }
 
         } catch (JWTDecodeFailureException) {
-            throw new UnauthorizedException($invalidTokenMessage);
+            throw new UnauthorizedException(self::INVALID_TOKEN_MESSAGE);
         }
 
         return $decodedToken;

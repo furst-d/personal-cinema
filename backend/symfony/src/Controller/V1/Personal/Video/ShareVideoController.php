@@ -132,7 +132,7 @@ class ShareVideoController extends BasePersonalController
     #[ResponseError(exception: new NotFoundException(ShareService::VIDEO_NOT_FOUND_MESSAGE))]
     #[ResponseError(exception: new ConflictException(ShareService::VIDEO_ALREADY_SHARED_MESSAGE))]
     #[ResponseError(exception: new InternalException())]
-    #[ResponseError(exception: new BadGatewayException("Failed to send email"))]
+    #[ResponseError(exception: new BadGatewayException())]
     #[Security(name: 'Bearer')]
     #[Route('', name: 'user_share_video', methods: ['POST'])]
     public function share(Request $request, VideoShareRequest $shareRequest): JsonResponse

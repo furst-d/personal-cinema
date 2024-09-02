@@ -124,7 +124,7 @@ class ShareFolderController extends BasePersonalController
     #[ResponseError(exception: new NotFoundException(FolderService::NOT_FOUND_MESSAGE))]
     #[ResponseError(exception: new ConflictException(ShareService::FOLDER_ALREADY_SHARED_MESSAGE))]
     #[ResponseError(exception: new InternalException())]
-    #[ResponseError(exception: new BadGatewayException("Failed to send email"))]
+    #[ResponseError(exception: new BadGatewayException())]
     #[Security(name: 'Bearer')]
     public function share(Request $request, FolderShareRequest $shareRequest): JsonResponse
     {
