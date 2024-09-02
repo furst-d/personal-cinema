@@ -2,6 +2,7 @@
 
 namespace App\Service\Account;
 
+use App\DTO\Account\AccountStatsResponse;
 use App\DTO\Admin\Account\UpdateUserRequest;
 use App\DTO\Filter\FilterRequest;
 use App\DTO\PaginatorRequest;
@@ -55,7 +56,8 @@ class AccountService
      */
     private Authenticator $authenticator;
 
-    private const ACCOUNT_NOT_FOUND_MESSAGE = 'Account not found.';
+    public const ACCOUNT_NOT_FOUND_MESSAGE = 'Account not found.';
+    public const INVALID_PASSWORD_MESSAGE = 'Invalid password.';
 
     /**
      * @param EntityManagerInterface $em
@@ -250,21 +252,23 @@ class AccountService
 
     /**
      * @param Account $account
-     * @return array
+     * @return AccountStatsResponse
      */
-    public function getStats(Account $account): array
+    public function getStats(Account $account): AccountStatsResponse
     {
-        return [
-            'email' => $account->getEmail(),
-            'storageUsedGB' => ByteSizeConverter::toGB($account->getStorage()->getUsedStorage()),
-            'storageLimitGB' => ByteSizeConverter::toGB($account->getStorage()->getMaxStorage()),
-            'storageUpgradeCount' => count($account->getStorageUpgrades()),
-            'videosCount' => count($account->getVideos()),
-            'foldersCount' => count($account->getFolders()),
-            'sharedVideosCount' => count($account->getSharedVideos()),
-            'sharedFoldersCount' => count($account->getSharedFolders()),
-            'created' => $account->getCreatedAt(),
-        ];
+        $stats = new AccountStatsResponse();
+
+        $stats->email = $account->getEmail();
+        $stats->storageUsedGB = ByteSizeConverter::toGB($account->getStorage()->getUsedStorage());
+        $stats->storageLimitGB = ByteSizeConverter::toGB($account->getStorage()->getMaxStorage());
+        $stats->storageUpgradeCount = count($account->getStorageUpgrades());
+        $stats->videosCount = count($account->getVideos());
+        $stats->foldersCount = count($account->getFolders());
+        $stats->sharedVideosCount = count($account->getSharedVideos());
+        $stats->sharedFoldersCount = count($account->getSharedFolders());
+        $stats->created = $account->getCreatedAt();
+
+        return $stats;
     }
 
     /**
@@ -276,7 +280,7 @@ class AccountService
     public function checkPasswordAndDeleteAccount(Account $account, string $password): void
     {
         if (!$this->authenticator->verifyPassword($password, $account->getPassword(), $account->getSalt())) {
-            throw new ForbiddenException('Invalid password.');
+            throw new ForbiddenException(self::INVALID_PASSWORD_MESSAGE);
         }
 
         $this->deleteAccount($account);
