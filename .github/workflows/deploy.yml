@@ -46,6 +46,19 @@ jobs:
           sed -i 's|minio_root_password|${{ secrets.MINIO_ROOT_PASSWORD }}|' cdn-backend/.env
           sed -i 's|redis_password|${{ secrets.REDIS_PASSWORD }}|' cdn-backend/.env
 
+      - name: List files before uploading artifacts
+        run: |
+          ls -la backend/
+          cat backend/.env
+          ls -la backend/symfony/
+          cat backend/symfony/.env
+          ls -la frontend/
+          cat frontend/.env
+          ls -la admin-frontend/
+          cat admin-frontend/.env
+          ls -la cdn-backend/
+          cat cdn-backend/.env
+
       - name: Create JWT key files
         run: |
           mkdir -p backend/symfony/config/jwt
