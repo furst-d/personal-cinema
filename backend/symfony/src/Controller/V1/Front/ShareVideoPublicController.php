@@ -2,20 +2,25 @@
 
 namespace App\Controller\V1\Front;
 
+use App\Attribute\OpenApi\Response\ResponseData;
+use App\Attribute\OpenApi\Response\ResponseError;
 use App\Controller\ApiController;
+use App\Entity\Video\Folder;
 use App\Entity\Video\Video;
 use App\Exception\ApiException;
-use App\Helper\Jwt\JwtUsage;
+use App\Exception\BadRequestException;
+use App\Exception\ForbiddenException;
+use App\Exception\InternalException;
+use App\Exception\NotFoundException;
+use App\Exception\UnauthorizedException;
 use App\Service\Account\SessionService;
-use App\Service\Auth\AuthService;
-use App\Service\Cdn\CdnService;
 use App\Service\Locator\BaseControllerLocator;
-use App\Service\Video\ManifestService;
+use App\Service\Video\FolderService;
 use App\Service\Video\ShareService;
 use App\Service\Video\VideoService;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/share')]
@@ -36,57 +41,36 @@ class ShareVideoPublicController extends ApiController
      */
     private SessionService $sessionService;
 
-    /**
-     * @var AuthService $authService
-     */
-    private AuthService $authService;
-
-    /**
-     * @var ManifestService $manifestService
-     */
-    private ManifestService $manifestService;
+    public const TAG = 'public/videos';
 
     /**
      * @param BaseControllerLocator $locator
      * @param VideoService $videoService
      * @param ShareService $shareService
      * @param SessionService $sessionService
-     * @param AuthService $authService
-     * @param ManifestService $manifestService
      */
     public function __construct(
         BaseControllerLocator $locator,
         VideoService $videoService,
         ShareService $shareService,
         SessionService $sessionService,
-        AuthService $authService,
-        ManifestService $manifestService
     )
     {
         parent::__construct($locator);
         $this->videoService = $videoService;
         $this->shareService = $shareService;
         $this->sessionService = $sessionService;
-        $this->authService = $authService;
-        $this->manifestService = $manifestService;
     }
 
-    #[Route('/url', name: 'public_video_manifest', methods: ['GET'])]
-    public function getManifest(Request $request): Response
-    {
-        try {
-            $video = $this->authService->authVideo($request, JwtUsage::USAGE_PUBLIC_VIDEO_ACCESS);
-            $manifestContent = $this->manifestService->getManifest($video, null);
-            $sessionId = $this->sessionService->generate($request);
-
-            $this->shareService->addView($video, $sessionId);
-
-            return new Response($manifestContent, 200, ['Content-Type' => 'application/vnd.apple.mpegurl']);
-        } catch (ApiException $e) {
-            return $this->re->withException($e);
-        }
-    }
-
+    #[OA\Get(
+        description: "Retrieve a video detail when accessing through public share link.",
+        summary: "Get video detail by a public share link",
+        tags: [self::TAG],
+    )]
+    #[ResponseData(entityClass: Video::class, groups: [Video::VIDEO_PUBLIC_READ], collection: false, description: "Video detail")]
+    #[ResponseError(exception: new ForbiddenException(ShareService::NO_PERMISSION_MESSAGE))]
+    #[ResponseError(exception: new NotFoundException(ShareService::VIDEO_NOT_FOUND_MESSAGE))]
+    #[ResponseError(exception: new InternalException())]
     #[Route('/{hash}', name: 'public_shared_video_detail', methods: ['GET'])]
     public function getVideoDetail(Request $request, string $hash): JsonResponse
     {
