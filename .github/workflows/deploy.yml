@@ -70,13 +70,13 @@ jobs:
         with:
           name: env-files
           path: |
-            backend/.env
-            backend/symfony/.env
-            frontend/.env
-            admin-frontend/.env
-            cdn-backend/.env
-            backend/symfony/config/jwt/private.pem
-            backend/symfony/config/jwt/public.pem
+            ${{ github.workspace }}/backend/.env
+            ${{ github.workspace }}/backend/symfony/.env
+            ${{ github.workspace }}/frontend/.env
+            ${{ github.workspace }}/admin-frontend/.env
+            ${{ github.workspace }}/cdn-backend/.env
+            ${{ github.workspace }}/backend/symfony/config/jwt/private.pem
+            ${{ github.workspace }}/backend/symfony/config/jwt/public.pem
 
   build:
     runs-on: ubuntu-latest
