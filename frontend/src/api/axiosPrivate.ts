@@ -8,7 +8,7 @@ const axiosPrivate = axios.create({
 
 axiosPrivate.interceptors.request.use(
     (config) => {
-        const token = getToken('access_token');
+        const token = getToken('accessToken');
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
         }
@@ -25,7 +25,7 @@ axiosPrivate.interceptors.response.use(
         const originalRequest = error.config;
         if (error.response.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
-            const refreshToken = getToken('refresh_token');
+            const refreshToken = getToken('refreshToken');
             if (!refreshToken) {
                 logoutUser();
                 return Promise.reject(error);
@@ -33,8 +33,8 @@ axiosPrivate.interceptors.response.use(
             try {
                 const response = await axios.post(`${import.meta.env.VITE_API_URL}/v1/users/refresh-token`, { token: refreshToken });
                 if (response.status === 200) {
-                    const newToken = response.data.payload.data.tokens.access_token;
-                    setToken('access_token', newToken);
+                    const newToken = response.data.payload.data.tokens.accessToken;
+                    setToken('accessToken', newToken);
                     originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
                     return axiosPrivate(originalRequest);
                 }

@@ -3,14 +3,11 @@
 namespace App\Controller\V1\Private\Cdn;
 
 use App\Attribute\OpenApi\Request\RequestBody;
-use App\Attribute\OpenApi\Response\ResponseData;
 use App\Attribute\OpenApi\Response\ResponseError;
 use App\Attribute\OpenApi\Response\ResponseMessage;
 use App\Controller\V1\Private\BasePrivateController;
 use App\DTO\Video\CdnNotificationRequest;
 use App\DTO\Video\CdnThumbnailRequest;
-use App\DTO\Video\FolderRequest;
-use App\Entity\Video\Folder;
 use App\Exception\ApiException;
 use App\Exception\BadRequestException;
 use App\Exception\InternalException;
@@ -19,7 +16,6 @@ use App\Exception\UnauthorizedException;
 use App\Service\Auth\AuthService;
 use App\Service\Cdn\CdnService;
 use App\Service\Locator\BaseControllerLocator;
-use App\Service\Video\FolderService;
 use App\Service\Video\VideoService;
 use OpenApi\Attributes as OA;
 use Nelmio\ApiDocBundle\Annotation\Security;

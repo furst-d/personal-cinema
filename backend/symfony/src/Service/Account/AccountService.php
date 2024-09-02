@@ -58,6 +58,7 @@ class AccountService
 
     public const ACCOUNT_NOT_FOUND_MESSAGE = 'Account not found.';
     public const INVALID_PASSWORD_MESSAGE = 'Invalid password.';
+    public const ACCOUNT_ALREADY_EXISTS_MESSAGE = 'Account already exists.';
 
     /**
      * @param EntityManagerInterface $em
@@ -93,7 +94,7 @@ class AccountService
     public function registerUser(string $email, string $password): Account
     {
         if ($this->accountRepository->findOneBy(['email' => $email])) {
-            throw new ConflictException('Account already exists.');
+            throw new ConflictException(self::ACCOUNT_ALREADY_EXISTS_MESSAGE);
         }
 
         try {

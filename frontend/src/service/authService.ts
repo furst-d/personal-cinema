@@ -13,8 +13,8 @@ export const login = async (email: string, password: string) => {
         if (response.status === 200) {
             const userData = response.data.payload.data;
             localStorage.setItem('user_data', JSON.stringify(userData));
-            setToken('access_token', userData.tokens.access_token);
-            setToken('refresh_token', userData.tokens.refresh_token);
+            setToken('accessToken', userData.tokens.accessToken);
+            setToken('refreshToken', userData.tokens.refreshToken);
             return { success: true, data: userData };
         }
     } catch (error: any) {
