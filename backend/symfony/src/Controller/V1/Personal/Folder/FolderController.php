@@ -2,6 +2,12 @@
 
 namespace App\Controller\V1\Personal\Folder;
 
+use App\Attribute\OpenApi\Request\Query\QueryInt;
+use App\Attribute\OpenApi\Request\Query\QueryLimit;
+use App\Attribute\OpenApi\Request\Query\QueryOffset;
+use App\Attribute\OpenApi\Request\Query\QueryOrderBy;
+use App\Attribute\OpenApi\Request\Query\QuerySortBy;
+use App\Attribute\OpenApi\Request\Query\QueryString;
 use App\Attribute\OpenApi\Request\RequestBody;
 use App\Attribute\OpenApi\Response\ResponseData;
 use App\Attribute\OpenApi\Response\ResponseError;
@@ -17,9 +23,11 @@ use App\Exception\BadRequestException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
+use App\Helper\DTO\SortBy;
 use App\Helper\Regex\RegexRoute;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Video\FolderService;
+use Doctrine\DBAL\Schema\Schema;
 use OpenApi\Attributes as OA;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -55,6 +63,11 @@ class FolderController extends BasePersonalController
         summary: "Get user's folders",
         tags: [self::TAG],
     )]
+    #[QueryInt(name: 'parentId', description: 'Parent folder id')]
+    #[QueryLimit]
+    #[QueryOffset]
+    #[QuerySortBy(choices: [SortBy::NAME, SortBy::UPDATE_DATE], default: SortBy::NAME)]
+    #[QueryOrderBy]
     #[ResponseData(entityClass: Folder::class, groups: [Folder::FOLDER_READ], pagination: true, description: "List of folders")]
     #[ResponseError(exception: new BadRequestException())]
     #[ResponseError(exception: new UnauthorizedException())]
@@ -62,7 +75,7 @@ class FolderController extends BasePersonalController
     #[ResponseError(exception: new InternalException())]
     #[Security(name: 'Bearer')]
     #[Route('', name: 'user_folders', methods: ['GET'])]
-    public function getFolders(Request $request, #[MapQueryString] FolderQueryRequest $folderQueryRequest): JsonResponse
+    public function getFolders(Request $request, FolderQueryRequest $folderQueryRequest): JsonResponse
     {
         try {
             $account = $this->getAccount($request);
@@ -87,13 +100,18 @@ class FolderController extends BasePersonalController
         summary: "Get user's searched folders",
         tags: [self::TAG],
     )]
+    #[QueryString(name: 'phrase', description: 'Search phrase', required: true)]
+    #[QueryLimit]
+    #[QueryOffset]
+    #[QuerySortBy(choices: [SortBy::NAME, SortBy::UPDATE_DATE], default: SortBy::NAME)]
+    #[QueryOrderBy]
     #[ResponseData(entityClass: Folder::class, groups: [Folder::FOLDER_READ], pagination: true, description: "List of searched folders")]
     #[ResponseError(exception: new BadRequestException())]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: 'Bearer')]
     #[Route('/search', name: 'user_folders_search', methods: ['GET'])]
-    public function searchFolders(Request $request, #[MapQueryString] SearchQueryRequest $searchQueryRequest): JsonResponse
+    public function searchFolders(Request $request, SearchQueryRequest $searchQueryRequest): JsonResponse
     {
         $account = $this->getAccount($request);
 

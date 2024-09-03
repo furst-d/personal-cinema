@@ -2,6 +2,11 @@
 
 namespace App\Controller\V1\Personal\Folder;
 
+use App\Attribute\OpenApi\Request\Query\QueryInt;
+use App\Attribute\OpenApi\Request\Query\QueryLimit;
+use App\Attribute\OpenApi\Request\Query\QueryOffset;
+use App\Attribute\OpenApi\Request\Query\QueryOrderBy;
+use App\Attribute\OpenApi\Request\Query\QuerySortBy;
 use App\Attribute\OpenApi\Request\RequestBody;
 use App\Attribute\OpenApi\Response\ResponseData;
 use App\Attribute\OpenApi\Response\ResponseError;
@@ -19,6 +24,7 @@ use App\Exception\ForbiddenException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
+use App\Helper\DTO\SortBy;
 use App\Helper\Jwt\JwtUsage;
 use App\Helper\Regex\RegexRoute;
 use App\Service\Account\AccountService;
@@ -92,13 +98,18 @@ class ShareFolderController extends BasePersonalController
         summary: "List of folders shared with the user",
         tags: [FolderController::TAG],
     )]
+    #[QueryInt(name: 'parentId', description: "Folder parent ID")]
+    #[QueryLimit]
+    #[QueryOffset]
+    #[QuerySortBy(choices: [SortBy::NAME, SortBy::UPDATE_DATE], default: SortBy::NAME)]
+    #[QueryOrderBy]
     #[ResponseData(entityClass: Folder::class, groups: [Folder::FOLDER_READ], pagination: true, description: "List of folders")]
     #[ResponseError(exception: new BadRequestException())]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: 'Bearer')]
     #[Route('', name: 'user_shared_folders', methods: ['GET'])]
-    public function getSharedFolders(Request $request, #[MapQueryString] FolderQueryRequest $folderQueryRequest): JsonResponse
+    public function getSharedFolders(Request $request, FolderQueryRequest $folderQueryRequest): JsonResponse
     {
         $account = $this->getAccount($request);
 

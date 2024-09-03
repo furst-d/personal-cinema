@@ -2,6 +2,13 @@
 
 namespace App\Controller\V1\Admin\Account;
 
+use App\Attribute\OpenApi\Request\Query\QueryFilter;
+use App\Attribute\OpenApi\Request\Query\QueryFilterPropertyEmail;
+use App\Attribute\OpenApi\Request\Query\QueryFilterPropertyIds;
+use App\Attribute\OpenApi\Request\Query\QueryLimit;
+use App\Attribute\OpenApi\Request\Query\QueryOffset;
+use App\Attribute\OpenApi\Request\Query\QueryOrderBy;
+use App\Attribute\OpenApi\Request\Query\QuerySortBy;
 use App\Attribute\OpenApi\Request\RequestBody;
 use App\Attribute\OpenApi\Response\ResponseData;
 use App\Attribute\OpenApi\Response\ResponseError;
@@ -20,6 +27,7 @@ use App\Exception\ConflictException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
+use App\Helper\DTO\SortBy;
 use App\Helper\Jwt\JwtUsage;
 use App\Helper\Regex\RegexRoute;
 use App\Service\Account\AccountService;
@@ -76,12 +84,17 @@ class UserController extends BasePersonalController
         summary: "Get users",
         tags: [self::TAG],
     )]
+    #[QueryLimit]
+    #[QueryOffset]
+    #[QuerySortBy(choices: [SortBy::ID, SortBy::EMAIL, SortBy::CREATE_DATE, SortBy::IS_ACTIVE])]
+    #[QueryOrderBy]
+    #[QueryFilter(properties: [new QueryFilterPropertyEmail()])]
     #[ResponseData(entityClass: Account::class, groups: [Account::ACCOUNT_READ], pagination: true, description: "List of users")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: "Bearer")]
     #[Route('', name: 'admin_users', methods: ['GET'])]
-    public function getUsers(#[MapQueryString] AccountQueryRequest $paginatorRequest, #[MapQueryString] ?EmailFilterRequest $filterRequest): JsonResponse
+    public function getUsers(AccountQueryRequest $paginatorRequest, ?EmailFilterRequest $filterRequest): JsonResponse
     {
         $accounts = $this->accountService->getAccounts($paginatorRequest, $filterRequest);
         return $this->re->withData($accounts, [Account::ACCOUNT_READ]);
@@ -124,13 +137,14 @@ class UserController extends BasePersonalController
         summary: "Delete users",
         tags: [self::TAG],
     )]
+    #[QueryFilter(properties: [new QueryFilterPropertyIds()])]
     #[ResponseData(entityClass: Account::class, groups: [Account::ACCOUNT_READ], description: "Deleted users")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new NotFoundException(AccountService::SOME_NOT_FOUND_MESSAGE))]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: 'Bearer')]
     #[Route('', name: 'admin_users_batch_delete', methods: ['DELETE'])]
-    public function batchDelete(#[MapQueryString] BatchDeleteFilterRequest $filter): JsonResponse
+    public function batchDelete(BatchDeleteFilterRequest $filter): JsonResponse
     {
         try {
             $accounts = $this->accountService->getAccountsByIds($filter->ids);

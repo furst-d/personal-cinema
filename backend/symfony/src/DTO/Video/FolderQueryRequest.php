@@ -27,7 +27,7 @@ class FolderQueryRequest extends PaginatorRequest
         int $offset = 0,
         ?int $parentId = null,
         OrderBy $order = OrderBy::ASC,
-        SortBy $sort = SortBy::ID
+        SortBy $sort = SortBy::NAME
     )
     {
         $this->sort = $sort;

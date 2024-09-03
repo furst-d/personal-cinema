@@ -2,6 +2,12 @@
 
 namespace App\Controller\V1\Admin\Storage;
 
+use App\Attribute\OpenApi\Request\Query\QueryFilter;
+use App\Attribute\OpenApi\Request\Query\QueryFilterPropertyIds;
+use App\Attribute\OpenApi\Request\Query\QueryLimit;
+use App\Attribute\OpenApi\Request\Query\QueryOffset;
+use App\Attribute\OpenApi\Request\Query\QueryOrderBy;
+use App\Attribute\OpenApi\Request\Query\QuerySortBy;
 use App\Attribute\OpenApi\Request\RequestBody;
 use App\Attribute\OpenApi\Response\ResponseData;
 use App\Attribute\OpenApi\Response\ResponseError;
@@ -15,12 +21,12 @@ use App\Exception\ApiException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
+use App\Helper\DTO\SortBy;
 use App\Helper\Regex\RegexRoute;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Storage\StoragePriceService;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
 
@@ -50,12 +56,16 @@ class StorageUpgradePriceController extends BasePersonalController
         summary: "Get storage upgrade prices",
         tags: [StorageController::TAG],
     )]
+    #[QueryLimit]
+    #[QueryOffset]
+    #[QuerySortBy(choices: [SortBy::ID, SortBy::SIZE, SortBy::PRICE_CZK, SortBy::PERCENTAGE_DISCOUNT, SortBy::DISCOUNT_EXPIRATION_AT])]
+    #[QueryOrderBy]
     #[ResponseData(entityClass: StorageUpgradePrice::class, groups: [StorageUpgradePrice::STORAGE_UPGRADE_PRICE_ADMIN_READ], pagination: true, description: "List of storage upgrade prices")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: "Bearer")]
     #[Route('', name: 'admin_storage_upgrade_prices', methods: ['GET'])]
-    public function getPrices(#[MapQueryString] StorageUpgradePriceQueryRequest $storageQueryRequest): JsonResponse
+    public function getPrices(StorageUpgradePriceQueryRequest $storageQueryRequest): JsonResponse
     {
         $prices = $this->storagePriceService->getPrices($storageQueryRequest);
         return $this->re->withData($prices, [StorageUpgradePrice::STORAGE_UPGRADE_PRICE_ADMIN_READ]);
@@ -83,13 +93,14 @@ class StorageUpgradePriceController extends BasePersonalController
         summary: "Delete storage upgrade prices",
         tags: [StorageController::TAG],
     )]
+    #[QueryFilter(properties: [new QueryFilterPropertyIds()])]
     #[ResponseData(entityClass: StorageUpgradePrice::class, description: "Deleted storage upgrade prices")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new NotFoundException(StoragePriceService::SOME_NOT_FOUND_MESSAGE))]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: "Bearer")]
     #[Route('', name: 'admin_storage_upgrade_prices_batch_delete', methods: ['DELETE'])]
-    public function batchDelete(#[MapQueryString] BatchDeleteFilterRequest $filter): JsonResponse
+    public function batchDelete(BatchDeleteFilterRequest $filter): JsonResponse
     {
         try {
             $prices = $this->storagePriceService->getPricesByIds($filter->ids);

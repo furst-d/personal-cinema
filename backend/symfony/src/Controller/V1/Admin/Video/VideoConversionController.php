@@ -2,6 +2,12 @@
 
 namespace App\Controller\V1\Admin\Video;
 
+use App\Attribute\OpenApi\Request\Query\QueryFilter;
+use App\Attribute\OpenApi\Request\Query\QueryFilterPropertyIds;
+use App\Attribute\OpenApi\Request\Query\QueryLimit;
+use App\Attribute\OpenApi\Request\Query\QueryOffset;
+use App\Attribute\OpenApi\Request\Query\QueryOrderBy;
+use App\Attribute\OpenApi\Request\Query\QuerySortBy;
 use App\Attribute\OpenApi\Request\RequestBody;
 use App\Attribute\OpenApi\Response\ResponseData;
 use App\Attribute\OpenApi\Response\ResponseError;
@@ -15,6 +21,7 @@ use App\Exception\ApiException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
+use App\Helper\DTO\SortBy;
 use App\Helper\Regex\RegexRoute;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Video\ConversionService;
@@ -50,12 +57,16 @@ class VideoConversionController extends BasePersonalController
         summary: "Get video conversions",
         tags: [VideoController::TAG],
     )]
+    #[QueryLimit]
+    #[QueryOffset]
+    #[QuerySortBy(choices: [SortBy::ID, SortBy::WIDTH, SortBy::HEIGHT, SortBy::BANDWIDTH])]
+    #[QueryOrderBy]
     #[ResponseData(entityClass: Conversion::class, groups: [Conversion::CONVERSION_READ], pagination: true, description: "List of video conversions")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: "Bearer")]
     #[Route('', name: 'admin_conversions', methods: ['GET'])]
-    public function getConversions(#[MapQueryString] VideoConversionQueryRequest $conversionQueryRequest): JsonResponse
+    public function getConversions(VideoConversionQueryRequest $conversionQueryRequest): JsonResponse
     {
         $conversions = $this->conversionService->getConversions($conversionQueryRequest);
         return $this->re->withData($conversions, [Conversion::CONVERSION_READ]);
@@ -83,13 +94,14 @@ class VideoConversionController extends BasePersonalController
         summary: "Delete video conversions",
         tags: [VideoController::TAG],
     )]
+    #[QueryFilter(properties: [new QueryFilterPropertyIds()])]
     #[ResponseData(entityClass: Conversion::class, groups: [Conversion::CONVERSION_READ], description: "Deleted video conversions")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new NotFoundException(ConversionService::SOME_NOT_FOUND_MESSAGE))]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: "Bearer")]
     #[Route('', name: 'admin_conversions_batch_delete', methods: ['DELETE'])]
-    public function batchDelete(#[MapQueryString] BatchDeleteFilterRequest $filter): JsonResponse
+    public function batchDelete(BatchDeleteFilterRequest $filter): JsonResponse
     {
         try {
             $conversions = $this->conversionService->getConversionsByIds($filter->ids);

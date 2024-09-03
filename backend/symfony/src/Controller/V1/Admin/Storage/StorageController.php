@@ -2,6 +2,12 @@
 
 namespace App\Controller\V1\Admin\Storage;
 
+use App\Attribute\OpenApi\Request\Query\QueryFilter;
+use App\Attribute\OpenApi\Request\Query\QueryFilterPropertyEmail;
+use App\Attribute\OpenApi\Request\Query\QueryLimit;
+use App\Attribute\OpenApi\Request\Query\QueryOffset;
+use App\Attribute\OpenApi\Request\Query\QueryOrderBy;
+use App\Attribute\OpenApi\Request\Query\QuerySortBy;
 use App\Attribute\OpenApi\Request\RequestBody;
 use App\Attribute\OpenApi\Response\ResponseData;
 use App\Attribute\OpenApi\Response\ResponseError;
@@ -14,6 +20,7 @@ use App\Exception\ApiException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
+use App\Helper\DTO\SortBy;
 use App\Helper\Regex\RegexRoute;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Storage\StorageService;
@@ -51,12 +58,17 @@ class StorageController extends BasePersonalController
         summary: "Get storage sizes",
         tags: [self::TAG],
     )]
+    #[QueryLimit]
+    #[QueryOffset]
+    #[QuerySortBy(choices: [SortBy::ID, SortBy::EMAIL, SortBy::MAX_STORAGE, SortBy::USED_STORAGE, SortBy::FILL_SIZE])]
+    #[QueryOrderBy]
+    #[QueryFilter(properties: [new QueryFilterPropertyEmail()])]
     #[ResponseData(entityClass: StorageService::class, groups: [Storage::STORAGE_READ], pagination: true, description: "List of storage sizes")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: "Bearer")]
     #[Route('', name: 'admin_storages', methods: ['GET'])]
-    public function getStorages(#[MapQueryString] StorageQueryRequest $storageQueryRequest, #[MapQueryString] ?EmailFilterRequest $filterRequest): JsonResponse
+    public function getStorages(StorageQueryRequest $storageQueryRequest, ?EmailFilterRequest $filterRequest): JsonResponse
     {
         $storages = $this->storageService->getStorages($storageQueryRequest, $filterRequest);
         return $this->re->withData($storages, [Storage::STORAGE_READ]);

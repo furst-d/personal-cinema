@@ -2,6 +2,13 @@
 
 namespace App\Controller\V1\Admin\Setting;
 
+use App\Attribute\OpenApi\Request\Query\QueryFilter;
+use App\Attribute\OpenApi\Request\Query\QueryFilterProperty;
+use App\Attribute\OpenApi\Request\Query\QueryFilterPropertyIds;
+use App\Attribute\OpenApi\Request\Query\QueryLimit;
+use App\Attribute\OpenApi\Request\Query\QueryOffset;
+use App\Attribute\OpenApi\Request\Query\QueryOrderBy;
+use App\Attribute\OpenApi\Request\Query\QuerySortBy;
 use App\Attribute\OpenApi\Request\RequestBody;
 use App\Attribute\OpenApi\Response\ResponseData;
 use App\Attribute\OpenApi\Response\ResponseError;
@@ -15,6 +22,7 @@ use App\Exception\ApiException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
+use App\Helper\DTO\SortBy;
 use App\Helper\Regex\RegexRoute;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Setting\SettingService;
@@ -52,12 +60,16 @@ class SettingController extends BasePersonalController
         summary: "Get settings",
         tags: [self::TAG],
     )]
+    #[QueryLimit]
+    #[QueryOffset]
+    #[QuerySortBy(choices: [SortBy::ID, SortBy::KEY, SortBy::VALUE])]
+    #[QueryOrderBy]
     #[ResponseData(entityClass: Settings::class, pagination: true, description: "List of settings")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: "Bearer")]
     #[Route('', name: 'admin_settings', methods: ['GET'])]
-    public function getSettings(#[MapQueryString] SettingQueryRequest $queryRequest): JsonResponse
+    public function getSettings(SettingQueryRequest $queryRequest): JsonResponse
     {
         $settings = $this->settingService->getSettings($queryRequest);
         return $this->re->withData($settings);
@@ -85,13 +97,14 @@ class SettingController extends BasePersonalController
         summary: "Delete settings",
         tags: [self::TAG],
     )]
+    #[QueryFilter(properties: [new QueryFilterPropertyIds()])]
     #[ResponseData(entityClass: Settings::class, description: "Deleted settings")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new NotFoundException(SettingService::SOME_NOT_FOUND_MESSAGE))]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: "Bearer")]
     #[Route('', name: 'admin_settings_batch_delete', methods: ['DELETE'])]
-    public function batchDelete(#[MapQueryString] BatchDeleteFilterRequest $filter): JsonResponse
+    public function batchDelete(BatchDeleteFilterRequest $filter): JsonResponse
     {
         try {
             $settings = $this->settingService->getSettingsByIds($filter->ids);

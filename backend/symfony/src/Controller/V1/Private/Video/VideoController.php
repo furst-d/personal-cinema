@@ -2,6 +2,7 @@
 
 namespace App\Controller\V1\Private\Video;
 
+use App\Attribute\OpenApi\Request\Query\QueryInt;
 use App\Attribute\OpenApi\Response\ResponseError;
 use App\Attribute\OpenApi\Response\ResponseFile;
 use App\Controller\V1\Private\BasePrivateController;
@@ -71,13 +72,14 @@ class VideoController extends BasePrivateController
         summary: "Retrieve a signed HLS manifest from CDN for a video",
         tags: [self::TAG],
     )]
+    #[QueryInt(name: 'quality', description: "Video quality")]
     #[ResponseFile(mimeType: MimeType::APPLICATION_MPEGURL, description: "HLS manifest")]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new NotFoundException(VideoService::NOT_FOUND_MESSAGE))]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: 'Bearer')]
     #[Route('/url', name: 'video_manifest', methods: ['GET'])]
-    public function getManifest(Request $request, #[MapQueryString] QualityRequest $qualityRequest): Response
+    public function getManifest(Request $request, QualityRequest $qualityRequest): Response
     {
         try {
             $video = $this->authService->authVideo($request, JwtUsage::USAGE_VIDEO_ACCESS);
