@@ -2,23 +2,35 @@
 
 namespace App\Controller\V1\Admin\Account;
 
+use App\Attribute\OpenApi\Request\RequestBody;
+use App\Attribute\OpenApi\Response\ResponseData;
+use App\Attribute\OpenApi\Response\ResponseError;
+use App\Attribute\OpenApi\Response\ResponseMessage;
 use App\Controller\V1\Personal\BasePersonalController;
 use App\DTO\Admin\Account\AccountQueryRequest;
 use App\DTO\Admin\Account\RegisterUserRequest;
 use App\DTO\Admin\Account\UpdateUserRequest;
 use App\DTO\Filter\BatchDeleteFilterRequest;
 use App\DTO\Filter\EmailFilterRequest;
-use App\DTO\PaginatorRequest;
 use App\Entity\Account\Account;
+use App\Entity\Account\Role;
 use App\Exception\ApiException;
+use App\Exception\BadRequestException;
+use App\Exception\ConflictException;
+use App\Exception\InternalException;
+use App\Exception\NotFoundException;
+use App\Exception\UnauthorizedException;
 use App\Helper\Jwt\JwtUsage;
 use App\Helper\Regex\RegexRoute;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
 use App\Service\Locator\BaseControllerLocator;
 use App\Service\Mailer\MailerService;
+use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
+use OpenApi\Attributes as OA;
 
 #[Route('/admin/users')]
 class UserController extends BasePersonalController
@@ -37,6 +49,8 @@ class UserController extends BasePersonalController
      * @var JwtService $jwtService
      */
     private JwtService $jwtService;
+
+    public const TAG = 'admin/users';
 
     /**
      * @param BaseControllerLocator $locator
@@ -57,13 +71,34 @@ class UserController extends BasePersonalController
         $this->jwtService = $jwtService;
     }
 
+    #[OA\Get(
+        description: "Retrieve a list of users.",
+        summary: "Get users",
+        tags: [self::TAG],
+    )]
+    #[ResponseData(entityClass: Account::class, groups: [Account::ACCOUNT_READ], pagination: true, description: "List of users")]
+    #[ResponseError(exception: new UnauthorizedException())]
+    #[ResponseError(exception: new InternalException())]
+    #[Security(name: "Bearer")]
     #[Route('', name: 'admin_users', methods: ['GET'])]
-    public function getUsers(AccountQueryRequest $paginatorRequest, ?EmailFilterRequest $filterRequest): JsonResponse
+    public function getUsers(#[MapQueryString] AccountQueryRequest $paginatorRequest, #[MapQueryString] ?EmailFilterRequest $filterRequest): JsonResponse
     {
         $accounts = $this->accountService->getAccounts($paginatorRequest, $filterRequest);
         return $this->re->withData($accounts, [Account::ACCOUNT_READ]);
     }
 
+    #[OA\Post(
+        description: "Register a new user.",
+        summary: "Register user",
+        requestBody: new RequestBody(entityClass: RegisterUserRequest::class),
+        tags: [self::TAG],
+    )]
+    #[ResponseData(entityClass: Account::class, groups: [Account::ACCOUNT_READ], collection: false, description: "Registered user")]
+    #[ResponseError(exception: new BadRequestException())]
+    #[ResponseError(exception: new UnauthorizedException())]
+    #[ResponseError(exception: new ConflictException(AccountService::ACCOUNT_ALREADY_EXISTS_MESSAGE))]
+    #[ResponseError(exception: new InternalException())]
+    #[Security(name: "Bearer")]
     #[Route('', name: 'admin_user_register', methods: ['POST'])]
     public function registerUser(RegisterUserRequest $registerUserRequest): JsonResponse
     {
@@ -84,8 +119,18 @@ class UserController extends BasePersonalController
         }
     }
 
+    #[OA\Delete(
+        description: "Batch delete users by their ids.",
+        summary: "Delete users",
+        tags: [self::TAG],
+    )]
+    #[ResponseData(entityClass: Account::class, groups: [Account::ACCOUNT_READ], description: "Deleted users")]
+    #[ResponseError(exception: new UnauthorizedException())]
+    #[ResponseError(exception: new NotFoundException(AccountService::SOME_NOT_FOUND_MESSAGE))]
+    #[ResponseError(exception: new InternalException())]
+    #[Security(name: 'Bearer')]
     #[Route('', name: 'admin_users_batch_delete', methods: ['DELETE'])]
-    public function batchDelete(BatchDeleteFilterRequest $filter): JsonResponse
+    public function batchDelete(#[MapQueryString] BatchDeleteFilterRequest $filter): JsonResponse
     {
         try {
             $accounts = $this->accountService->getAccountsByIds($filter->ids);
@@ -100,12 +145,31 @@ class UserController extends BasePersonalController
         }
     }
 
+    #[OA\Get(
+        description: "Retrieve a list of roles.",
+        summary: "Get roles",
+        tags: [self::TAG],
+    )]
+    #[ResponseData(entityClass: Role::class, description: "List of roles")]
+    #[ResponseError(exception: new UnauthorizedException())]
+    #[ResponseError(exception: new InternalException())]
+    #[Security(name: "Bearer")]
     #[Route('/roles', name: 'admin_roles', methods: ['GET'])]
     public function getRoles(): JsonResponse
     {
         return $this->re->withData($this->accountService->getRoles());
     }
 
+    #[OA\Get(
+        description: "Retrieve a user by id.",
+        summary: "Get user",
+        tags: [self::TAG],
+    )]
+    #[ResponseData(entityClass: Account::class, groups: [Account::ACCOUNT_READ], collection: false, description: "User detail")]
+    #[ResponseError(exception: new UnauthorizedException())]
+    #[ResponseError(exception: new NotFoundException(AccountService::SOME_NOT_FOUND_MESSAGE))]
+    #[ResponseError(exception: new InternalException())]
+    #[Security(name: "Bearer")]
     #[Route(RegexRoute::ID, name: 'admin_user', methods: ['GET'])]
     public function getUserDetail(int $id): JsonResponse
     {
@@ -117,6 +181,17 @@ class UserController extends BasePersonalController
         }
     }
 
+    #[OA\Put(
+        description: "Updates user by id.",
+        summary: "Update user",
+        requestBody: new RequestBody(entityClass: UpdateUserRequest::class),
+        tags: [self::TAG],
+    )]
+    #[ResponseData(entityClass: Account::class, groups: [Account::ACCOUNT_READ], collection: false, description: "Updated user")]
+    #[ResponseError(exception: new UnauthorizedException())]
+    #[ResponseError(exception: new NotFoundException(AccountService::SOME_NOT_FOUND_MESSAGE))]
+    #[ResponseError(exception: new InternalException())]
+    #[Security(name: "Bearer")]
     #[Route(RegexRoute::ID, name: 'admin_user_update', methods: ['PUT'])]
     public function updateUser(int $id, UpdateUserRequest $updateUserRequest): JsonResponse
     {
@@ -129,6 +204,16 @@ class UserController extends BasePersonalController
         }
     }
 
+    #[OA\Delete(
+        description: "Delete user by ids.",
+        summary: "Delete user",
+        tags: [self::TAG],
+    )]
+    #[ResponseMessage(message: "User deleted successfully")]
+    #[ResponseError(exception: new UnauthorizedException())]
+    #[ResponseError(exception: new NotFoundException(AccountService::SOME_NOT_FOUND_MESSAGE))]
+    #[ResponseError(exception: new InternalException())]
+    #[Security(name: "Bearer")]
     #[Route(RegexRoute::ID, name: 'admin_user_delete', methods: ['DELETE'])]
     public function deleteUser(int $id): JsonResponse
     {

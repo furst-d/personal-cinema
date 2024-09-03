@@ -17,6 +17,9 @@ class ConversionService
      */
     private ConversionRepository $conversionRepository;
 
+    public const SOME_NOT_FOUND_MESSAGE = 'Some conversions not found.';
+    public const NOT_FOUND_MESSAGE = 'Conversion not found.';
+
     /**
      * @param ConversionRepository $conversionRepository
      */
@@ -44,7 +47,7 @@ class ConversionService
         $conversion = $this->conversionRepository->find($id);
 
         if (!$conversion) {
-            throw new NotFoundException('Conversion not found');
+            throw new NotFoundException(self::NOT_FOUND_MESSAGE);
         }
 
         return $conversion;
@@ -92,7 +95,7 @@ class ConversionService
         $conversions = $this->conversionRepository->findByIds($ids);
 
         if (count($conversions) !== count($ids)) {
-            throw new NotFoundException("Some conversions not found.");
+            throw new NotFoundException(self::SOME_NOT_FOUND_MESSAGE);
         }
 
         return $conversions;

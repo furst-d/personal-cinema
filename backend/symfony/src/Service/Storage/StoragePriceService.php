@@ -18,6 +18,8 @@ class StoragePriceService
 
     public const INVALID_STORAGE_PRICE_ID = 'Invalid storage price ID';
 
+    public const SOME_NOT_FOUND_MESSAGE = 'Some storage prices not found.';
+
     /**
      * @param StorageUpgradePriceRepository $storageUpgradePriceRepository
      */
@@ -70,7 +72,7 @@ class StoragePriceService
         $prices = $this->storageUpgradePriceRepository->findByIds($ids);
 
         if (count($prices) !== count($ids)) {
-            throw new NotFoundException('Some storage prices not found');
+            throw new NotFoundException(self::SOME_NOT_FOUND_MESSAGE);
         }
 
         return $prices;

@@ -19,15 +19,11 @@ enum StoragePaymentType: int
     }
 
     /**
-     * @return array
+     * @return StoragePaymentInfo
      */
-    public function getInfo(): array
+    public function getInfo(): StoragePaymentInfo
     {
-        return [
-            'id' => $this->value,
-            'name' => $this->name,
-            'label' => $this->getLabel()
-        ];
+        return new StoragePaymentInfo($this->value, $this->name, $this->getLabel());
     }
 
     /**

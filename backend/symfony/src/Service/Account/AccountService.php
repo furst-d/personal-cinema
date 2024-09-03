@@ -59,6 +59,7 @@ class AccountService
     public const ACCOUNT_NOT_FOUND_MESSAGE = 'Account not found.';
     public const INVALID_PASSWORD_MESSAGE = 'Invalid password.';
     public const ACCOUNT_ALREADY_EXISTS_MESSAGE = 'Account already exists.';
+    public const SOME_NOT_FOUND_MESSAGE = 'Some accounts not found.';
 
     /**
      * @param EntityManagerInterface $em
@@ -218,7 +219,7 @@ class AccountService
         $accounts = $this->accountRepository->findByIds($ids);
 
         if (count($accounts) !== count($ids)) {
-            throw new NotFoundException("Some accounts not found.");
+            throw new NotFoundException(self::SOME_NOT_FOUND_MESSAGE);
         }
 
         return $accounts;

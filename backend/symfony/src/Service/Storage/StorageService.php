@@ -26,6 +26,7 @@ class StorageService
 
     public const FILE_EXCEEDS_STORAGE_LIMIT_MESSAGE = 'File exceeds storage limit';
     public const FILE_TOO_LARGE_MESSAGE = 'File too large';
+    public const NOT_FOUND_MESSAGE = 'Storage not found';
 
     /**
      * @param SettingsRepository $settingsRepository
@@ -60,7 +61,7 @@ class StorageService
         $storage = $this->storageRepository->find($id);
 
         if (!$storage) {
-            throw new NotFoundException('Storage not found');
+            throw new NotFoundException(self::NOT_FOUND_MESSAGE);
         }
 
         return $storage;

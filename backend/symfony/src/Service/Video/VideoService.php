@@ -53,6 +53,8 @@ class VideoService
 
     public const NOT_FOUND_MESSAGE = 'Video not found';
 
+    public const SOME_NOT_FOUND_MESSAGE = 'Some videos not found.';
+
     /**
      * @param VideoRepository $videoRepository
      * @param MD5Repository $md5Repository
@@ -303,7 +305,7 @@ class VideoService
         $videos = $this->videoRepository->findByIds($ids);
 
         if (count($videos) !== count($ids)) {
-            throw new NotFoundException("Some videos not found.");
+            throw new NotFoundException(self::SOME_NOT_FOUND_MESSAGE);
         }
 
         return $videos;
