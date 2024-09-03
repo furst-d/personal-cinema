@@ -99,7 +99,7 @@ class VideoController extends BasePersonalController
     #[ResponseError(exception: new NotFoundException(VideoService::SOME_NOT_FOUND_MESSAGE))]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: "Bearer")]
-    #[Route('', name: 'admin_users_batch_delete', methods: ['DELETE'])]
+    #[Route('', name: 'admin_videos_batch_delete', methods: ['DELETE'])]
     public function batchDelete(BatchDeleteFilterRequest $filter): JsonResponse
     {
         try {

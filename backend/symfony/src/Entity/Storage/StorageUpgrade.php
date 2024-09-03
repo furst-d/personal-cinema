@@ -4,6 +4,7 @@ namespace App\Entity\Storage;
 
 use App\Entity\Account\Account;
 use App\Helper\Storage\ByteSizeConverter;
+use App\Helper\Storage\StoragePaymentInfo;
 use App\Helper\Storage\StoragePaymentType;
 use App\Repository\Storage\StorageUpgradeRepository;
 use DateTimeImmutable;
@@ -99,11 +100,11 @@ class StorageUpgrade
     }
 
     /**
-     * @return array
+     * @return StoragePaymentInfo
      */
     #[Groups([self::STORAGE_UPGRADE_READ, self::STORAGE_UPGRADE_ADMIN_READ])]
 
-    public function getPaymentTypeInfo(): array
+    public function getPaymentTypeInfo(): StoragePaymentInfo
     {
         return $this->getPaymentType()->getInfo();
     }
