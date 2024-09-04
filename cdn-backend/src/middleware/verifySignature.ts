@@ -5,9 +5,9 @@ import Nonce from '../entities/nonce';
 import http_build_query from '../utils/http_build_query';
 
 const verifySignature = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-    const { nonce, params, signature, project_id, fileSize } = req.body;
+    const { nonce, params, signature, projectId, fileSize } = req.body;
 
-    if (!nonce || !params || !signature || !project_id) {
+    if (!nonce || !params || !signature || !projectId) {
         return res.status(400).json({ error: 'Missing required parameters' });
     }
 
@@ -16,14 +16,14 @@ const verifySignature = async (req: Request, res: Response, next: NextFunction):
         return res.status(400).json({ error: 'Nonce already used' });
     }
 
-    const project = await Project.findByPk(project_id);
+    const project = await Project.findByPk(projectId);
 
     if (!project) {
         return res.status(401).json({ error: 'Project not authenticated' });
     }
 
     const secretKey = project.apiKey;
-    const data: any = { nonce, params, project_id };
+    const data: any = { nonce, params, projectId };
 
     if (fileSize) {
         data.size = fileSize;
