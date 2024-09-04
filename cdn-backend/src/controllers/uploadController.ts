@@ -11,7 +11,7 @@ export const uploadVideoRoute = async (req: Request, res: Response): Promise<voi
             return;
         }
 
-        const video = await uploadVideo(file, req.body.params, req.body.project_id);
+        const video = await uploadVideo(file, req.body.params, req.body.projectId);
         await sendNotificationCallback(video.id);
 
         res.status(201).json({ message: 'Video uploaded successfully' });

@@ -120,7 +120,7 @@ class CdnService
      */
     public function createUploadData(array $data): UploadResponse
     {
-        $data['project_id'] = $this->cdnProjectId;
+        $data['projectId'] = $this->cdnProjectId;
         $data['nonce'] = $this->generator->generateString(32);
         $this->cdnHasher->addSignature($data, $this->cdnSecretKey);
         $this->logger->info('Generated upload data.', $data);
@@ -128,7 +128,7 @@ class CdnService
         return new UploadResponse(
             $data['nonce'],
             $data['params'],
-            $data['project_id'],
+            $data['projectId'],
             $data['signature']
         );
     }

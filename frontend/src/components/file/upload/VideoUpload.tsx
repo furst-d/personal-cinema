@@ -91,7 +91,7 @@ const VideoUpload: React.FC<VideoUploadProps> = ({ currentFolderId, handleSingle
             formData.append('params', metadataResponse.params);
             formData.append('signature', metadataResponse.signature);
             formData.append('nonce', metadataResponse.nonce);
-            formData.append('project_id', metadataResponse.project_id);
+            formData.append('projectId', metadataResponse.projectId);
 
             await uploadVideoToCdn(formData, async (progressEvent) => {
                 if (progressEvent.lengthComputable && progressEvent.total && !hasError) {

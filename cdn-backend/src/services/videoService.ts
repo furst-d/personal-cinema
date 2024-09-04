@@ -13,9 +13,9 @@ import {sendDeleteNotificationCallback} from "./callbackService";
  * Upload a video
  * @param file
  * @param params
- * @param project_id
+ * @param projectId
  */
-export const uploadVideo = async (file: Express.Multer.File, params: string, project_id: string) => {
+export const uploadVideo = async (file: Express.Multer.File, params: string, projectId: string) => {
     const { originalname, buffer, mimetype, size } = file;
 
     const extension = path.extname(originalname);
@@ -36,7 +36,7 @@ export const uploadVideo = async (file: Express.Multer.File, params: string, pro
             originalPath: urlPath,
             extension: extension,
             size: size,
-            projectId: project_id,
+            projectId: projectId,
             parameters: JSON.parse(params),
         });
 
