@@ -73,6 +73,10 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
 
+    App\Security\DocAuthenticator:
+        arguments:
+            $docPassword: '%env(API_DOC_PASSWORD)%'
+
     # Console commands
     App\Console\TestFeature:
         tags: [ 'console.command' ]
