@@ -37,6 +37,7 @@ class StorageUpgradeService
     private PaymentService $paymentService;
 
     public const UPGRADE_ALREADY_EXISTS_MESSAGE = 'Upgrade already exists';
+    public const SOME_NOT_FOUND_MESSAGE = 'Some upgrades not found.';
 
     /**
      * @param StorageUpgradeRepository $storageUpgradeRepository
@@ -114,7 +115,7 @@ class StorageUpgradeService
         $upgrades = $this->storageUpgradeRepository->findByIds($ids);
 
         if (count($upgrades) !== count($ids)) {
-            throw new NotFoundException('Some upgrades not found.');
+            throw new NotFoundException(self::SOME_NOT_FOUND_MESSAGE);
         }
 
         return $upgrades;

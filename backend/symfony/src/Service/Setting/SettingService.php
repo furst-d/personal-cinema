@@ -16,6 +16,9 @@ class SettingService
      */
     private SettingsRepository $settingsRepository;
 
+    public const SOME_NOT_FOUND_MESSAGE = 'Some settings not found.';
+    public const NOT_FOUND_MESSAGE = 'Setting not found.';
+
     /**
      * @param SettingsRepository $settingsRepository
      */
@@ -55,7 +58,7 @@ class SettingService
         $settings = $this->settingsRepository->findByIds($ids);
 
         if (count($settings) !== count($ids)) {
-            throw new NotFoundException("Some settings not found.");
+            throw new NotFoundException(self::SOME_NOT_FOUND_MESSAGE);
         }
 
         return $settings;
@@ -80,7 +83,7 @@ class SettingService
         $setting = $this->settingsRepository->find($id);
 
         if (!$setting) {
-            throw new NotFoundException("Setting not found.");
+            throw new NotFoundException(self::NOT_FOUND_MESSAGE);
         }
 
         return $setting;

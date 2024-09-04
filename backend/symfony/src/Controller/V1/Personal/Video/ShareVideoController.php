@@ -2,6 +2,11 @@
 
 namespace App\Controller\V1\Personal\Video;
 
+use App\Attribute\OpenApi\Request\Query\QueryInt;
+use App\Attribute\OpenApi\Request\Query\QueryLimit;
+use App\Attribute\OpenApi\Request\Query\QueryOffset;
+use App\Attribute\OpenApi\Request\Query\QueryOrderBy;
+use App\Attribute\OpenApi\Request\Query\QuerySortBy;
 use App\Attribute\OpenApi\Request\RequestBody;
 use App\Attribute\OpenApi\Response\ResponseData;
 use App\Attribute\OpenApi\Response\ResponseError;
@@ -21,6 +26,7 @@ use App\Exception\ForbiddenException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
+use App\Helper\DTO\SortBy;
 use App\Helper\Jwt\JwtUsage;
 use App\Helper\Regex\RegexRoute;
 use App\Service\Account\AccountService;
@@ -95,13 +101,18 @@ class ShareVideoController extends BasePersonalController
         summary: "List of videos shared with the user",
         tags: [VideoController::TAG],
     )]
+    #[QueryInt(name: 'folderId', description: "Folder ID")]
+    #[QueryLimit]
+    #[QueryOffset]
+    #[QuerySortBy(choices: [SortBy::ID, SortBy::NAME, SortBy::EMAIL, SortBy::UPDATE_DATE])]
+    #[QueryOrderBy]
     #[ResponseData(entityClass: Video::class, groups: [Video::VIDEOS_READ], pagination: true, description: "List of videos")]
     #[ResponseError(exception: new BadRequestException())]
     #[ResponseError(exception: new UnauthorizedException())]
     #[ResponseError(exception: new InternalException())]
     #[Security(name: 'Bearer')]
     #[Route('', name: 'user_shared_videos', methods: ['GET'])]
-    public function getSharedVideos(Request $request, #[MapQueryString] VideoQueryRequest $videoQueryRequest): JsonResponse
+    public function getSharedVideos(Request $request, VideoQueryRequest $videoQueryRequest): JsonResponse
     {
         try {
             $account = $this->getAccount($request);

@@ -28,7 +28,8 @@ services:
             $denormalizer: '@serializer'
             $validator: '@validator'
             $re: '@App\Helper\Api\ResponseEntity'
-        tags: [ 'controller.argument_value_resolver' ]
+        tags:
+            - { name: 'controller.argument_value_resolver', priority: 100 }
 
     App\Service\Locator\BaseControllerLocator:
         arguments:
@@ -71,6 +72,10 @@ services:
     App\Listener\TokenValidatorListener:
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
+
+    App\Security\DocAuthenticator:
+        arguments:
+            $docPassword: '%env(API_DOC_PASSWORD)%'
 
     # Console commands
     App\Console\TestFeature:
