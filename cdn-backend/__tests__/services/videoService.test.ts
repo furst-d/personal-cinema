@@ -2,7 +2,6 @@ import { getVideo } from '../../src/services/videoService';
 import Video from '../../src/entities/video';
 
 jest.mock('../../src/entities/video');
-jest.mock('../../src/config/minio'); // Keep this if necessary
 
 describe('getVideo', () => {
     beforeEach(() => {
