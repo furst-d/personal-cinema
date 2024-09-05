@@ -14,6 +14,7 @@ This directory contains the CDN backend for the **Personal Cinema** project. It 
     - [Upload Routes](#upload-routes)
     - [Video Routes](#video-routes)
 - [Callbacks](#callbacks)
+- [Running Tests](#running-tests)
 
 ## Overview
 
@@ -145,3 +146,13 @@ During the video processing lifecycle, the system sends out notifications via **
 - **Thumbnail Callback**: Sent when thumbnails are ready, notifying the client about the availability of preview images.
 
 The callback system ensures that the client is updated with the video processing progress.
+
+## Running Tests
+
+The CDN backend includes a set of **Jest** tests to verify the functionality of the application. These tests are run inside the **CDN Backend Docker container**.
+
+To run the tests, use the following command inside the running Docker container:
+
+```bash
+docker exec -it cdn-backend-cdn-api-1 npm run test
+```
