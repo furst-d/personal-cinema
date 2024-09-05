@@ -3,23 +3,6 @@ import Settings from '../../src/entities/settings';
 
 jest.mock('../../src/entities/settings');
 
-jest.mock('../../src/config/minio', () => ({
-    minioClient: {
-        presignedUrl: jest.fn().mockResolvedValue('https://mocked-minio-url.com'),
-        listObjectsV2: jest.fn().mockReturnValue({
-            [Symbol.asyncIterator]() {
-                return {
-                    async next() {
-                        return { done: true }; // Simuluje prázdný seznam objektů
-                    },
-                };
-            },
-        }),
-        removeObjects: jest.fn().mockResolvedValue(undefined),
-    },
-    bucketName: 'mocked-bucket',
-}));
-
 describe('getVideoSizeLimit', () => {
     beforeEach(() => {
         jest.clearAllMocks();
