@@ -10,6 +10,13 @@ jest.mock('../../src/services/videoService');
 jest.mock('../../src/entities/project');
 jest.mock('../../src/config/logger');
 
+jest.mock('../../src/config/minio', () => ({
+    minioClient: {
+        presignedUrl: jest.fn().mockResolvedValue('https://mocked-minio-url.com'),
+    },
+    bucketName: 'mocked-bucket',
+}));
+
 describe('Callback Service', () => {
     const mockVideo = { id: 'video1', projectId: 'project1', isDeleted: false };
     const mockCallback = { notificationUrl: 'http://example.com/notify', thumbUrl: 'http://example.com/thumb' };
