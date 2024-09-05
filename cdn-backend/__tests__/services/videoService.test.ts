@@ -3,6 +3,13 @@ import Video from '../../src/entities/video';
 
 jest.mock('../../src/entities/video');
 
+jest.mock('../../src/config/minio', () => ({
+    minioClient: {
+        presignedUrl: jest.fn().mockResolvedValue('https://mocked-minio-url.com'),
+    },
+    bucketName: 'mocked-bucket',
+}));
+
 describe('getVideo', () => {
     beforeEach(() => {
         jest.clearAllMocks();
