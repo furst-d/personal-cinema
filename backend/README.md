@@ -124,3 +124,4 @@ To run the tests, use the following command inside the running Docker container:
 
 ```bash
 docker exec -it backend-php-fpm-1 php /var/www/vendor/bin/phpunit --configuration /var/www/phpunit.xml.dist
+```

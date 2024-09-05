@@ -34,3 +34,5 @@ sequelize.sync({ alter: true }).then(() => {
 }).catch(error => {
     console.log('Unable to connect to the database:', error);
 });
+
+export default app;
