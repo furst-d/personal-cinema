@@ -2,21 +2,27 @@
 
 namespace App\Helper\Storage;
 
+use App\Entity\Storage\StorageUpgrade;
+use Symfony\Component\Serializer\Attribute\Groups;
+
 class StoragePaymentInfo
 {
     /**
      * @var int $id
      */
+    #[Groups([StorageUpgrade::STORAGE_UPGRADE_READ, StorageUpgrade::STORAGE_UPGRADE_ADMIN_READ])]
     public int $id;
 
     /**
      * @var string $name
      */
+    #[Groups([StorageUpgrade::STORAGE_UPGRADE_READ, StorageUpgrade::STORAGE_UPGRADE_ADMIN_READ])]
     public string $name;
 
     /**
      * @var string $label
      */
+    #[Groups([StorageUpgrade::STORAGE_UPGRADE_READ, StorageUpgrade::STORAGE_UPGRADE_ADMIN_READ])]
     public string $label;
 
     /**

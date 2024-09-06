@@ -103,7 +103,6 @@ class StorageUpgrade
      * @return StoragePaymentInfo
      */
     #[Groups([self::STORAGE_UPGRADE_READ, self::STORAGE_UPGRADE_ADMIN_READ])]
-
     public function getPaymentTypeInfo(): StoragePaymentInfo
     {
         return $this->getPaymentType()->getInfo();
