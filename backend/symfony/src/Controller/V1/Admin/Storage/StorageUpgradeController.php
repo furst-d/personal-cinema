@@ -28,11 +28,9 @@ use App\Helper\Storage\StoragePaymentInfo;
 use App\Helper\Storage\StoragePaymentMetadata;
 use App\Helper\Storage\StoragePaymentType;
 use App\Service\Account\AccountService;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Storage\StorageUpgradeService;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
 
@@ -50,17 +48,14 @@ class StorageUpgradeController extends BasePersonalController
     private AccountService $accountService;
 
     /**
-     * @param BaseControllerLocator $locator
      * @param StorageUpgradeService $storageUpgradeService
      * @param AccountService $accountService
      */
     public function __construct(
-        BaseControllerLocator $locator,
         StorageUpgradeService $storageUpgradeService,
         AccountService $accountService
     )
     {
-        parent::__construct($locator);
         $this->storageUpgradeService = $storageUpgradeService;
         $this->accountService = $accountService;
     }

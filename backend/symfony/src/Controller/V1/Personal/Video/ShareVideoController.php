@@ -31,7 +31,6 @@ use App\Helper\Jwt\JwtUsage;
 use App\Helper\Regex\RegexRoute;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Mailer\MailerService;
 use App\Service\Video\ShareService;
 use App\Service\Video\VideoService;
@@ -40,7 +39,6 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/personal/videos/share')]
@@ -72,7 +70,6 @@ class ShareVideoController extends BasePersonalController
     private MailerService $mailerService;
 
     /**
-     * @param BaseControllerLocator $locator
      * @param JwtService $jwtService
      * @param VideoService $videoService
      * @param ShareService $shareService
@@ -80,7 +77,6 @@ class ShareVideoController extends BasePersonalController
      * @param MailerService $mailerService
      */
     public function __construct(
-        BaseControllerLocator $locator,
         JwtService $jwtService,
         VideoService $videoService,
         ShareService $shareService,
@@ -88,7 +84,6 @@ class ShareVideoController extends BasePersonalController
         MailerService $mailerService
     )
     {
-        parent::__construct($locator);
         $this->jwtService = $jwtService;
         $this->videoService = $videoService;
         $this->shareService = $shareService;

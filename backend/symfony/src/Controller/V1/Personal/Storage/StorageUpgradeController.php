@@ -19,7 +19,6 @@ use App\Exception\NotFoundException;
 use App\Exception\PaymentRequiredException;
 use App\Exception\UnauthorizedException;
 use App\Service\Account\AccountService;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Payment\PaymentService;
 use App\Service\Storage\StoragePriceService;
 use App\Service\Storage\StorageUpgradeService;
@@ -48,19 +47,16 @@ class StorageUpgradeController extends BasePersonalController
     private PaymentService $paymentService;
 
     /**
-     * @param BaseControllerLocator $locator
      * @param StoragePriceService $storagePriceService
      * @param StorageUpgradeService $storageUpgradeService
      * @param PaymentService $paymentService
      */
     public function __construct(
-        BaseControllerLocator $locator,
         StoragePriceService $storagePriceService,
         StorageUpgradeService $storageUpgradeService,
         PaymentService $paymentService
     )
     {
-        parent::__construct($locator);
         $this->storagePriceService = $storagePriceService;
         $this->storageUpgradeService = $storageUpgradeService;
         $this->paymentService = $paymentService;

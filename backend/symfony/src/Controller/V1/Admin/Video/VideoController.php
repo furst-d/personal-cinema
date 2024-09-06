@@ -27,11 +27,9 @@ use App\Exception\UnauthorizedException;
 use App\Helper\DTO\SortBy;
 use App\Helper\Regex\RegexRoute;
 use App\Helper\Video\FolderData;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Video\VideoService;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
 
@@ -46,15 +44,10 @@ class VideoController extends BasePersonalController
     public const TAG = 'admin/videos';
 
     /**
-     * @param BaseControllerLocator $locator
      * @param VideoService $videoService
      */
-    public function __construct(
-        BaseControllerLocator $locator,
-        VideoService $videoService
-    )
+    public function __construct(VideoService $videoService)
     {
-        parent::__construct($locator);
         $this->videoService = $videoService;
     }
 

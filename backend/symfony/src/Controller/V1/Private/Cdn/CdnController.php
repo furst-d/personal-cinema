@@ -13,9 +13,7 @@ use App\Exception\BadRequestException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
-use App\Service\Auth\AuthService;
 use App\Service\Cdn\CdnService;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Video\VideoService;
 use OpenApi\Attributes as OA;
 use Nelmio\ApiDocBundle\Annotation\Security;
@@ -34,17 +32,10 @@ class CdnController extends BasePrivateController
     public const TAG = 'private/cdn';
 
     /**
-     * @param BaseControllerLocator $locator
-     * @param AuthService $authService
      * @param CdnService $cdnService
      */
-    public function __construct(
-        BaseControllerLocator $locator,
-        AuthService $authService,
-        CdnService $cdnService
-    )
+    public function __construct(CdnService $cdnService)
     {
-        parent::__construct($locator, $authService);
         $this->cdnService = $cdnService;
     }
 

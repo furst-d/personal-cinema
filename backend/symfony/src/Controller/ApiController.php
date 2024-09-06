@@ -3,11 +3,10 @@
 namespace App\Controller;
 
 use App\Helper\Api\ResponseEntity;
-use App\Service\Locator\BaseControllerLocator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class ApiController extends AbstractController
 {
@@ -27,13 +26,33 @@ class ApiController extends AbstractController
     protected SerializerInterface $serializer;
 
     /**
-     * @param BaseControllerLocator $locator
+     * @param ResponseEntity $re
+     * @return void
      */
-    public function __construct(BaseControllerLocator $locator)
+    #[Required]
+    public function setResponseEntity(ResponseEntity $re): void
     {
-        $this->re = $locator->getResponseEntity();
-        $this->em = $locator->getEntityManager();
-        $this->serializer = $locator->getSerializer();
+        $this->re = $re;
+    }
+
+    /**
+     * @param EntityManagerInterface $em
+     * @return void
+     */
+    #[Required]
+    public function setEntityManager(EntityManagerInterface $em): void
+    {
+        $this->em = $em;
+    }
+
+    /**
+     * @param SerializerInterface $serializer
+     * @return void
+     */
+    #[Required]
+    public function setSerializer(SerializerInterface $serializer): void
+    {
+        $this->serializer = $serializer;
     }
 
     /**

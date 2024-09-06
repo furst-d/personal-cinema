@@ -22,7 +22,6 @@ use App\Exception\InternalException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Mailer\MailerService;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -51,18 +50,15 @@ class UserController extends ApiController
     public const TAG = 'public/users';
 
     /**
-     * @param BaseControllerLocator $locator
      * @param AccountService $accountService
      * @param MailerService $mailerService
      * @param JwtService $jwtService
      */
     public function __construct(
-        BaseControllerLocator $locator,
         AccountService $accountService,
         MailerService $mailerService,
         JwtService $jwtService,
     ) {
-        parent::__construct($locator);
         $this->accountService = $accountService;
         $this->mailerService = $mailerService;
         $this->jwtService = $jwtService;

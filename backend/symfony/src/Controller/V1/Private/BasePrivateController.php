@@ -4,30 +4,21 @@ namespace App\Controller\V1\Private;
 
 use App\Controller\ApiController;
 use App\Service\Auth\AuthService;
-use App\Service\Locator\BaseControllerLocator;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class BasePrivateController extends ApiController
 {
-    /**
-     * @var BaseControllerLocator $locator
-     */
-    protected BaseControllerLocator $locator;
-
     /**
      * @var AuthService $authService
      */
     protected AuthService $authService;
 
     /**
-     * @param BaseControllerLocator $locator
      * @param AuthService $authService
      */
-    public function __construct(
-        BaseControllerLocator $locator,
-        AuthService $authService
-    )
+    #[Required]
+    public function setAuthService(AuthService $authService): void
     {
-        parent::__construct($locator);
         $this->authService = $authService;
     }
 }

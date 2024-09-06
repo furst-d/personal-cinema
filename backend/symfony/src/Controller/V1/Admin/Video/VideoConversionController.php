@@ -23,11 +23,9 @@ use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
 use App\Helper\DTO\SortBy;
 use App\Helper\Regex\RegexRoute;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Video\ConversionService;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
 
@@ -40,15 +38,10 @@ class VideoConversionController extends BasePersonalController
     private ConversionService $conversionService;
 
     /**
-     * @param BaseControllerLocator $locator
      * @param ConversionService $conversionService
      */
-    public function __construct(
-        BaseControllerLocator $locator,
-        ConversionService $conversionService
-    )
+    public function __construct(ConversionService $conversionService)
     {
-        parent::__construct($locator);
         $this->conversionService = $conversionService;
     }
 

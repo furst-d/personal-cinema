@@ -36,7 +36,6 @@ use App\Helper\Regex\RegexRoute;
 use App\Helper\Video\ThirdParty;
 use App\Service\Cdn\CdnService;
 use App\Service\Jwt\JwtService;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Storage\StorageService;
 use App\Service\Video\FolderService;
 use App\Service\Video\ShareService;
@@ -45,7 +44,6 @@ use Nelmio\ApiDocBundle\Annotation\Security;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/personal/videos')]
@@ -84,7 +82,6 @@ class VideoController extends BasePersonalController
     public const TAG = 'personal/videos';
 
     /**
-     * @param BaseControllerLocator $locator
      * @param JwtService $jwtService
      * @param CdnService $cdnService
      * @param VideoService $videoService
@@ -93,7 +90,6 @@ class VideoController extends BasePersonalController
      * @param ShareService $shareService
      */
     public function __construct(
-        BaseControllerLocator $locator,
         JwtService $jwtService,
         CdnService $cdnService,
         VideoService $videoService,
@@ -102,7 +98,6 @@ class VideoController extends BasePersonalController
         ShareService $shareService
     )
     {
-        parent::__construct($locator);
         $this->jwtService = $jwtService;
         $this->cdnService = $cdnService;
         $this->videoService = $videoService;

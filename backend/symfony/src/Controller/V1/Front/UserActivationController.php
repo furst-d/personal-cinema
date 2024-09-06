@@ -17,7 +17,6 @@ use App\Exception\UnauthorizedException;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Mailer\MailerService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
@@ -42,18 +41,15 @@ class UserActivationController extends ApiController
     private MailerService $mailerService;
 
     /**
-     * @param BaseControllerLocator $locator
      * @param AccountService $accountService
      * @param JwtService $jwtService
      * @param MailerService $mailerService
      */
     public function __construct(
-        BaseControllerLocator $locator,
         AccountService $accountService,
         JwtService $jwtService,
         MailerService $mailerService,
     ) {
-        parent::__construct($locator);
         $this->accountService = $accountService;
         $this->jwtService = $jwtService;
         $this->mailerService = $mailerService;
