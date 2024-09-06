@@ -16,7 +16,6 @@ use App\Exception\ForbiddenException;
 use App\Exception\InternalException;
 use App\Exception\UnauthorizedException;
 use App\Service\Account\AccountService;
-use App\Service\Locator\BaseControllerLocator;
 use OpenApi\Attributes as OA;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -34,15 +33,10 @@ class AccountController extends BasePersonalController
     public const TAG = 'personal/account';
 
     /**
-     * @param BaseControllerLocator $locator
      * @param AccountService $accountService
      */
-    public function __construct(
-        BaseControllerLocator $locator,
-        AccountService $accountService
-    )
+    public function __construct(AccountService $accountService)
     {
-        parent::__construct($locator);
         $this->accountService = $accountService;
     }
 

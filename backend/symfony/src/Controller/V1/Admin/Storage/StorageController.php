@@ -22,11 +22,9 @@ use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
 use App\Helper\DTO\SortBy;
 use App\Helper\Regex\RegexRoute;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Storage\StorageService;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
 
@@ -41,15 +39,10 @@ class StorageController extends BasePersonalController
     public const TAG = 'admin/storage';
 
     /**
-     * @param BaseControllerLocator $locator
      * @param StorageService $storageService
      */
-    public function __construct(
-        BaseControllerLocator $locator,
-        StorageService $storageService
-    )
+    public function __construct(StorageService $storageService)
     {
-        parent::__construct($locator);
         $this->storageService = $storageService;
     }
 

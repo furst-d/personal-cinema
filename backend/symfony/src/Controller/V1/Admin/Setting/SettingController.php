@@ -24,11 +24,9 @@ use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
 use App\Helper\DTO\SortBy;
 use App\Helper\Regex\RegexRoute;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Setting\SettingService;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
 
@@ -43,15 +41,10 @@ class SettingController extends BasePersonalController
     public const TAG = 'admin/settings';
 
     /**
-     * @param BaseControllerLocator $locator
      * @param SettingService $settingService
      */
-    public function __construct(
-        BaseControllerLocator $locator,
-        SettingService $settingService,
-    )
+    public function __construct(SettingService $settingService)
     {
-        parent::__construct($locator);
         $this->settingService = $settingService;
     }
 

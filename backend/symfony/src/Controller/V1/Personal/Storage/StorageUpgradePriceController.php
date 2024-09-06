@@ -5,11 +5,9 @@ namespace App\Controller\V1\Personal\Storage;
 use App\Attribute\OpenApi\Response\ResponseData;
 use App\Attribute\OpenApi\Response\ResponseError;
 use App\Controller\V1\Personal\BasePersonalController;
-use App\Entity\Storage\StorageUpgrade;
 use App\Entity\Storage\StorageUpgradePrice;
 use App\Exception\InternalException;
 use App\Exception\UnauthorizedException;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Storage\StoragePriceService;
 use OpenApi\Attributes as OA;
 use Nelmio\ApiDocBundle\Annotation\Security;
@@ -25,15 +23,10 @@ class StorageUpgradePriceController extends BasePersonalController
     private StoragePriceService $storagePriceService;
 
     /**
-     * @param BaseControllerLocator $locator
      * @param StoragePriceService $storagePriceService
      */
-    public function __construct(
-        BaseControllerLocator $locator,
-        StoragePriceService $storagePriceService
-    )
+    public function __construct(StoragePriceService $storagePriceService)
     {
-        parent::__construct($locator);
         $this->storagePriceService = $storagePriceService;
     }
 

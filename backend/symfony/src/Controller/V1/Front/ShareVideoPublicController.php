@@ -11,7 +11,6 @@ use App\Exception\ForbiddenException;
 use App\Exception\InternalException;
 use App\Exception\NotFoundException;
 use App\Service\Account\SessionService;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Video\ShareService;
 use App\Service\Video\VideoService;
 use OpenApi\Attributes as OA;
@@ -40,19 +39,16 @@ class ShareVideoPublicController extends ApiController
     public const TAG = 'public/videos';
 
     /**
-     * @param BaseControllerLocator $locator
      * @param VideoService $videoService
      * @param ShareService $shareService
      * @param SessionService $sessionService
      */
     public function __construct(
-        BaseControllerLocator $locator,
         VideoService $videoService,
         ShareService $shareService,
         SessionService $sessionService,
     )
     {
-        parent::__construct($locator);
         $this->videoService = $videoService;
         $this->shareService = $shareService;
         $this->sessionService = $sessionService;

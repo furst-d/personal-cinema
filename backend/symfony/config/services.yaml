@@ -31,14 +31,6 @@ services:
         tags:
             - { name: 'controller.argument_value_resolver', priority: 100 }
 
-    App\Service\Locator\BaseControllerLocator:
-        arguments:
-            $re: '@App\Helper\Api\ResponseEntity'
-            $em: '@doctrine.orm.entity_manager'
-            $serializer: '@serializer'
-        autowire: true
-        autoconfigure: true
-
     App\Service\Mailer\MailerService:
         arguments:
             $apiKey: '%env(MAILERSEND_API_KEY)%'

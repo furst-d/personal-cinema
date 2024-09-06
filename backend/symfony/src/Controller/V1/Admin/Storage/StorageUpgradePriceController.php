@@ -23,7 +23,6 @@ use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
 use App\Helper\DTO\SortBy;
 use App\Helper\Regex\RegexRoute;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Storage\StoragePriceService;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -39,15 +38,10 @@ class StorageUpgradePriceController extends BasePersonalController
     private StoragePriceService $storagePriceService;
 
     /**
-     * @param BaseControllerLocator $locator
      * @param StoragePriceService $storagePriceService
      */
-    public function __construct(
-        BaseControllerLocator $locator,
-        StoragePriceService $storagePriceService
-    )
+    public function __construct(StoragePriceService $storagePriceService)
     {
-        parent::__construct($locator);
         $this->storagePriceService = $storagePriceService;
     }
 

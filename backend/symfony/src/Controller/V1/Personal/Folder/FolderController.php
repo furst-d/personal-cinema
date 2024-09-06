@@ -25,14 +25,11 @@ use App\Exception\NotFoundException;
 use App\Exception\UnauthorizedException;
 use App\Helper\DTO\SortBy;
 use App\Helper\Regex\RegexRoute;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Video\FolderService;
-use Doctrine\DBAL\Schema\Schema;
 use OpenApi\Attributes as OA;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/personal/folders')]
@@ -46,15 +43,10 @@ class FolderController extends BasePersonalController
     public const TAG = 'personal/folders';
 
     /**
-     * @param BaseControllerLocator $locator
      * @param FolderService $folderService
      */
-    public function __construct(
-        BaseControllerLocator $locator,
-        FolderService $folderService,
-    )
+    public function __construct(FolderService $folderService)
     {
-        parent::__construct($locator);
         $this->folderService = $folderService;
     }
 

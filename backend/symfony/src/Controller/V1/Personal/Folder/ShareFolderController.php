@@ -29,7 +29,6 @@ use App\Helper\Jwt\JwtUsage;
 use App\Helper\Regex\RegexRoute;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Mailer\MailerService;
 use App\Service\Video\FolderService;
 use App\Service\Video\ShareService;
@@ -37,7 +36,6 @@ use OpenApi\Attributes as OA;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/personal/folders/share')]
@@ -69,7 +67,6 @@ class ShareFolderController extends BasePersonalController
     private AccountService $accountService;
 
     /**
-     * @param BaseControllerLocator $locator
      * @param FolderService $folderService
      * @param ShareService $shareService
      * @param JwtService $jwtService
@@ -77,7 +74,6 @@ class ShareFolderController extends BasePersonalController
      * @param AccountService $accountService
      */
     public function __construct(
-        BaseControllerLocator $locator,
         FolderService $folderService,
         ShareService $shareService,
         JwtService $jwtService,
@@ -85,7 +81,6 @@ class ShareFolderController extends BasePersonalController
         AccountService $accountService
     )
     {
-        parent::__construct($locator);
         $this->folderService = $folderService;
         $this->shareService = $shareService;
         $this->jwtService = $jwtService;

@@ -14,8 +14,6 @@ use App\Exception\UnauthorizedException;
 use App\Helper\File\MimeType;
 use App\Helper\Jwt\JwtUsage;
 use App\Service\Account\SessionService;
-use App\Service\Auth\AuthService;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Video\ManifestService;
 use App\Service\Video\ShareService;
 use App\Service\Video\VideoService;
@@ -23,7 +21,6 @@ use OpenApi\Attributes as OA;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/private/videos')]
@@ -47,21 +44,16 @@ class VideoController extends BasePrivateController
     public const TAG = 'private/videos';
 
     /**
-     * @param BaseControllerLocator $locator
-     * @param AuthService $authService
      * @param ManifestService $manifestService
      * @param ShareService $shareService
      * @param SessionService $sessionService
      */
     public function __construct(
-        BaseControllerLocator $locator,
-        AuthService $authService,
         ManifestService $manifestService,
         ShareService $shareService,
         SessionService $sessionService,
     )
     {
-        parent::__construct($locator, $authService);
         $this->manifestService = $manifestService;
         $this->shareService = $shareService;
         $this->sessionService = $sessionService;

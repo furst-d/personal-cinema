@@ -32,11 +32,9 @@ use App\Helper\Jwt\JwtUsage;
 use App\Helper\Regex\RegexRoute;
 use App\Service\Account\AccountService;
 use App\Service\Jwt\JwtService;
-use App\Service\Locator\BaseControllerLocator;
 use App\Service\Mailer\MailerService;
 use Nelmio\ApiDocBundle\Annotation\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
 
@@ -61,19 +59,16 @@ class UserController extends BasePersonalController
     public const TAG = 'admin/users';
 
     /**
-     * @param BaseControllerLocator $locator
      * @param AccountService $accountService
      * @param MailerService $mailerService
      * @param JwtService $jwtService
      */
     public function __construct(
-        BaseControllerLocator $locator,
         AccountService $accountService,
         MailerService $mailerService,
         JwtService $jwtService
     )
     {
-        parent::__construct($locator);
         $this->accountService = $accountService;
         $this->mailerService = $mailerService;
         $this->jwtService = $jwtService;
