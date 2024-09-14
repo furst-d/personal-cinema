@@ -49,12 +49,23 @@ To set up the development environment using Docker, follow these steps:
     ```
    Fill in the required values such as Minio credentials, PostgreSQL, and Redis details.
 
-3. Build the Docker image:
+3. Add a record to your `hosts` file to ensure proper routing to Minio:
+
+    - **Windows**: Edit the `C:\Windows\System32\drivers\etc\hosts` file.
+    - **Linux**: Edit the `/etc/hosts` file.
+
+   Add the following line to the file:
+
+    ```plaintext
+    127.0.0.1    minio
+    ```
+   
+4. Build the Docker image:
     ```bash
     docker-compose build
     ```
 
-4. Run the development environment using Docker Compose:
+5. Run the development environment using Docker Compose:
     ```bash
     docker-compose up
     ```
