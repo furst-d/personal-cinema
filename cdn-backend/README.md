@@ -72,7 +72,7 @@ To set up the development environment using Docker, follow these steps:
 
 This will build the CDN backend image and start the development server inside a Docker container. The application will be accessible at `http://localhost:4000`.
 
-5. **Important**: After starting the application for the first time, you need to execute an SQL script to insert default values into the database. Run the following SQL script on your PostgreSQL database:
+6. **Important**: After starting the application for the first time, you need to execute an SQL script to insert default values into the database. Run the following SQL script on your PostgreSQL database:
     ```bash
     scripts/init-db.sql
     ```
