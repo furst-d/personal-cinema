@@ -49,19 +49,30 @@ To set up the development environment using Docker, follow these steps:
     ```
    Fill in the required values such as Minio credentials, PostgreSQL, and Redis details.
 
-3. Build the Docker image:
+3. Add a record to your `hosts` file to ensure proper routing to Minio:
+
+    - **Windows**: Edit the `C:\Windows\System32\drivers\etc\hosts` file.
+    - **Linux**: Edit the `/etc/hosts` file.
+
+   Add the following line to the file:
+
+    ```plaintext
+    127.0.0.1    minio
+    ```
+   
+4. Build the Docker image:
     ```bash
     docker-compose build
     ```
 
-4. Run the development environment using Docker Compose:
+5. Run the development environment using Docker Compose:
     ```bash
     docker-compose up
     ```
 
 This will build the CDN backend image and start the development server inside a Docker container. The application will be accessible at `http://localhost:4000`.
 
-5. **Important**: After starting the application for the first time, you need to execute an SQL script to insert default values into the database. Run the following SQL script on your PostgreSQL database:
+6. **Important**: After starting the application for the first time, you need to execute an SQL script to insert default values into the database. Run the following SQL script on your PostgreSQL database:
     ```bash
     scripts/init-db.sql
     ```
